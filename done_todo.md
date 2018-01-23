@@ -5,4 +5,4 @@
   * vim note skills
   * nerdtree skills
   * git on phone
-  * github space limitation? using Dropbox for resources?
+  * github space limitation? using Dropbox for resources? How much?
