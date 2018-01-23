@@ -13,6 +13,8 @@
 6 master版本，即最终发布版本，commit到本地的库中。
     git commit -m 'initial commit'
 7 推送到github
+    git remote add origin https://github.com/cdutboy928/notes
+    git remote -v
     git push -u origin master
     git会提示输入github的用户名和密码，输入后，git会自动将master分支上传到服务器。
 8 将master分支推送到github服务器后，每一次在本地进行修改时，如修整了软件按的一个bug，一般流程如下：
