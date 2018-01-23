@@ -1,5 +1,7 @@
-# To do list
+# Done and To do list
 ## 20180122
-  . markdown syntax  
-  . git to github
-  . vim note skills
+  * git to github
+  * markdown syntax  
+  * vim note skills
+  * nerdtree skills
+  * git on phone
