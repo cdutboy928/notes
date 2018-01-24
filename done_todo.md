@@ -1,12 +1,14 @@
 # Done and To do list
 ## 201801
-  * git to github done ☻
-  * git on phone done ☻
+  * git to github done ✓
+  * git on phone done ✓
+  * If there are modifications in the remote, how to do? (Wether there are conflicts or not)✓
+  * git on phone✓
+  *  How to insert emoji in vim✓
+  * print the digraph table✓
+  * github space limitation? using Dropbox for resources? ✓
+      put normal files in github, and large files(>100MB) in Dropbox.
   * markdown syntax   ⅕
   * vim note skills 
   * nerdtree skills
-  * git on phone
-  * github space limitation? using Dropbox for resources? 
-  * If there are modifications in the remote, how to do? (Wether there are conflicts or not)✔️
-  *  How to insert emoji in vim
-  * print the digraph table
+  * 存钱、Visa卡、还款、电磁炉
