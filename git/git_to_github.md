@@ -26,3 +26,17 @@
     (5) 提交所做的修改git add *
     (6) 记录所做的修改git commit -m "xx bug fixed"
     (7) 提交所做的修改到github服务器 git push
+9 如果远端有变化，如何获取最新状态。
+    * git fetch 
+        git fetch <远端主机名> <远端分支名>:<本地分支名>
+        git fetch origin master:brach2
+        git fetch origin master:tmp
+        git diff tmp
+        git merge tmp
+        git branch -d tmp
+
+        git fetch <远程主机名> 将远程主机的更新，全部取回本地。
+    * git pull 
+        git pull <远端主机名> <远端分支名>:<本地分支名>
+        git pull 相当于 git fetch & git merge
+        git pull 的弊端在于直接合并了，隐藏了细节。

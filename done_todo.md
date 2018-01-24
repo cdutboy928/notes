@@ -1,7 +1,7 @@
 # Done and To do list
-## 20180122
-  * git to github done from the phone
-  * markdown syntax  
-  * vim note skills
+## 201801
+  * git to github done ☻
+  * git on phone done ☻
+  * markdown syntax   ⅕
+  * vim note skills 
   * nerdtree skills
-  * git on phone
