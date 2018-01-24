@@ -13,3 +13,4 @@
   * nerdtree skills
   * 存钱、Visa卡、还款、电磁炉
   * 挂着代理git 不好用
+  * 洗衣服
