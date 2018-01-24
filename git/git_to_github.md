@@ -29,13 +29,22 @@
 9 如果远端有变化，如何获取最新状态。
     * git fetch 
         git fetch <远端主机名> <远端分支名>:<本地分支名>
+        git fetch <远程主机名> 将远程主机的更新，全部取回本地。
+
         git fetch origin master:brach2
         git fetch origin master:tmp
         git diff tmp
-        git merge tmp
+        git merge tmp "if there are conflicts
         git branch -d tmp
 
-        git fetch <远程主机名> 将远程主机的更新，全部取回本地。
+        If there are conflicts, resolve the conflicts mannually, git add and git commit
+        The conflicts' format is as follows:
+        <<<<< your part
+        |||||
+        original part
+        ==========
+        their part
+        >>>>>>
     * git pull 
         git pull <远端主机名> <远端分支名>:<本地分支名>
         git pull 相当于 git fetch & git merge
