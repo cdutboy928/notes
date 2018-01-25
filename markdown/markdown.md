@@ -18,7 +18,7 @@ There is no need to trans when in code format
      \~\~text\~\~ : ~~text~~
 * Emphasize
     \*Emphasize\* : *Emphasize*
-## code
+## code<a name="tocode"></a>
 * inline code
        \`inline code\` : `inline code`
        _*Note: can only be used in one line*_
@@ -52,6 +52,7 @@ There is no need to trans when in code format
     * from a different page
 	 * `[See the lates questions](Questions#latest)`
 	 * `[Ask me something](Questions#ask-your-question)`
+	     [link to code](#tocode)
 
 ## image
 ### inline image links
