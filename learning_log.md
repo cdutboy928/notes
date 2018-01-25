@@ -1,3 +1,3 @@
 # Learning Log
 ## 25 Jan, 2018
-* [markdown links](markdown#markdown-learning)
+* [markdown links](markdown#links)
