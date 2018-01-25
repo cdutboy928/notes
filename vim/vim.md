@@ -1,5 +1,5 @@
 # Vim Skills
-* insert special characters
+## insert special characters
     * <C-k> and type 0U for a smile face: ☻
     * <C-k> and type OK for a tick: ✓
     * <C-k> and type XX for a ballot X: ✗
@@ -54,8 +54,33 @@
 ◑     0R      25D1    9681    CIRCLE WITH RIGHT HALF BLACK
 ☺     0u      263A    9786    WHITE SMILING FACE
 ☻     0U      263B    9787    BLACK SMILING FACE
-* how to insert emoji in vim
-    * Using vim-plug: Plug 'junegunn/vim-emoji'
-    * put "set completefunc=emoji#complete" in .vimrc
-    * <C-x> and then <C-u>:
-      [![](https://camo.githubusercontent.com/c2c6add271b0719215f2cac78e6a777f83184bed/68747470733a2f2f7261772e6769746875622e636f6d2f6a756e6567756e6e2f692f6d61737465722f656d6f6a692d636f6d706c6574652e676966)](https://camo.githubusercontent.com/c2c6add271b0719215f2cac78e6a777f83184bed/68747470733a2f2f7261772e6769746875622e636f6d2f6a756e6567756e6e2f692f6d61737465722f656d6f6a692d636f6d706c6574652e676966)
+## how to insert emoji in vim
+* Using vim-plug: Plug 'junegunn/vim-emoji'
+* put "set completefunc=emoji#complete" in .vimrc
+* `<C-x>` and then `<C-u>`:
+  [![](https://camo.githubusercontent.com/c2c6add271b0719215f2cac78e6a777f83184bed/68747470733a2f2f7261772e6769746875622e636f6d2f6a756e6567756e6e2f692f6d61737465722f656d6f6a692d636f6d706c6574652e676966)](https://camo.githubusercontent.com/c2c6add271b0719215f2cac78e6a777f83184bed/68747470733a2f2f7261772e6769746875622e636f6d2f6a756e6567756e6e2f692f6d61737465722f656d6f6a692d636f6d706c6574652e676966)
+## NERDTree
+* file node mappings 
+    * o: open in preview window (the cursor at the nerdtree window)
+    * go: preview (the cursor at the edit window)
+    * t: open in new tab
+    * T: open in new tab silently
+    * i: open split
+    * gi: preview split
+    * s: open vsplit
+    * gs: preview vsplit
+* directory node mapping	
+    * o: open and close node
+    * O: recursively open node
+    * t: open in the new tab
+    * T: open in the new tab silently
+    * e: explore selected dir
+* Tree navigation mappings	
+    * p: go to the root
+    * P: go to the parent 
+    * K: go to the first child
+    * J: go to the last child
+    * `<C-j>`: go to the next sibling
+    * `<C-k>`: go to the prev sibling
+* Other mappings
+    * A: Zoom (maximize-minimize) the NERDTree window
