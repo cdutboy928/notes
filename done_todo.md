@@ -10,10 +10,10 @@
       put normal files in github, and large files(>100MB) in Dropbox.
   * markdown syntax   ⅕
   * vim note skills 
-  * nerdtree skills
+  * nerdtree skills✓
   * 存钱、Visa卡、还款、电磁炉
-  * 挂着代理git 不好用
+  * 挂着代理git 不好用✓
   * 洗衣服
   * ～～重新打一遍～～
-  * 启用Sp13 
+  * 启用Sp13 ✓
   * Markdown anchor relative directory

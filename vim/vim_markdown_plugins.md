@@ -4,6 +4,10 @@
 * commands:
     * MarkdownPreview
     * MarkdownPreviewStop
+* iamcco's vim-markdown plugin sometimes cannot show the content of md file. Maybe it is a problem of port. 
+    * To solve this problem:
+        * Open a *.md file before configuring the shadowsocks proxy
+        * or close the md file and open it agin for a few times.
 * page: random port
 * install through vim-plug
 ## 2. [suan/vim-instant-markdown](https://github.com/suan/vim-instant-markdown)
