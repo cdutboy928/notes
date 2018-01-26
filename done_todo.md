@@ -14,4 +14,6 @@
   * 存钱、Visa卡、还款、电磁炉
   * 挂着代理git 不好用
   * 洗衣服
-  * 重新打一遍
+  * ～～重新打一遍～～
+  * 启用Sp13 
+  * Markdown anchor relative directory
