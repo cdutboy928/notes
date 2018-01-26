@@ -7,13 +7,14 @@
   *  How to insert emoji in vim✓
   * print the digraph table✓
   * github space limitation? using Dropbox for resources? ✓
-      put normal files in github, and large files(>100MB) in Dropbox.
+      put normal files in github, and large files(>100MB) in Dropbox.✔️
   * markdown syntax   ⅕
   * vim note skills 
-  * nerdtree skills
+  * nerdtree skills✔️
   * 存钱、Visa卡、还款、电磁炉
   * 挂着代理git 不好用
   * 洗衣服
-  * ～～重新打一遍～～
-  * 启用Sp13 
+  * ～～重新打一遍～～✔️
+  * 启用Sp13 ✔️
   * Markdown anchor relative directory
+  * 不能显示的问题还是没解决，貌似是跟shadowsocks proxy 有关。现在就是多开几次或者重启。试一下修改polipo端口
