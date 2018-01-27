@@ -18,7 +18,7 @@ There is no need to trans when in code format
      \~\~text\~\~ : ~~text~~
 * Emphasize
     \*Emphasize\* : *Emphasize*
-## code<a name="tocode"></a>
+## code <a name=tocode></a>
 * inline code
        \`inline code\` : `inline code`
        _*Note: can only be used in one line*_
@@ -50,10 +50,9 @@ There is no need to trans when in code format
 	 * `[See the latest questions](#latest)`
 	 * `[Ask me something](#ask-your-question)`
     * from a different page
-	 * `[See the lates questions](Questions#latest)`
-	 * `[Ask me something](Questions#ask-your-question)`
-	     [link to code](#tocode)
-
+     * `## code <a name=tocode></a>`
+       `[go the code](markddown#tocode)` 
+       _Note: no need to write the ".md" extension nor the relative directory_
 ## image
 ### inline image links
    * display the inline image
