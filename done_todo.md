@@ -17,4 +17,4 @@
   * vim note skills 
   * 存钱、Visa卡、还款、电磁炉
   * 洗衣服
-  * 不能显示的问题还是没解决，貌似是跟shadowsocks proxy 有关。现在就是多开几次或者重启。试一下修改polipo端口，或者修改markdown previe。或者不用export 到终端可以管用？
+  * 不能显示的问题还是没解决，貌似是跟shadowsocks proxy 有关。现在就是多开几次或者重启。试一下修改polipo端口，或者修改markdown preview。或者不用export 到终端可以管用？(好像也不管用）
