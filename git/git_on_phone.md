@@ -19,4 +19,4 @@
 2. Open Termux, and navigate to /sdcard/ as you normally would on the command line.
 3. Use `mv` to move the files to `/data/data/com.termux/files/home/.ssh/`
 ### Test it
-![test the termux]()
+![test the termux](git_on_android_gif.gif)
