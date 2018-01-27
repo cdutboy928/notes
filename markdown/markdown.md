@@ -18,7 +18,7 @@ There is no need to trans when in code format
      \~\~text\~\~ : ~~text~~
 * Emphasize
     \*Emphasize\* : *Emphasize*
-## code <a name=tocode></a>
+## code
 * inline code
        \`inline code\` : `inline code`
        _*Note: can only be used in one line*_
