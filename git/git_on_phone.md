@@ -20,3 +20,12 @@
 3. Use `mv` to move the files to `/data/data/com.termux/files/home/.ssh/`
 ### Test it
 ![test the termux](git_on_android_gif.gif)
+### about input
+* Volume-Down acts as the CTRL key
+* Volume-Up is used for special keys
+* Volume-Up+Q on your virtual-keyboard to make Termux display a row on top of the keyboard that has practical shortcuts for commonly used keys.
+### to recognize more linux commands
+        $ apt install coreutils
+### Install tig
+Tig is an ncurses-based text-mode interface for git. It makes it easier to browse a git repository, therefore defeating the need for a dedicated Android application for this purpose. When using it note that on Termux you can emulate the keyboard arrow keys for navigating ncurses by simply swiping on the screen in the same direction of the arrow key you're trying to use. To install tig: 
+        $ apt install tig

@@ -53,11 +53,15 @@ There is no need to trans when in code format
      * `## code <a name=tocode></a>`
        `[go the code](markdown/markddown.md#tocode)` 
        _*Note: have to write the ".md" extension and add the relative directory!!!*_
+                .. for the up parent directory
 ## image
 ### inline image links
    * display the inline image
               ![Benjamin Bannekat](https://octodex.github.com/images/bannekat.png)
         ![Benjamin Bannekat](https://octodex.github.com/images/bannekat.png)
+        ![test a image](standfor_parent.png)
+        *.. stands for the up parent directory*
+        ![test a image](../git/git_on_android_gif.gif)
    * does not display the inline image
               [Benjamin Bannekat](https://octodex.github.com/images/bannekat.png)
           [Benjamin Bannekat](https://octodex.github.com/images/bannekat.png)
