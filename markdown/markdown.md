@@ -51,8 +51,8 @@ There is no need to trans when in code format
 	 * `[Ask me something](#ask-your-question)`
     * from a different page
      * `## code <a name=tocode></a>`
-       `[go the code](markddown.md#tocode)` 
-       _Note: have to write the ".md" extension, no need to add the relative directory_
+       `[go the code](markdown/markddown.md#tocode)` 
+       _*Note: have to write the ".md" extension and add the relative directory!!!*_
 ## image
 ### inline image links
    * display the inline image
