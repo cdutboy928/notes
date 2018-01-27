@@ -1,4 +1,4 @@
 # Learning Log
 ## 25 Jan, 2018
 * [markdown links](markdown#links)
-* [markdown code](markdown.md#tocode)
+* [markdown code](markdown#tocode)
