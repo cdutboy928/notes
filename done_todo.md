@@ -13,12 +13,16 @@
   * nerdtree skills✓
   * Markdown anchor relative directory✓
   * 挂着代理git 不好用✓
+  * 存钱、、还款、电磁炉✓
+  * 洗衣服✓
   * markdown syntax   ⅕
   * vim note skills 
-  * 存钱、Visa卡、还款、电磁炉
-  * 洗衣服
+  * Visa卡
   * 不能显示的问题还是没解决，貌似是跟shadowsocks proxy 有关。现在就是多开几次或者重启。试一下修改polipo端口，或者修改markdown preview。或者不用export 到终端可以管用？(好像也不管用）
-  * termux中文输入问题，向上键问题
+  * termux中文输入问题，向上键问题✓
+    * 先安装聪明狗的百度皮肤，数字键盘里边，左下角的退格键右划=切换其它输入法。
+    * 先安装聪明狗的百度皮肤，中文状态下点击emoji。
   * 查王雪纯和那几个人的唐诗朗诵
-  * how to download tumblr video on android phone
+  * how to download tumblr video on android phone✓
   * try to copy as markdown to see the markdown code
+  * vim中文输入的问题

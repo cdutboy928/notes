@@ -84,3 +84,14 @@
     * `<C-k>`: go to the prev sibling
 * Other mappings
     * A: Zoom (maximize-minimize) the NERDTree window
+## [fcitx](https://fcitx-im.org/wiki/Special:MyLanguage/Fcitx)
+* Fcitx [ˈfaɪtɪks] is an input method framework with extension support. Currently it supports Linux and Unix systems like freebsd. It has three built-in Input Method Engine, Pinyin, QuWei and Table-based input methods. 
+* Install
+    `sudo add-apt-repository ppa:fcitx-team/stable`
+    `sudo apt-get update`
+* Config
+    If you are using newer Ubuntu, your Ubuntu might use im-config instead of im-switch, you simply run im-config and choose the input method. 
+* Install input method
+    * You'd better install it with your distribution package management software, usually the input method is in the same repo from which you install Fcitx. All Fcitx related package is start with fcitx, so you will see it when you search fcitx. zhuxianzhan 
+    * After you install
+        `fcitx -r`
