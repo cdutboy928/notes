@@ -54,6 +54,8 @@ There is no need to trans when in code format
        `[go the code](markdown/markddown.md#tocode)` 
        _*Note: have to write the ".md" extension and add the relative directory!!!*_
                 .. for the up parent directory
+    * or use the githubusercontent.com link
+        **最简单就是讲需要上传的文件放在项目里面，上传到github上。到文件的页面，点击download就可以跳转到新的一页，复制其URL就可以啦。**
 ## image
 ### inline image links
    * display the inline image
