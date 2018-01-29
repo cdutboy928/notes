@@ -27,3 +27,4 @@
   * try to copy as markdown to see the markdown code
   * vim中文输入的问题
   * 节奏不明显，需要改
+  * set .vimrc and install plugins on phone
