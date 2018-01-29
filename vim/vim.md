@@ -1,5 +1,6 @@
 # Vim Skills
 ## insert special characters
+* *Note: Ctrl+Shift+\_to insert special characters.*
     * <C-k> and type 0U for a smile face: ☻
     * <C-k> and type OK for a tick: ✓
     * <C-k> and type XX for a ballot X: ✗
@@ -95,3 +96,6 @@
     * You'd better install it with your distribution package management software, usually the input method is in the same repo from which you install Fcitx. All Fcitx related package is start with fcitx, so you will see it when you search fcitx. zhuxianzhan 
     * After you install
         `fcitx -r`
+## vimim
+### installation
+* 
