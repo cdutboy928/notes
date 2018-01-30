@@ -26,7 +26,7 @@
   * 查王雪纯和那几个人的唐诗朗诵
   * try to copy as markdown to see the markdown code
   * vim中文输入的问题
-  * 节奏不明显，需要改
+  * 节奏不明显，需要改：_不是节奏的问题，是手机播放器没能体现，用耳机或者HiFi音箱应该没问题。✓
   * set .vimrc and install plugins on phone
   * .vimrc配置不起作用(好像也是那个spf13 惹的祸)
   * the addon like in chrome

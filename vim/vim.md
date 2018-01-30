@@ -1,6 +1,6 @@
 # Vim Skills
 ## insert special characters
-* *Note: Ctrl+Shift+\_to insert special characters.*
+* *Note: `Ctrl+Shift+_` or `Ctrl+7`to insert special characters.*
     * <C-k> and type 0U for a smile face: ☻
     * <C-k> and type OK for a tick: ✓
     * <C-k> and type XX for a ballot X: ✗
@@ -96,6 +96,25 @@
     * You'd better install it with your distribution package management software, usually the input method is in the same repo from which you install Fcitx. All Fcitx related package is start with fcitx, so you will see it when you search fcitx. zhuxianzhan 
     * After you install
         `fcitx -r`
-## vimim
+## [vimim](https://vim.sourceforge.io/scripts/script.php?script_id=2506)
 ### installation
-* 
+* just put the vimim.vim and 词库文件 to ~/.vim/plugin/
+    * [vimim.vim](https://github.com/xhh/vimim)
+    * [词库文件](https://code.google.com/archive/p/vimim-data/downloads)
+* or install through vundle:
+    * Plugin 'vim-scripts/VimIM'
+    * Plugin 'vimim/vimim'
+    ` let g:vimim_ctrl_space_to_toggle=1`
+     `let g:vimim_tab_as_onekey=1`
+     `imap <C-L> <C-\>`
+* **Note: the spf13 makes the installation failed once again.**
+### how to use
+* 无菜单模式
+    在normal 模式下输入gi 即可进入无菜单的中文输入：输入拼音后按空格键选词,按空格键或者Ctrl+n是向下翻词,Ctrl+p 是向上翻,Ctrl+o 是把词语分成字来选。
+**注意:
+    * 按gi 之后是在光标的后边输入汉字;
+    * 选好词或者字之后就继续打后面的词语就行了,不必再按空格键了。
+    * 标点符号也是可以翻词的。比如点号翻成句号。
+    * 汉字和英语要分开距离。**
+* 有菜单模式
+    在insert 模式下按下Ctrl+6, 即可进入有菜单的输入模式,按菜单提示按对应的字母或者按字母j 和k 上下翻选词就行了。按回车是无缝上英文的？
