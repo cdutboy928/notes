@@ -34,3 +34,4 @@
   * .vimrc配置不起作用(好像也是那个spf13 惹的祸)
   * the addon like in chrome
   * to show the english when typing chinese
+  * think out an idea for dating
