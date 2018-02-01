@@ -29,7 +29,7 @@
     * `[]`
     * ]c
     * ]u
-# vim-plug and vundle
+# vim-plug and vundle and pathogen
 ## [vim-plug](https://github.com/junegunn/vim-plug) 
 * commands:
   * PlugInstall
@@ -45,5 +45,14 @@
  * PluginSearch markdown
    * i for isntall; c for clean; 
  * PluginClean
+## pathogen
+* installation
+mkdir -p ~/.vim/autoload ~/.vim/bundle && \
+curl -LSso ~/.vim/autoload/pathogen.vim https://tpo.pe/pathogen.vim
+* configuration
+    execute pathogen#infect()
+* how to install plugins through pathogen 
+    cd ~/.vim/bundle && \
+    git clone https://github.com/tpope/vim-sensible.git
 ## Note:
 * **The spf13-vim makes many things not working and me really confused!!!**

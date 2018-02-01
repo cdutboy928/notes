@@ -108,7 +108,7 @@
      `let g:vimim_tab_as_onekey=1`
      `imap <C-L> <C-\>`
 * **Note: the spf13 makes the installation failed once again.**
-### how to use
+	### how to use
 * 注意使用的时候得出现百度云才行。通过Ctrl+Shift+－来toggle中文英文，用Ctrl+6来toggle中文用什么输入法。
 * 无菜单模式
     在normal 模式下输入gi 即可进入无菜单的中文输入：输入拼音后按空格键选词,按空格键或者Ctrl+n是向下翻词,Ctrl+p 是向上翻,Ctrl+o 是把词语分成字来选。
@@ -119,3 +119,5 @@
     * 汉字和英语要分开距离。**
 * 有菜单模式
     在insert 模式下按下Ctrl+6, 即可进入有菜单的输入模式,按菜单提示按对应的字母或者按字母j 和k 上下翻选词就行了。按回车是无缝上英文的？
+    试试切换wish 还
+    试试wish 

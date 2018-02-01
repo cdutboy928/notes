@@ -108,6 +108,9 @@
      `let g:vimim_tab_as_onekey=1`
      `imap <C-L> <C-\>`
 * **Note: the spf13 makes the installation failed once again.**
+### configuration
+* `s:rc["g:Vimim_cloud"]` 中的初始值改为'baidu'
+* put `let g:Vimim_cloud='baidu'` in .vimrc
 ### how to use
 * 注意使用的时候得出现百度云才行。通过Ctrl+Shift+－来toggle中文英文，用Ctrl+6来toggle中文用什么输入法。
 * 无菜单模式
@@ -118,5 +121,51 @@
     * 标点符号也是可以翻词的。比如点号翻成句号。
     * 汉字和英语要分开距离。**
 * 有菜单模式
-    在insert 模式下按下Ctrl+6, 即可进入有菜单的输入模式,按菜单提示按对应的字母或者按字母j 和k 上下翻选词就行了。按回车是无缝上英文的？
-shishi
+    * 在insert模式下直接按Ctrl+Shift+－，即进入有菜单的输入模式，通过数字键选词，空格键可以选择第一个词。Ctrl+p和Ctrl+n上下翻词（不能用j和k来选词）。按回车是无缝上英文的。这个的优势是打完拼音就能直接出中文菜单，可以直接选。缺点是不能jk选词。
+    * 在insert 模式下按下Ctrl+6, 即可进入有菜单的输入模式,按菜单提示按对应的字母或者按字母j 和k 上下翻选词就行了。按回车是无缝上英文的。这个的优点是可以jk选词，但是其实是点石成金模式，打完拼音需要按空格才能出现中文选词菜单。
+* 拼音搜索中文
+    * 用 Vim 打开一个文本，输入 /ceshi 来搜索关键字，然后回车，此时会提示 Pattern not found（确保文中没有 ceshi 这个 5 个字母的关键字，有的话则匹配不到中文的），然后继续按 n ，如果这个文本里有 测试 或拼音一样的中文的话，则都会被搜索匹配到，继续按 n 来匹配一下一个关键字。
+## aboout color schemes
+### [solarized](https://github.com/altercation/vim-colors-solarized)
+![the light and dark](https://raw.githubusercontent.com/altercation/solarized/master/img/solarized-vim.png)
+#### installation
+* $ cd ~/.vim/bundle
+  $ git clone git://github.com/altercation/vim-colors-solarized.git
+#### configuration
+* syntax enable
+  set background=light
+  colorscheme solarized
+* and add this to .vimrc
+  `set rtp+=~/.vim/bundle/vim-colors-solarized`
+### ColorSchemePicker
+randomly pick up a colorscheme for you
+#### installation
+through pathogen:
+`cd ~/.vim/bundle &&
+git clone https://github.com/sunuslee/vim-plugin-random-colorscheme-picker`
+#### commands
+* 
+  if you LOVE this colorscheme,
+  Enter( In Normal Mode )
+  `:Love`
+  then I will never change your colorscheme again.
+* 
+  if you HATE this colorscheme and don't want to see her again,
+  Enter( In Normal Mode )
+  `:Hate`
+  then I will never pick this colorscheme for you and then
+  randomly pick a new colorscheme.
+* 
+  if you somehow regret what you did and want to get the hated colorscheme back,
+  Enter(In Normal Mode)
+  `:Back`
+  then all you hated colorscheme will back to select pool, and you might see
+  her again:)
+* 
+  Enter(In Normal Mode)
+  `:CS`
+  to see current colorscheme
+* 
+  Enter(In Normal Mode)
+  `:CSnext`
+  to switch to a new random theme without restarting vim.
