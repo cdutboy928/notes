@@ -35,3 +35,5 @@
   * the addon like in chrome
   * to show the english when typing chinese
   * think out an idea for dating
+  * pkg用法
+  * 手机vim配置
