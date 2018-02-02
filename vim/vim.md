@@ -171,3 +171,6 @@ git clone https://github.com/sunuslee/vim-plugin-random-colorscheme-picker`
   Enter(In Normal Mode)
   `:CSnext`
   to switch to a new random theme without restarting vim.
+## relativenumber
+* `set relativenumber` or `set rnu`
+* use `d4j` `d4k` `g4j` insteada of `4dd`

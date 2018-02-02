@@ -29,6 +29,16 @@
 ### Install tig
 Tig is an ncurses-based text-mode interface for git. It makes it easier to browse a git repository, therefore defeating the need for a dedicated Android application for this purpose. When using it note that on Termux you can emulate the keyboard arrow keys for navigating ncurses by simply swiping on the screen in the same direction of the arrow key you're trying to use. To install tig: 
         $ apt install tig
+### pkg commands
+* `pkg files <packages>`
+* `pkg show <packages>`
+* `pkg search <query>` (_very useful_)
+* `pkg install <packages>` or `apt install <packages>`
+* `pkg uninstall <packages>` `apt uninstall <packages>`
+* `pkg list-all`
+* `pkg list-installed`
+* `pkg upgrade`
 ## about input method
     * 先安装聪明狗的百度皮肤，数字键盘里边，左下角的退格键右划=切换其它输入法。
     * 英文使用codeboard 来输入,长按空格键来切换到其他输入法。
+    * 也可以用vimim输入法结合codeboard来使用，就不用切换输入法了。
