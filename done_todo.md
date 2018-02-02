@@ -32,4 +32,5 @@
   * vim note skills 
   * Visa卡
   * 查王雪纯和那几个人的唐诗朗诵
-  * set .vimrc and install plugins on phone
+  * to show the english when typing chinese
+  * think out an idea for dating
