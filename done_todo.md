@@ -34,4 +34,6 @@
   * 查王雪纯和那几个人的唐诗朗诵
   * to show the english when typing chinese
   * think out an idea for dating
+  * pkg用法
+  * 手机vim配置
   * 还是要把《童年》节拍化。
