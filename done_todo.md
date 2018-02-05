@@ -40,3 +40,4 @@
   * 百度云绑定手机号的问题
   * ubuntu录屏，视频转gif
   * 印度代购药，防伪唯一机制，md5?
+  * options for vimium on phone
