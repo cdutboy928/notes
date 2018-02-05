@@ -28,16 +28,15 @@
     * 在出现白框之后马上用鼠标点里面的行。
   * .vimrc配置不起作用(好像也是那个spf13 惹的祸)✗
   * the addon like in chrome ✗
+  * pkg用法✓
+  * 手机vim配置✓
+  * 还是要把《童年》节拍化。✓
+  * 爸的礼物自动茶具，小孩的礼物吉它或编程。✓
   * markdown syntax   ⅕
   * vim note skills 
   * Visa卡
   * 查王雪纯和那几个人的唐诗朗诵
   * to show the english when typing chinese
-  * think out an idea for dating
-  * pkg用法
-  * 手机vim配置
-  * 还是要把《童年》节拍化。
   * 百度云绑定手机号的问题
-  * 爸的礼物自动茶具，小孩的礼物吉它或编程。
   * ubuntu录屏，视频转gif
   * 印度代购药，防伪唯一机制，md5?
