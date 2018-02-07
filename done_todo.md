@@ -32,12 +32,12 @@
   * 手机vim配置✓
   * 还是要把《童年》节拍化。✓
   * 爸的礼物自动茶具，小孩的礼物吉它或编程。✓
+  * options for vimium on phone✓
+  * to show the english when typing chinese✗
   * markdown syntax   ⅕
   * vim note skills 
   * Visa卡
   * 查王雪纯和那几个人的唐诗朗诵
-  * to show the english when typing chinese
   * 百度云绑定手机号的问题
   * ubuntu录屏，视频转gif
   * 印度代购药，防伪唯一机制，md5?
-  * options for vimium on phone
