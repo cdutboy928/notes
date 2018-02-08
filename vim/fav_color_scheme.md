@@ -4,3 +4,5 @@
 * murphy
 * morning
 * evening
+* default
+* industry
