@@ -2,3 +2,7 @@
 * torte
 * darkblue
 * murphy
+* morning
+* evening
+* default
+* industry
