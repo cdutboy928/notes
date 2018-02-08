@@ -34,6 +34,7 @@
   * 爸的礼物自动茶具，小孩的礼物吉它或编程。✓
   * options for vimium on phone✓
   * to show the english when typing chinese✗
+  * 按键精灵录制，要注意时间和布局，不能一味求快。✓
   * markdown syntax   ⅕
   * vim note skills 
   * Visa卡
@@ -43,4 +44,3 @@
   * ubuntu录屏，视频转gif
   * 印度代购药，防伪唯一机制，md5?
   *  url="http://auto.tom61.com/down/mp3book/gscjx/古诗精选-采葛（诗经-王风）.mp3?176013719797087x1517986929x176013721672955-77ca97c604691230b0bec04e98642197"
-  * 按键精灵录制，要注意时间和布局，不能一味求快。
