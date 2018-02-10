@@ -37,11 +37,11 @@
   * 按键精灵录制，要注意时间和布局，不能一味求快。✓
   * options for vimium on phone	✓
   * 电子词典✓
+  * 查王雪纯和那几个人的唐诗朗诵✓
   * markdown syntax   ⅕
   * vim note skills 
   * Visa卡
   * 医保银行
-  * 查王雪纯和那几个人的唐诗朗诵
   * 百度云绑定手机号的问题
   * ubuntu录屏，视频转gif
   * 印度代购药，防伪唯一机制，md5?
