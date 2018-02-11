@@ -38,6 +38,7 @@
   * options for vimium on phone	✓
   * 电子词典✓
   * 查王雪纯和那几个人的唐诗朗诵✓
+  *  回家准备✓
   * markdown syntax   ⅕
   * vim note skills 
   * Visa卡
