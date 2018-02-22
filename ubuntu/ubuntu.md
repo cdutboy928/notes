@@ -88,3 +88,8 @@ Similarly, If blah1 is deleted, blah1-hard still holds the contents; if blah2 is
 * how to use
     * kazam
     * 可以录全屏和窗口，但是不能录gif
+### 视频转GIF
+## [ffmpeg](https://www.ffmpeg.org/ffmpeg.html)
+### 1 Synopsis
+`ffmpeg [global_options] {[input_file_options] -i input_url} ... {[output_file_options] output_url} ... `
+
