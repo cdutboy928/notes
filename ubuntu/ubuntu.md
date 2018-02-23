@@ -72,6 +72,53 @@ Similarly, If blah1 is deleted, blah1-hard still holds the contents; if blah2 is
     dog
     cdutboy@ubuntu:~/testlink$ cat hardlink
     dog
+## 截屏
+### shutter <a name=shutter></a>
+#### SYNOPSIS
+       shutter [options]
+#### capture mode options
+* -s, --select=[X,Y,WIDTH,HEIGHT]
+    Capture an area of the screen. Providing X,Y,WIDTH,HEIGHT is optional.
+* -f,--full
+    Capture the entire screen.
+* -w, --window=[NAME_PATTERN]
+    Select a window to capture. Providing a NAME_PATTERN (Perl-style reges) ist optional.
+* -a, --active
+    Capture the current active window.
+* --section
+    Capture a section. You will be able to select any child window by moving the mouse over it.
+* --web=[URL]
+    Capture a webpage. Providing an URL ist optional.
+* -r, --redo
+    Redo last screenshot.
+#### setting options
+* -P, --profile=NAME
+    Load a specific profile on startup.
+* -o, output=FILENAME
+    Specify a filename to save the screenshot to (overwrites any profile-related setting).
+    Supported image formats: You can save to any popular image format (e.g. jpeg, png, gif, bmp). Additionally it is possible to save to pdf, ps or svg.
+    Please note: There are several wildcards available, like
+    %Y = year
+    %m = month
+    %d = day
+    %T = time
+    \$h = height
+    \$w = width
+    \$name = multi-purpose (e.g. window title)
+    \$nb_name = like $name but without blanks in resulting strings
+    \$profile = name of current profile
+    \$R = random char (e.g. $RRRR = ag4r)
+    %NN = counter
+    As an example: shutter -f -e -o './%y-%m-%d_$w_$h.png' would create a file named '11-10-28_1280_800.png' in the current directory.
+* -d, --delay=SECONDS
+    Wait n seconds before taking a screenshot.
+* -c, --include_cursor
+    Include cursor when taking a screenshot.
+* -C, --remove_cursor
+    Remove cursor when taking a screenshot.
+#### application options
+* -e, --exit_after_capture
+    Exit after the first capture has been made. This is useful when using Shutter in scripts. 
 ## 录屏软件
 ### peek
 * installation
@@ -92,4 +139,17 @@ Similarly, If blah1 is deleted, blah1-hard still holds the contents; if blah2 is
 ## [ffmpeg](https://www.ffmpeg.org/ffmpeg.html)
 ### 1 Synopsis
 `ffmpeg [global_options] {[input_file_options] -i input_url} ... {[output_file_options] output_url} ... `
-
+### Description
+ffmpeg is a very fast video and audio converter that can also grab from a live audio/video source. It can also convert between arbitrary sample rates and resize video on the fly with a high quality polyphase filter. 
+ffmpeg reads from an arbitrary number of input "files" (which can be regular files, pipes, network streams, grabbing devices, etc.), specified by the -i option, and writes to an arbitrary number of output "files", which are specified by a plain output url. Anything found on the command line which cannot be interpreted as an option is considered to be an output url. 
+Each input or output url can, in principle, contain any number of streams of different types (video/audio/subtitle/attachment/data). The allowed number and/or types of streams may be limited by the container format. Selecting which streams from which inputs will go into which output is either done automatically or with the -map option (see the Stream selection chapter). 
+To refer to input files in options, you must use their indices (0-based). E.g. the first input file is 0, the second is 1, etc. Similarly, streams within a file are referred to by their indices. E.g. 2:3 refers to the fourth stream in the third input file. Also see the Stream specifiers chapter. 
+As a general rule, options are applied to the next specified file. Therefore, order is important, and you can have the same option on the command line multiple times. Each occurrence is then applied to the next input or output file. Exceptions from this rule are the global options (e.g. verbosity level), which should be specified first. 
+Do not mix input and output files – first specify all input files, then all output files. Also do not mix options which belong to different files. All options apply ONLY to the next input or output file and are reset between files. 
+* To set the video bitrate of the output file to 64Kbit/s:
+    `ffmpeg -i input.avi -b:v 64k -bufsize 64k output.avi`
+* To force the frame rate of the output file to 24fps:
+    `ffmpeg -i input.avi -r 24 output.avi`
+* To force the frame rate of the input file (valid for raw formats only) to 1 fps and the frame rate of the output file to 24 fps:
+    `ffmpeg -r 1 -i input.avi -r 24 output.avi`
+### Detailed description
