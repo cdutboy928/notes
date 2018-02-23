@@ -153,3 +153,37 @@ Do not mix input and output files – first specify all input files, then all ou
 * To force the frame rate of the input file (valid for raw formats only) to 1 fps and the frame rate of the output file to 24 fps:
     `ffmpeg -r 1 -i input.avi -r 24 output.avi`
 ### Detailed description
+The transcoding process in ffmpeg for each output can be described by the following diagram: 
+![detailed description](ffmpeg_detailed.png)
+ffmpeg calls the libavformat library (containing demuxers) to read input files and get packets containing encoded data from them. When there are multiple input files, ffmpeg tries to keep them synchronized by tracking lowest timestamp on any active input stream. 
+Encoded packets are then passed to the decoder (unless streamcopy is selected for the stream, see further for a description). The decoder produces uncompressed frames (raw video/PCM audio/...) which can be processed further by filtering (see next section). After filtering, the frames are passed to the encoder, which encodes them and outputs encoded packets. Finally those are passed to the muxer, which writes the encoded packets to the output file. 
+#### 3.1 Filtering
+Before encoding, ffmpeg can process raw audio and video frames using filters from the libavfilter library. Several chained filters form a filter graph. ffmpeg distinguishes between two types of filtergraphs: simple and complex. 
+#### 3.2 Stream copy
+Stream copy is a mode selected by supplying the copy parameter to the -codec option. It makes ffmpeg omit the decoding and encoding step for the specified stream, so it does only demuxing and muxing. It is useful for changing the container format or modifying container-level metadata. The diagram above will, in this case, simplify to this: 
+![stream_copy](stream_copy.png)
+Since there is no decoding or encoding, it is very fast and there is no quality loss. However, it might not work in some cases because of many factors. Applying filters is obviously also impossible, since filters work on uncompressed data. 
+### 5 Options
+All the numerical options, if not specified otherwise, accept a string representing a number as input, which may be followed by one of the SI unit prefixes, for example: 'K', 'M', or 'G'.
+If 'i' is appended to the SI unit prefix, the complete prefix will be interpreted as a unit prefix for binary multiples, which are based on powers of 1024 instead of powers of 1000. Appending 'B' to the SI unit prefix multiplies the value by 8. This allows using, for example: 'KB', 'MiB', 'G' and 'B' as number suffixes. 
+Options which do not take arguments are boolean options, and set the corresponding value to true. They can be set to false by prefixing the option name with "no". For example using "-nofoo" will set the boolean option with name "foo" to false. 
+#### 5.1 Stream specifiers
+Some options are applied per-stream, e.g. bitrate or codec. Stream specifiers are used to precisely specify which stream(s) a given option belongs to. 
+#### 5.2 Generic options
+These options are shared amongst the ff* tools. 
+#### 5.3 AVOptions
+#### Main options
+## youtube-dl
+## mplayer
+Q = Quit
+P = Pause
+Up arrow = Jump forward in file more
+Right arrow = Jump forward in file less
+Down arrow = Jump back in file more
+Left arrow = Jump back in file less
+) = Volume up
+( = Volume down
+M = Volume mute
+F = Full screen view
+O = On-screen display
+V = Toggle subtitles in video
