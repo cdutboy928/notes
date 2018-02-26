@@ -105,24 +105,24 @@ alert(s);
 
 ### reference image links
 * display the reference image
-              ![The first father][First Father]
-              ![The second father][Second Father]
-              [First father]: http://octodex.github.com/images/founding-father.jpg
+              ![The first father][First Father]  
+              ![The second father][Second Father]  
+              [First father]: http://octodex.github.com/images/founding-father.jpg  
               [Second father]: http://octodex.github.com/images/foundingfather_v2.png
-![The first father][First Father]
-![The second father][Second Father]
-[First father]: http://octodex.github.com/images/founding-father.jpg
-[Second father]: http://octodex.github.com/images/foundingfather_v2.png
+![The first father][First Father]  
+![The second father][Second Father]  
+[First father]: http://octodex.github.com/images/founding-father.jpg  
+[Second father]: http://octodex.github.com/images/foundingfather_v2.png  
 
    *  does not display the reference image
-              [The first father][First Father]
-              [The second father][Second Father]
-              [First father]: http://octodex.github.com/images/founding-father.jpg
-              [Second father]: http://octodex.github.com/images/foundingfather_v2.png
-   [The first father][First Father]
-   [The second father][Second Father]
-   [First father]: http://octodex.github.com/images/founding-father.jpg
-   [Second father]: http://octodex.github.com/images/foundingfather_v2.png
+              [The first father][First Father]  
+              [The second father][Second Father]  
+              [First father]: http://octodex.github.com/images/founding-father.jpg  
+              [Second father]: http://octodex.github.com/images/foundingfather_v2.png  
+   [The first father][First Father]  
+   [The second father][Second Father]  
+   [First father]: http://octodex.github.com/images/founding-father.jpg  
+   [Second father]: http://octodex.github.com/images/foundingfather_v2.png  
    *Note: the text in the brackets is the alt text or the descriptive text for the image.*
 
 ## Blockquotes
