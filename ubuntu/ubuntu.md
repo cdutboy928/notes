@@ -136,6 +136,15 @@ Similarly, If blah1 is deleted, blah1-hard still holds the contents; if blah2 is
     * kazam
     * 可以录全屏和窗口，但是不能录gif
 ### 视频转GIF
+#### 将视频转换为GIF
+`apt install ffmpeg imagemagick`
+`ffmpeg -ss 00:00:20 -i input.mp4 -to 10 -r 10 -vf scale=200:-1 output.gif`
+#### 合并多个GIF文件
+`convert -delay 120 -loop 0 *.gif output.gif`
+ * `-delay 120`:表示GIF动画速度
+ * `-loop 0`:表示无限循环
+#### 从jpg图片序列创建gif动图
+`convert -delay 120 -loop 0 *.jpg linux.gif`
 ## [ffmpeg](https://www.ffmpeg.org/ffmpeg.html)
 ### 1 Synopsis
 `ffmpeg [global_options] {[input_file_options] -i input_url} ... {[output_file_options] output_url} ... `
@@ -173,7 +182,7 @@ Some options are applied per-stream, e.g. bitrate or codec. Stream specifiers ar
 These options are shared amongst the ff* tools. 
 #### 5.3 AVOptions
 #### Main options
-### 20 FFmpeg commands for beginners <a name=ffmpegcommands></a>
+### Some FFmpeg commands for beginners <a name=ffmpegcommands></a>
 The typical syntax of the FFmpeg command is:
       ffmpeg [global_options] {[input_file_options] -i input_url} ... {[output_file_options] output_url} ...
 1. Getting audio/vidio file information
@@ -281,7 +290,7 @@ Here,
  * image-%2d.png: Indicates how we want to name the extracted images. In this case, the names should start like image-01.png, image-02.png, image-03.png and so on. If you use %3d, then the name of images will start like image-001.png, image-002.png and so on. 
 
 10. Cropping videos 
-t is somewhat similar to change the resolution of the video file. let us say you want to a video with size 300×300. You could do that using command:
+It is somewhat similar to change the resolution of the video file. let us say you want to a video with size 300×300. You could do that using command:
 		ffmpeg -i input.mp4 -croptop 100 -cropbottom 100 -cropleft 300 -cropright 300 output.mp4
 Please note that cropping videos will affect the quality. Do not do this unless it is necessary.
 11. Convert a specific portion of a video
