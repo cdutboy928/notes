@@ -1,5 +1,8 @@
 # Learning Log
-## 25 Jan, 2018
-* [markdown links](markdown#links)
-* [markdown code](markdown/markdown.md#tocode)
-* ![test a image](git/git_on_android_gif.gif)
+## 23 Feb, 2018
+* [shutter](ubuntu/ubuntu.md#shutter)
+* ffmpeg
+## 24 Feb, 2018
+* [ffmpeg commands for beginners](ubuntu/ubuntu.md#ffmpegcommands)
+## 26 Feb, 2018
+* [finish the markdown learning](markdown/markdown.md#markdown_learning)

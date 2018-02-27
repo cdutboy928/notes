@@ -22,8 +22,7 @@
   * termux中文输入问题，向上键问题✓
     * 先安装聪明狗的百度皮肤，数字键盘里边，左下角的退格键右划=切换其它输入法。✓
     * 先安装聪明狗的百度皮肤，中文状态下点击emoji。✓
-  * 不能显示的问题还是没解决，
-    * 貌似是跟shadowsocks proxy 有关。现在就是多开几次或者重启。
+  * 不能显示的问题还是没解决， * 貌似是跟shadowsocks proxy 有关。现在就是多开几次或者重启。
     *  试一下修改polipo端口，或者修改markdown preview。或者不用export 到终端可以管用？(好像也不管用）
     * 在出现白框之后马上用鼠标点里面的行。
   * .vimrc配置不起作用(好像也是那个spf13 惹的祸)✗
@@ -39,13 +38,16 @@
   * 电子词典✓
   * 查王雪纯和那几个人的唐诗朗诵✓
   *  回家准备✓
-  * markdown syntax   ⅕
+  *  20 ffmpeg commands✓
+  * ubuntu录屏，视频转gif✓
+  * markdown syntax   ✓
+  * 500✓
   * vim note skills 
   * Visa卡
   * 医保银行
   * 百度云绑定手机号的问题
-  * ubuntu录屏，视频转gif
   * 印度代购药，防伪唯一机制，md5?
-  * 500
   *  url="http://auto.tom61.com/down/mp3book/gscjx/古诗精选-采葛（诗经-王风）.mp3?176013719797087x1517986929x176013721672955-77ca97c604691230b0bec04e98642197"
   *  扩展g盘空间
+  *  KTV 歌单
+  *  python learning preparing
