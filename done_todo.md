@@ -52,3 +52,5 @@
   *  KTV 歌单
   *  python learning preparing
   *  乐理
+  *  markdown 怎么标记有疑问的地方
+  *  zathura使用
