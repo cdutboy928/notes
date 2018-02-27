@@ -104,17 +104,17 @@ alert(s);
           [Benjamin Bannekat](https://octodex.github.com/images/bannekat.png)
 
 ### reference image links
-* display the reference image
+* display the reference image  
               ![The first father][First Father]  
               ![The second father][Second Father]  
               [First father]: http://octodex.github.com/images/founding-father.jpg  
-              [Second father]: http://octodex.github.com/images/foundingfather_v2.png
+              [Second father]: http://octodex.github.com/images/foundingfather_v2.png  
 ![The first father][First Father]  
 ![The second father][Second Father]  
 [First father]: http://octodex.github.com/images/founding-father.jpg  
 [Second father]: http://octodex.github.com/images/foundingfather_v2.png  
 
-   *  does not display the reference image
+   *  does not display the reference image  
               [The first father][First Father]  
               [The second father][Second Father]  
               [First father]: http://octodex.github.com/images/founding-father.jpg  
