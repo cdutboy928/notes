@@ -6,3 +6,5 @@
 * [ffmpeg commands for beginners](ubuntu/ubuntu.md#ffmpegcommands)
 ## 26 Feb, 2018
 * [finish the markdown learning](markdown/markdown.md#markdown_learning)
+## 27 Feb, 2018
+* [zathura](ubuntu/ubuntu.md#zathura)

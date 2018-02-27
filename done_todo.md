@@ -51,3 +51,5 @@
   *  扩展g盘空间
   *  KTV 歌单
   *  python learning preparing
+  *  markdown 怎么标记有疑问的地方
+  *  zathura使用

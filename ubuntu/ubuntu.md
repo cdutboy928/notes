@@ -528,3 +528,45 @@ V = Toggle subtitles in video
 ## display a picture
         gwenview test.gif
         ffplay test.gif
+## zathura <a name=zathura></a>
+### navigation and shortcuts
+* same as vim navigation
+* f: Follow links on the page
+* F: Display link target
+* r: Rotate by 90 degrees
+* ^r: Recolor
+* Tab: Show index and switch to Index mode
+    * k,j: Move to upper or lower entry
+    * l: Expand entry
+    * L: Expand all entries
+    * h: Collapse entry
+    * H: Collapse all entries
+    * space, return: Select and open entry
+* d: Toggle dual page view
+* F11: Switch to fullscreen mode
+* +,-,=: Zoom in, out or to the original size
+* zI, zO, z0: Zoom in, out or the oringal size
+* a: Zoom to fit
+* s: Zoom to width
+* mX: Set a quickmark to a letter or number X
+* \`X: Goto quickmark saved at letter or number X
+* /: Search forwards
+* ?: Search backwards
+* q: Quit
+### commands
+* :: Enter command
+* bmark: Save a bookmark
+* bdelete: Delete a bookmark
+* blist: List bookmarks
+    press Tab after blist to show all the bookmarks and Press Tab to go through the bookmarks and then press return to open one.
+* close: Close document
+* exec: Excute an external command
+* info: Show document information
+* open: Open a document
+* print: Print document
+* write(!): Save document (and force overwritting)
+* export: Export attachments
+* dump: Write values, descriptions, etc. of all current settings to a file.
+### Enable copy to clipboard
+        vim ~/.config/zathura/zathurarc
+        set selection-clipboard clipboard
