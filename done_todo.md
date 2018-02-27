@@ -51,3 +51,4 @@
   *  扩展g盘空间
   *  KTV 歌单
   *  python learning preparing
+  *  乐理
