@@ -23,8 +23,8 @@ Note: The * and the _ is replacable.
 
 ## code <a name=tocode></a>
 * inline code
-       \`inline code\` : `inline code`
-       _*Note: can only be used in one line*_
+  \`inline code\` : `inline code`
+  _*Note: can only be used in one line*_
 * code block 
          indenting by 4 spaces will turn an entire paragraph into a code-block
 Blocks of code are either fenced by lines with three back-ticks ```, or are indented with four spaces. I recommend only using the fenced code blocks -- they're easier and only they support syntax highlighting.
@@ -296,7 +296,7 @@ Markdown | Less | Pretty
 [![IMAGE ALT TEXT HERE](https://img.youtube.com/vi/LpsW9N3Ih5Y/0.jpg)](https://www.youtube.com/watch?v=LpsW9N3Ih5Y)
 Note: There must be line (either normal or innormal) after the link.
 [local_video](test.mp4)
-<video src="https://www.youtube.com/watch?v=LpsW9N3Ih5Y" controls="controls">
+???<video src="https://www.youtube.com/watch?v=LpsW9N3Ih5Y" controls="controls">
 Your browser does not support the video tag.
 </video>
-<iframe  src="test.mp4" frameborder="0" allowfullscreen></iframe>
+???<iframe  src="test.mp4" frameborder="0" allowfullscreen></iframe>

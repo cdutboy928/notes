@@ -42,6 +42,7 @@
   * ubuntu录屏，视频转gif✓
   * markdown syntax   ✓
   * 500✓
+  *  乐理✓
   * vim note skills 
   * Visa卡
   * 医保银行
@@ -51,6 +52,5 @@
   *  扩展g盘空间
   *  KTV 歌单
   *  python learning preparing
-  *  乐理
   *  markdown 怎么标记有疑问的地方
   *  zathura使用
