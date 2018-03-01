@@ -54,3 +54,4 @@
   *  乐理
   *  markdown 怎么标记有疑问的地方
   *  zathura使用
+  *  set three mark string to red in vim
