@@ -177,3 +177,13 @@ git clone https://github.com/sunuslee/vim-plugin-random-colorscheme-picker`
 ## 显示空格等不可见的字符
     set list
     set listchars=tab:›\ ,trail:•,extends:#,nbsp:. " Highlight problematic whitespace
+## how to note question parts
+put the following codes in .vimrc:
+        hi Error ctermbg=red guibg=darked
+        match Error /???/
+    Or
+        hi Todo ctermbg=red guibg=darked
+        match Todo /???/
+    Or
+        hi Title ctermbg=red guibg=darked
+        match Title /???/

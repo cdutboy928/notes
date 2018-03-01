@@ -43,7 +43,10 @@
   * markdown syntax   ✓
   * 500✓
   *  乐理✓
-  * vim note skills 
+  *  markdown 怎么标记有疑问的地方✓
+  *  zathura使用✓
+  *  python learning preparing✓
+  * vim note skills ✓
   * Visa卡
   * 医保银行
   * 百度云绑定手机号的问题
@@ -51,6 +54,3 @@
   *  url="http://auto.tom61.com/down/mp3book/gscjx/古诗精选-采葛（诗经-王风）.mp3?176013719797087x1517986929x176013721672955-77ca97c604691230b0bec04e98642197"
   *  扩展g盘空间
   *  KTV 歌单
-  *  python learning preparing
-  *  markdown 怎么标记有疑问的地方
-  *  zathura使用

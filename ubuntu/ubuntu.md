@@ -542,6 +542,7 @@ V = Toggle subtitles in video
     * h: Collapse entry
     * H: Collapse all entries
     * space, return: Select and open entry
+* 100gg: go to page 100
 * d: Toggle dual page view
 * F11: Switch to fullscreen mode
 * +,-,=: Zoom in, out or to the original size
@@ -560,12 +561,15 @@ V = Toggle subtitles in video
 * blist: List bookmarks
     press Tab after blist to show all the bookmarks and Press Tab to go through the bookmarks and then press return to open one.
 * close: Close document
-* exec: Excute an external command
+* exec: Excute an external command ???
 * info: Show document information
 * open: Open a document
 * print: Print document
-* write(!): Save document (and force overwritting)
+* write(!): Save document (and force overwritting) ???
 * export: Export attachments
+        export attachment-{name} {file-name}
+        export image-p{page_number}-{image_number} {file_name}
+  Press Tab to show all the images that can be exported and then press Tab to go through the images and press return to select one.
 * dump: Write values, descriptions, etc. of all current settings to a file.
 ### Enable copy to clipboard
         vim ~/.config/zathura/zathurarc
