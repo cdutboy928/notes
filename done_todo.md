@@ -48,6 +48,7 @@
   *  python learning preparing✓
   * vim note skills ✓
   * Visa卡✓
+  *  电脑✓
   * 医保银行
   * 百度云绑定手机号的问题
   * 印度代购药，防伪唯一机制，md5?
