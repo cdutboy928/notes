@@ -574,3 +574,8 @@ V = Toggle subtitles in video
 ### Enable copy to clipboard
         vim ~/.config/zathura/zathurarc
         set selection-clipboard clipboard
+## webtorrent
+* [Download](https://webtorrent.io/desktop/)
+* install
+        dpkg -i webtorrent-desktop_0.19.0-1_amd64.deb
+* put torrent to `https://instant.io/` if cannot play
