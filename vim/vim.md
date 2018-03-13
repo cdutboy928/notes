@@ -187,3 +187,6 @@ put the following codes in .vimrc:
     Or
         hi Title ctermbg=red guibg=darked
         match Title /???/
+## auto indent
+* set ai          设置自动缩进
+* :set shiftwidth=4   设置自动缩进 4 个空格, 当然要设自动缩进先.
