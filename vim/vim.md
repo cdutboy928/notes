@@ -190,3 +190,16 @@ put the following codes in .vimrc:
 ## auto indent
 * set ai          设置自动缩进
 * :set shiftwidth=4   设置自动缩进 4 个空格, 当然要设自动缩进先.
+## hardcopy
+* `hardcopy` 调出打印对话框
+* `hardcopy!` 不调出打印对话框
+* `：1,100 hardcopy`
+* `set printoptions=paper:A4,syntax:y,wrap:y,number:y`
+    * paper:A4,A3,letter,legal
+    * syntax:
+        * 默认值“a”，意味着仅在使用彩色打印机时，打印语法高亮度；
+        * 你也可以将值设为“y” ，强制打印语法高亮度。
+    * wrap选项，确定是否折行打印。
+        * 默认值“:y”，意味着自动折行；
+        * 如果你将值设为“n”，那么过长的行在打印时将被截断。
+    * number选项，设为“y”时，将会打印行号。
