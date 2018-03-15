@@ -78,9 +78,9 @@
   * vim print✓
   * 口球✓
   * 问李总✓
+  * 现代语》古语✓
   * 医保银行
   * 印度代购药，防伪唯一机制，md5?区块链？
   *  url="http://auto.tom61.com/down/mp3book/gscjx/古诗精选-采葛（诗经-王风）.mp3?176013719797087x1517986929x176013721672955-77ca97c604691230b0bec04e98642197"
   *  扩展g盘空间
   * git pocerlain and plumbing commands corresponding
-  * 现代语》古语
