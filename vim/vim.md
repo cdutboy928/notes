@@ -203,3 +203,16 @@ put the following codes in .vimrc:
         * 默认值“:y”，意味着自动折行；
         * 如果你将值设为“n”，那么过长的行在打印时将被截断。
     * number选项，设为“y”时，将会打印行号。
+
+## about folding and unfolding
+
+* `zo` to open the current fold
+* `zO` to open all folds
+* `zc` to close the current fold
+* `zC` to close all folds
+* `za` to toggle the current fold
+* `zA` to toglle all foldes
+* `zr` to open one more level of folds through out the whole buffer
+* `zR` to open all folds
+* `zm` to close one more level of folds through out the whole buffer
+* `zM` to close all folds
