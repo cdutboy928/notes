@@ -34,7 +34,7 @@
   * options for vimium on phone✓
   * to show the english when typing chinese✗
   * 按键精灵录制，要注意时间和布局，不能一味求快。✓
-  * options for vimium on phone	✓
+  * options for vimium on phone✓
   * 电子词典✓
   * 查王雪纯和那几个人的唐诗朗诵✓
   *  回家准备✓
@@ -82,3 +82,5 @@
   * 印度代购药，防伪唯一机制，md5?区块链？
   *  url="http://auto.tom61.com/down/mp3book/gscjx/古诗精选-采葛（诗经-王风）.mp3?176013719797087x1517986929x176013721672955-77ca97c604691230b0bec04e98642197"
   *  扩展g盘空间
+  * git pocerlain and plumbing commands corresponding
+  * 现代语》古语
