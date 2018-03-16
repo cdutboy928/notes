@@ -4,3 +4,135 @@
 ### 10.3 Git References
 #### Remotes
 
+The third type of reference that you'll see is a remote reference. If you add a remote and push to it, Git stores the value you last pushed to that remote for each branch in the refs/remotes directory. For instance, you can add a remote called origin and push your master branch to it:
+
+        $ git remote add origin git@github.com:schacon/simplegit-progit.git
+        $ git push origin master
+        Counting objects: 11, done.
+        Compressing objects: 100% (5/5), done.
+        Writing objects: 100% (7/7), 716 bytes, done.
+        Total 7 (delta 2), reused 4 (delta 1)
+        To git@github.com:schacon/simplegit-progit.git
+          allbef0..ca82a6d master -> master
+Then, you can see what the `master` branch on the `origin` remote was the last time you communicated with the server, by checking the refs/remotes/origin/master file:
+        
+        $ cat .git/refs/remotes/origin/master
+        ca82a6dff817ec66f44342007202690a93763949
+Remote references differ from branches (refs/heads references) mainly in that they're considered read-only. You can `git checkout` to one, but Git won't point HEAD at one, so you'll never update it with a `commit` command. Git manages them as bookmarks to the last known state of where those branches were on those servers.
+
+### [10.4 Git Internals-Packfiles](https://git-scm.com/book/en/v2/Git-Internals-Packfiles)
+**Packfiles**
+If you followed all of the instructions in the example from the previous section, you should now have a test Git repository with 11 objects-four blobs, three trees, three commits, and one tag:
+
+        $ find .git/objects -type f
+        .git/objects/01/55eb4229851634a0f03eb265b69f5a2d56f341 # tree 2
+        .git/objects/1a/410efbd13591db07496601ebc7a059dd55cfe9 # commit 3
+        .git/objects/1f/7a7a472abf3dd9643fd615f6da379c4acb3e3a # test.txt v2
+        .git/objects/3c/4e9cd789d88d8d89c1073707c3585e41b0e614 # tree 3
+        .git/objects/83/baae61804e65cc73a7201a7252750c76066a30 # test.txt v1
+        .git/objects/95/85191f37f7b0fb9444f35a9bf50de191beadc2 # tag
+        .git/objects/ca/c0cab538b970a37ea1e769cbbde608743bc96d # commit 2
+        .git/objects/d6/70460b4b4aece5915caf5c68d12f560a9fe3e4 # 'test content'
+        .git/objects/d8/329fc1cc938780ffdd9f94e0d364e0ea74f579 # tree 1
+        .git/objects/fa/49b077972391ad58037050f2a75f74e3671e92 # new.txt
+        .git/objects/fd/f4fc3344e67ab068f836878b6c4951e3b15f3d # commit 1
+Git compresses the contents of these files with zlib, and you're not storing much, so all these files collectively take up only 925 bytes. Now you'll add some more sizable content to the repository to demonstrate an interesting feature of Git. To demonstrate, we'll add the repo.rb file from the Grit library-this is about a 22K source code file:
+
+        $ curl https://raw.githubusercontent.com/mojombo/grit/master/lib/grit/repo.rb > repo.rb
+        $ git checkout master
+        $ git add repo.rb
+        $ git commit -m 'added repo.rb'
+        [master 484a592] added repo.rb
+         3 files changed, 709 insertions(+), 2 deletions(-)
+         delete mode 100644 bak/test.txt
+         create mode 100644 repo.rb
+         rewrite test.txt (100%)
+If you look at the resulting tree, you can see the SHA-1 value that was calculated for your new repo.rb blob object:
+
+        $ git cat-file -p master^{tree}
+        100644 blob fa49b077972391ad58037050f2a75f74e3671e92    new.txt
+        100644 blob 033b4468fa6b2a9547a70d88d1bbe8bf3f9ed0d5    repo.rb
+        100644 blob e3f094f522629ae358806b17daf78246c27c007b    test.txt
+You can then use `git cat-file` to see how large that object is:
+
+        $ git cat-file -s 033b4468fa6b2a9547a70d88d1bbe8bf3f9ed0d5
+        22044
+At this point, modify that file a little, and see what happens:
+
+        $ echo '# testing' >> repo.rb
+        $ git commit -am 'modified repo a bit'
+        [master 2431da6] modified repo.rb a bit
+        1 file changed, 1 insertion(+)
+Check the tree createdd by that last commit, and you see something interesting:
+
+        $ git cat-file -p master^{tree}
+        100644 blob fa49b077972391ad58037050f2a75f74e3671e92    new.txt
+        100644 blob b042a60ef7dff760008df33cee372b945b6e884e    repo.rb
+        100644 blob e3f094f522629ae358806b17daf78246c27c007b    test.txt
+The blob is now a different blob, which means that although you added only a single line to the end of a 400-line file, Git stored that new content as a completely new object:
+
+        $ git cat-file -s b042a60ef7dff760008df33cee372b945b6e884e
+        2431da676938450a4d72e260db3bf7b0f587bbc1 commit 223 155 12
+        69bcdaff5328278ab1c0812ce0e07fa7d26a96d7 commit 214 152 167
+        80d02664cb23ed55b226516648c7ad5d0a3deb90 commit 214 145 319
+        43168a18b7613d1281e5560855a83eb8fde3d687 commit 213 146 464
+        092917823486a802e94d727c820a9024e14a1fc2 commit 214 146 610
+        702470739ce72005e2edff522fde85d52a65df9b commit 165 118 756
+        d368d0ac0678cbe6cce505be58126d3526706e54 tag    130 122 874
+        fe879577cb8cffcdf25441725141e310dd7d239b tree   136 136 996
+        d8329fc1cc938780ffdd9f94e0d364e0ea74f579 tree   36 46 1132
+        deef2e1b793907545e50a2ea2ddb5ba6c58c4506 tree   136 136 1178
+        d982c7cb2c2a972ee391a85da481fc1f9127a01d tree   6 17 1314 1 \
+          deef2e1b793907545e50a2ea2ddb5ba6c58c4506
+        3c4e9cd789d88d8d89c1073707c3585e41b0e614 tree   8 19 1331 1 \
+          deef2e1b793907545e50a2ea2ddb5ba6c58c4506
+        0155eb4229851634a0f03eb265b69f5a2d56f341 tree   71 76 1350
+        83baae61804e65cc73a7201a7252750c76066a30 blob   10 19 1426
+        fa49b077972391ad58037050f2a75f74e3671e92 blob   9 18 1445
+        b042a60ef7dff760008df33cee372b945b6e884e blob   22054 5799 1463
+        033b4468fa6b2a9547a70d88d1bbe8bf3f9ed0d5 blob   9 20 7262 1 \
+          b042a60ef7dff760008df33cee372b945b6e884e
+        1f7a7a472abf3dd9643fd615f6da379c4acb3e3a blob   10 19 7282       22054
+        non delta: 15 objects
+        chain length = 1:3 objects
+        .git/objects/pack/pack-978e03944f5c581011e6998cd0e9e30000905586.pack: ok
+Here, the `033b4` blob, which if you remember was the first version of your `repo.rb` file, is referencing the `b042a` blob, which was the second version of the file. The third column in the output is the size of the object in the pack, so you can see that `b042a` takes up 22K of the file, but that `033b4` only takes up 9 bytes. What is also interesting is that the second version of the file is the one that is stored intact, whereas the original version is stored as a delta-this is because you're most likely to need faster access to the most recent version of the file.
+The really nice thing about this is that it can be repacked at any time. Git will occasionally repack your database automatically, always trying to save more space, but you can also manualy repack at any time by running `git gc` by hand.
+
+### [10.5 Git Internals- The Refspec](https://git-scm.com/book/en/v2/Git-Internals-The-Refspec)
+#### The Refspec
+Throughout this book, we've used simple mappings from remote branches to local references, but they can be more complex. Suppose you were following along with the last couple sections and had created a small local Git repository, and now wanted to add a remote to it:
+
+        $ git remote add origin https://github.com/schacon/simplegit-progit
+Running the command above adds a section to your repository's `.git/config` file, specifying the name of the remote(`origin`), the URL of the remote repository, and the *refspec* to be used for fetching:
+
+        [remote "origin"]
+                url = https://github.com/schacon/simplegit-progit
+                fetch = +refs/heads/*:refs/remotes/origin/*
+The format of the refspec is, first, an optional `+`, followed by `<src>:<dst>`, where `<src>` is the pattern for references on the remote side and `<dst>` is where those references will be tracked locally. The `+` tells Git to update the reference even if it isn't a fast-forward.
+In the default case that is automatically written by a `git remote add` command, Git fetches all the references under `refs/heads/` on the server and writes them to `refs/remotes/origin/` locally. So, if there is a `master` branch on the server, you can access the log of that branch locally via any of the following:
+
+        $ git log origin/master
+        $ git log remotes/orgin/master
+        $ git log refs/remotes/origin/master
+They're all equivalent, because Git expands each of them to `refs/remotes/origin/master`.
+If you want Git instead to pull down only the `master` branch each time, and not every other branch on the remote server, you can change the fetch line to refer to that branch only:
+
+        fetch = +refs/heads/master:refs/remotes/origin/master
+This is just the default refspec for `git fetch` for that remote. If you want to do a one-time only fetch, you can specify the specific refspec on the command line, too. To pull the `master` branch on the remote down to the `origin/mymaster` locally, you can run:
+
+        $ git fetch origin master:refs/remotes/origin/mymaster
+You can also specify multiple refspecs. One the command line, you can pull down several branches like so:
+
+        $ git fetch origin master:refs/remotes/origin/mymaster \
+                topic:refs/remotes/origin/topic
+        From git@github.com:schacon/simplegit
+        ! [rejected]        master      -> origin/mymaster      (non fast forward)
+        * [new branch]      topic       ->origin/topic
+In this case, the `master` branch pull was rejected because it wasn't listed as a fast-forward reference. You can override that by specifying the `+` in front of the refspec.
+You can also specify multiple refspec for fetching in your configuration file. If you want to always fetch the `master` and `experiment` branches from the `origin` remote, add two lines:
+
+        [remote "origin"]
+                url = https://github.com/schacon/simplegit-progit
+                fetch = +refs/heads/master:refs/remotes/origin/master
+                fetch = +refs/heads/experiment:refs/remote/origin/experiment
