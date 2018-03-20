@@ -72,6 +72,29 @@ Check the tree createdd by that last commit, and you see something interesting:
 The blob is now a different blob, which means that although you added only a single line to the end of a 400-line file, Git stored that new content as a completely new object:
 
         $ git cat-file -s b042a60ef7dff760008df33cee372b945b6e884e
+        22054
+You have two nearly identical 22K objects on your disk (each compressed to approximately 7K). Wouldn’t it be nice if Git could store one of them in full but then the second object only as the delta between it and the first?
+It turns out that it can. The initial format in which Git saves objects on disk is called a “loose” object format. However, occasionally Git packs up several of these objects into a single binary file called a “packfile” in order to save space and be more efficient. Git does this if you have too many loose objects around, if you run the `git gc` command manually, or if you push to a remote server. To see what happens, you can manually ask Git to pack up the objects by calling the `git gc` command:
+
+        $ git gc
+        Counting objects: 18, done.
+        Delta compression using up to 8 threads.
+        Compressing objects: 100% (14/14), done.
+        Writing objects: 100% (18/18), done.
+        Total 18 (delta 3), reused 0 (delta 0)
+If you look in your `objects` directory, you’ll find that most of your objects are gone, and a new pair of files has appeared:
+
+        $ find .git/objects -type f
+        .git/objects/bd/9dbf5aae1a3862dd1526723246b20206e5fc37
+        .git/objects/d6/70460b4b4aece5915caf5c68d12f560a9fe3e4
+        .git/objects/info/packs
+        .git/objects/pack/pack-978e03944f5c581011e6998cd0e9e30000905586.idx
+        .git/objects/pack/pack-978e03944f5c581011e6998cd0e9e30000905586.pack
+The objects that remain are the blobs that aren’t pointed to by any commit — in this case, the “what is up, doc?” example and the “test content” example blobs you created earlier. Because you never added them to any commits, they’re considered dangling and aren’t packed up in your new packfile.
+The other files are your new packfile and an index. The packfile is a single file containing the contents of all the objects that were removed from your filesystem. The index is a file that contains offsets into that packfile so you can quickly seek to a specific object. What is cool is that although the objects on disk before you ran the `gc` command were collectively about 15K in size, the new packfile is only 7K. You’ve cut your disk usage by half by packing your objects.
+How does Git do this? When Git packs objects, it looks for files that are named and sized similarly, and stores just the deltas from one version of the file to the next. You can look into the packfile and see what Git did to save space. The `git verify-pack` plumbing command allows you to see what was packed up:
+
+        $ git verify-pack -v .git/objects/pack/pack-978e03944f5c581011e6998cd0e9e30000905586.idx
         2431da676938450a4d72e260db3bf7b0f587bbc1 commit 223 155 12
         69bcdaff5328278ab1c0812ce0e07fa7d26a96d7 commit 214 152 167
         80d02664cb23ed55b226516648c7ad5d0a3deb90 commit 214 145 319
@@ -136,3 +159,13 @@ You can also specify multiple refspec for fetching in your configuration file. I
                 url = https://github.com/schacon/simplegit-progit
                 fetch = +refs/heads/master:refs/remotes/origin/master
                 fetch = +refs/heads/experiment:refs/remote/origin/experiment
+You can't use partial globs in the pattern, so this would be invalid:
+
+        fetch = +refs/heads/qa*:refs/remotes/origin/qa*
+However, you can use namespaces (or directories) to accomplish something like that. If you have a QA team that pushes a series of branches, and you want to get the `mater` branch and any of the QA team's branches but nothing else, you can use a config like this:
+
+        [remote "origin"]
+                url = https://github.com/schacon/simplegit-progit
+                fetch = +refs/heads/master:refs/remotes/origin/master
+                fetch = +refs/heads/qa/*:refs/remotes/origin/qa/*
+If you have a complex workflow process tha has a QA team pushing branches, developers pushing branches, and integration teams pushing and collaborating on remote branches, you can namespace them easily this way.
