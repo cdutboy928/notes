@@ -169,3 +169,27 @@ However, you can use namespaces (or directories) to accomplish something like th
                 fetch = +refs/heads/master:refs/remotes/origin/master
                 fetch = +refs/heads/qa/*:refs/remotes/origin/qa/*
 If you have a complex workflow process tha has a QA team pushing branches, developers pushing branches, and integration teams pushing and collaborating on remote branches, you can namespace them easily this way.
+#### Pushing Refspecs
+It's nice that you can fetch namespaced references that way, but how does the QA team get their branches into a `qa/` namespace in the first place? You accomplish that by using refspecs to push.
+If the QA team wants to push their `master` branch to `qa/master` on the remote server, they can run:
+
+        $ git push origin master:refs/heads/qa/master
+If they want Git to do that automatically each time they run `git push origin`, they can add a `push` value to their config file:
+
+        [remote "origin"]
+                url = https://github.com/schacon/simplegit-progit
+                fetch = +refs/heads/*:refs/remotes/origin/*
+                push = refs/heads/master:refs/heads/qa/master
+Again, this will cause `git push origin` to push the local `master` branch to the remote `qa/master` branch by default.
+#### Deleting References
+You can also use the refspec to delete references from the remote server by running something like this:
+
+        $ git push origin :topic
+Because the refspec is `<src>:<dst>`, by leaving off the `<src>` part, this basically says to make the `topic` branch on the remote nothing, which deletes it.
+Or you can use the newer syntax (available since Git v1.7.0):
+
+        $ git push origin --delete topic
+### 10.6 Git Internals - Transfer Protocols
+#### Transfer Protocols
+Git can transfer data between two repositories in two major two ways: the "dumb" protocoal and the "smart" protocol. This section will quickly cover how these two main protocols operate.
+#### The Dumb Protocol
