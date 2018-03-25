@@ -193,3 +193,42 @@ Or you can use the newer syntax (available since Git v1.7.0):
 #### Transfer Protocols
 Git can transfer data between two repositories in two major two ways: the "dumb" protocoal and the "smart" protocol. This section will quickly cover how these two main protocols operate.
 #### The Dumb Protocol
+If you're setting up a repository to be served read-only over HTTP, the dumb protocol is likely what will be used. This protocol is called "dumb" because it requires no Git-specific code on the server side during the transport process; the fetch process is series of HTTP `GET` requests, where the client can assume the layout of the Git repository on the server.
+*Note: The dumb protocol is fairly rarely used these days. It's difficult to secure or make private, so most Git hosts (both cloud-based and on-premises) will refuse to use it. It's generally advised to use the smart protocol, which we describe a bit further on.*
+Let's follow the `http-fetch` process for the simplegit library:
+
+        $ git clone http://server/simplegit-progit.git
+The first thing this command does is pull down the `info/refs` file. This file is written by the `update-server-info` command, which is why you need to enable that as a `post-receive` hook in order for the HTTP transport to work properly:
+
+        => GET info/refs
+        ca82a6dff817ec66f44342007202690a93763949        refs/heads/master
+Now you have a list of the remote references and SHA-1s. Next, you look for what the HEAD reference is so you know what o check out when you're finished:
+
+        => GET HEAD
+        ref: refs/heads/master
+You need to check out the `master` branch when you've completed the process. At this point, you're ready to start the walking process. Because your starting point is the `ca82a6` commit object you saw in the `ino/refs` file, you start by fetching that:
+
+        => GET objects/ca/82a6dff817ec66f44342007202690a93763949
+        (179 bytes of binary data)
+You get an object back-that object is in loose format on the server, and youfetched it over a static HTTP GET request. You can zlib-uncompress it, strip off the header, and look at the commit content:
+
+        $ git cat-file -p ca82a6dff817ec66f44342007202690a93763949
+        tree cfda3bf379e4f8dba8717dee55aab78aef7f4daf
+        parent 085bb3bcb608e1e8451d4b2432f8ecbe6306e7e7
+        author Scott Chacon <schacon$gmail.com> 1205815931 -0700
+        commiter Scott Chacon <schacon@gmail.com> 1240030591 -0700
+
+        change the version number
+
+Next, you have two more objects to retrieve-`cfda3b`, which is the tree of content that the commit we just retrieved points to; and `085bb3`, which is the parent commit:
+
+        Get objects/08/5bb3bcb608e1e8451d4b2432f8ecbe6306e7e7
+        (179 bytes of data)
+This gives you your next commit object. Grab the tree object:
+
+        => GET objects/cf/da3bf379e4f8dba8717dee55aab78aef7f4daf
+        (404 - Not Found)
+Oops-it looks like that tree object isn't in loose format on the server, so you get a 404 reponse back. There are a couple of reasons for this-the object could be in an alternate repository, or it could be in a packfile in this repository. Git checks or any listed alternates first:
+
+        GET objects/info/http-alternates
+        (empty file)
