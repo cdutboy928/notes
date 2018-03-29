@@ -579,3 +579,22 @@ V = Toggle subtitles in video
 * install
         dpkg -i webtorrent-desktop_0.19.0-1_amd64.deb
 * put torrent to `https://instant.io/` if cannot play
+## xdg-open
+### Examples
+
+        jelline@jelline:~$ xdg-open la_isla_bonita.mp3
+        jelline@jelline:~$ xdg-open http://baidu.com
+### Usage
+
+        xdg-open { file | URL }
+        xdg-open { --help | --manual | --version }
+### Manual
+    xdg-open opens a file or URL in the user's preferred application. If a URL is provided the URL will be opened in the user's preferred web browser. If a file is provided the file will be opened in the preferred application for files of that type. xdg-open supports file, ftp, http and https URLs.
+    xdg-open is for use inside a desktop session only. It is not recommended to use xdg-open as root.
+## 用专门的程序打开文件
+
+        libreoffice 文件名 &
+* 打开  .doc .docx .xls .xlsx .ppt .pptx
+* 打‘&’的目的是让文件在后台运行，命令行终端还能用。如果忘了打&可以 Ctrl+z，然后打bg回车
+* 文件名中含空格要打成'\ '
+*  文件名太长不用打完，如 abcdefghijklmn.pdf,可以打完前几个abc,然后点tab键，剩下的就自动打出来了。
