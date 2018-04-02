@@ -346,6 +346,12 @@ FFmpeg allows you to adjust the video playback speed. To increase the video play
 `ffmpeg -i inputvideo.mp4 -vf "setpts=0.5*PTS" outputvideo.mp4`
 To decrease playback speed, run:
 `ffmpeg -i inputvideo.mp4 -vf "setpts=4.0*PTS" outputvideo.mp4`
+对视频进行加速时，如果不想丢帧，可以用-r 参数指定输出视频FPS
+`ffmpeg -i input.mkv -an -r 60 -filter:v "setpts=0.5*PTS" output.mkv`
+调整音频播放速度
+`ffmpeg -i input.mkv -filter:a "atempo=2.0" -vn output.mkv`
+同时调整音频视频
+`ffmpeg -i input.mkv -filter_complex "[0:v]setpts=0.5*PTS[v];[0:a]atempo=2.0[a]" -map "[v]" -map "[a]" output.mkv`
 20. Turn X images to a video sequence
         ffmpeg -f image2 -i image%d.jpg video.mpg
 This command will transform all the images from the current directory (named image1.jpg, image2.jpg, etc…) to a video file named video.mpg.
@@ -513,18 +519,27 @@ Explanations:
     在一个MP4文件里面添加字幕，不是把 .srt 字幕文件集成到 MP4 文件里，而是在播放器里选择字幕，这种集成字幕比较简单，速度也相当快
 ## youtube-dl
 ## mplayer
-Q = Quit
-P = Pause
-Up arrow = Jump forward in file more
-Right arrow = Jump forward in file less
-Down arrow = Jump back in file more
-Left arrow = Jump back in file less
-) = Volume up
-( = Volume down
-M = Volume mute
-F = Full screen view
-O = On-screen display
-V = Toggle subtitles in video
+* Q = Quit
+* P = Pause
+* Up arrow = Jump forward in file more
+* Right arrow = Jump forward in file less
+* Down arrow = Jump back in file more
+* Left arrow = Jump back in file less
+* ) = Volume up
+* ( = Volume down
+* M = Volume mute
+* F = Full screen view
+* O = On-screen display
+* V = Toggle subtitles in video
+* time control
+    * Stop at 56 seconds.
+            -endpos 56
+    * Stop at 1 hour 10 minutes.
+            -endpos 01:10:00
+    * Stop at 1 minutes 6 seconds.
+            -ss 10 -endpos 56
+    * Stop playback after reading 100MB of the input file.
+            mplayer -endpos 100mb
 ## display a picture
         gwenview test.gif
         ffplay test.gif
@@ -598,3 +613,9 @@ V = Toggle subtitles in video
 * 打‘&’的目的是让文件在后台运行，命令行终端还能用。如果忘了打&可以 Ctrl+z，然后打bg回车
 * 文件名中含空格要打成'\ '
 *  文件名太长不用打完，如 abcdefghijklmn.pdf,可以打完前几个abc,然后点tab键，剩下的就自动打出来了。
+## ffplay
+        ffplay videofile
+        ffplay picfile
+* time control
+        -ss pos
+        -t duration

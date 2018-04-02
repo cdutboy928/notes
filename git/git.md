@@ -250,7 +250,7 @@ You have your tree object, so you continue walking your commits. They're all als
 The dumb protocol is simple but a bit inefficient, and it can't handle writing of data from the client to the server. The smart protocol is a more common method of transferring data, but it requires a process on the remote end that is intelligent about Git-it can read local data, figure out what the client has and needs, and generate a custom packfile for it. There are two sets of processes for transferring data: a pair for uploading data and a pair for downloading data.
 ##### Uploading Data
 To upload data to a remote process, Git uses the `send-pack` and `receive-pack` processes. The `send-pack` process runs on the client and connects to a `receive-pack` process on the remote side.
-`SSH`
+* SSH
 For example, say you run `git push origin master` in your project, and `origin` is defined as a URL that uses the SSH protocol. Git fires up tha `send-pack` process, which initiates a connection over SSH to your server. It tries to run a command on the remote sever via an SSH call that looks something like this:
 
         $ ssh -x git@server "git-receive-pack 'simplegit-progit.git'"
@@ -270,10 +270,31 @@ Git sends a line for each reference you're updating with the line's length, the 
 Next, the client sends a packfile of all the objects the server doesn't have yet. Finally, the server responds with a success (or failure) indication:
 
         000eunpack ok
-_HTTP(S)_
+* HTTP(S)
 This process is mostly the same over HTTP, though the handshaking is a bit different. The connection is initiated with this request:
 
         => GET http://server/simplegit-progit.git/info/refs?service=git-receive-pack
         001f# service=git-receive-pack
         00ab6c5f0e45abd7832bf23074a333f739977c9e8188 refs/heads/master□report-status \
-                delete-refs side-band-64
+                delete-refs side-band-64k quiet ofs-delta \
+                agent=git/2:2.1.1~vmg-bitmaps-bugaloo-608-g116744e
+        0000
+That's the end of the first client-server exchange. The client then makes another request, this time a `POST`, with the data that `send-pack` provides.
+
+        => POST http://server/simplegit-progit.git/git-receive-pack
+The `POST` request includes the `send-pack` output and the packfile as its payload. The server then indicates success or failure with its HTTP response.
+##### Downloading Data
+When you download data, the `fetch-pack` and `upload-pack` processes are involved. The client initiates a `fetch-pack` process that connects to an `upload-pack` process on the remote side to negotiate what data will be transferred down.
+* SSH
+If you're doing the fetch over SSH, `fetch-pack` runs something like this:
+
+        $ ssh -x git@server "git-upload-pack 'simplegit-progit.git'"
+After `fech-pack` connects, `upload-pack` sends back something like this:
+
+        00dfca82a6dff817ec66f44342007202690a93763949 HEAD□multi_ack thin-pack \
+                side-band side-band-64k ofs-delta shallow no-progress include-tag \
+                multi_ack_detailed symref=HEAD:refs/heads/master \
+                agent=git/2:2.1.1+github-607-gfba4028
+        003fe2409a098dc3e53539a9028a94b6224db9d6a6b6 refs/heads/master
+        0000
+This is very similar to what `receive-pack` responds with, but the capabilities are different. 
