@@ -619,3 +619,10 @@ Explanations:
 * time control
         -ss pos
         -t duration
+## Adding shared printers
+1. 查找网络打印机，输入对方IP地址，然后查找
+![searching printer](searching_printer.jpg)
+2. 输入对方用户名和密码
+3. 记得点下面的Set authentication details now，然后输入对方的用户名和密码，这样就不会出现等待验证的问题了。
+![authentication](adding_shared_printers.jpg)
+4. 后面就是选择合适的驱动就行了。

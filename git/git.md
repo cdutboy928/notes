@@ -1,5 +1,77 @@
 # Git Book
 ## 1. Getting Started
+## 2. Git Basics
+### Git Basics-Recording Changes to the Repository
+#### Removing Files
+To remove a file from Git, you have to remove it from your tracked files (more accurately, remove it from your staging area) and then commit it. The `git rm` command does that, and also removes the file from your working directory so you don't see it as untracked file the next time around.
+If you simply remove the file from your working directory, it shows up under the "Changes not staged for commit" (that is, *unstaged*) area of your `git status` output:
+
+        $ rm PROJECTS.md
+        $ git status
+        On branch master
+        Your branch is up-to-date with 'origin/master'.
+        Changes not staged for commit:
+        (use "git add/rm <file>..." to update what will be committed)
+        (use "git checkout -- <file>..." to discard changes in working directory)
+
+                deleted:    PROJECTS.md
+        no changes added to commit (use "git add" and/or "git commit -a")
+Then, if you run `git rm`, it stages the file's removal:
+
+        $ git rm PROJECTS.md
+        rm 'PROJECTS.md'
+        $ git status
+        On branch master
+        Your branch is up-to-date with 'origin/master'.
+        Changes to be committed:
+        (use "git reset HEAD <file>..." to unstage)
+
+            deleted: PROJECTS.md
+The next time you commit, the file will be gone and no longer tracked. If you modified the file and added it to the staging area already, you must force the removal with the `-f` option. This is a safety feature to prevent accidental removal of data that hasn't yet been recorded in a snapshot and that can't be recovered from Git.
+Another useful thing you may want to do is to keep the file in your working tree but remove it from your staging area. In other words, you may want to keep the file on your hard drive but not have Git track it anymore. This is particulary useful if you forgot to add something to your `.gitignore` file and accidentally staged it, like a large log file or a bunch of `.a` compiled files. To do this, use the `--cached` option(similar with `git update-index --remove` or `git update-index --force-remove`):
+
+        $ git rm --cached README
+You can pass files, directories, and file-glob patterns to the `git rm` command. That means you can do things such as:
+
+        $ git rm log/\*.log
+Note the backslash in front of the `*`. This is necessary because Git does its own filename expansion in addition to your shell's filename expansion. This command removes all files that have the `.log` extension in the `log/` directory. Or, you can do something like this:
+
+        $ git rm \*~
+This command removes all files whose names end with a `~`.
+#### Moving Files
+Unlike many other VCS systems, Git doesn't explicitly track file movement. If you rename a file in Git, no metadata is stored in Git that tells it you renamed the file. However, Git is pretty smart about figuring that out after the fact-we'll deal with detecting file movement a bit later.
+Thus it's a bit confusing that Git has a `mv` command. If you want to rename a file in Git, you can runn something like this:
+
+        $ git mv file_from file_to
+and it works fine. In fact, if you run something like this and look at the status, you'll see that Git considers it a renamed file:
+
+        $ git mv README.md README
+        $ gi status
+        On branch master
+        Your branch is up-to-date with 'origin/master'.
+        Changes to be committed:
+            (use "git reset HEAD <file>..." to unstage)
+
+            renamed: README.md -> REAME
+However, this is equivalent to running something like this:
+
+        $ mv README.md README
+        $ git rm README.md
+        $ git add README
+Git figures out that it's a rename implicitly, so it doesn't matter if you rename a file that way or with the `mv` command. The only difference is that `git mv` is one command instead of three-it's a convenience function. More importantly, you can use any tool you like to rename a file, and address tha add/rm later, before you commit.
+### 2.3 Git Basics-Viewing the Commit History
+#### Viewing the Commit History
+After you have created several commits, or if you have cloned a repository with an existing commit history, you'll probaly want to look back to see what has happened. The most basic and powerful tool to do this is the `git log` command.
+These examples use a very simple project called "simplegit". To get the project, run
+
+        $ git clone https://github.com/schacon/simplegit-progit
+When you run `git log` in this project, you should get output that looks something like this:
+
+        $ git log
+        commit ca82a6dff817ec66f44342007202690a93763949
+        Author: Scott Chacon <schacon@gee-mail.com>
+        Date:   Mon Mar 17 21:52:11 2008 -0700
+
 ## 10. Git Internals
 ### 10.3 Git References
 #### Remotes
@@ -297,4 +369,30 @@ After `fech-pack` connects, `upload-pack` sends back something like this:
                 agent=git/2:2.1.1+github-607-gfba4028
         003fe2409a098dc3e53539a9028a94b6224db9d6a6b6 refs/heads/master
         0000
-This is very similar to what `receive-pack` responds with, but the capabilities are different. 
+This is very similar to what `receive-pack` responds with, but the capabilities are different. In addition, it sends bach what HEAD points to (`symref=HEAD:refs/heads/master`) so the client knows what to check out if this is a clone.
+At this point, the `fetch-pack` process looks at what objects it has and responds with the objects that it needs by sending "want" and then the SHA-1 it wants. It sends all the objects it already has with "have" and then the SHA-1. At the end of this list, it writes "done" to initiate the `upload-pack` process to begin sending the packfile of the data it needs:
+
+        003cwant ca82a6dff817ec66f44342007202690a93763949 ofs-delta
+        0032have 085bb3bcb608e1e8451d4b2432f8ecbe6306e7e7
+        0009done
+        0000
+* HTTP(S)
+The handshake for a fetch operation takes two HTTP requests. The first is a `GET` to the same endpoint used in the dumb protocol: 
+
+        => GET $GIT_URL/info/refs?service=git-upload-pack
+        001e# service=git-upload-pack
+        00e7ca82a6dff817ec66f44342007202690a93763949 HEAD□multi_ack thin-pack \
+                side-band side-band-64k ofs-delta shallow no-process include-tag \
+                multi_ack_detailed no-done symref=HEAD:refs/heads/master \
+                agent=git/2:2.2.1+github-607-gfba4028
+        003fca82a6dff817ec66f44342007202690a93763949 refs/heads/master
+        0000
+This is very similar to invoking `git-upload-pack` over an SSH connection, but the second exchange is performed as a seperate request:
+
+        => POST $GIT_URL/git-upload-pack HTTP/1.0
+        0032want 0a53e9ddeaddad63ad106860237bbf53411d11a7
+        0032have 441b40d833fdfa93eb2908e52742248faf0ee993
+        0000
+Again, this is the same format as above. The response to this request indicates success or failure, and includes the packfile.
+#### Protocols Summary
+This section contains a very basic overview of the transfer protocols. The protocol includes many other features, such as `multi_ack` or `side-band` capabilities, but covering them is outside the scope of this book. We've tried to give you a sense of the general back-and-forth between client and server; if you need more knowledge than this, you'll probaly want to take a look at the Git source code.
