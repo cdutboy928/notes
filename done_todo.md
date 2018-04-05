@@ -86,3 +86,5 @@
   * git pocerlain and plumbing commands corresponding
   * 查书
   * 乱码问题
+  * 哥手机
+  * 湿纸巾
