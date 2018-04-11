@@ -331,6 +331,7 @@ Create join.txt file that contains the exact paths of the files that you want to
 Now, join all files using command:
 		ffmpeg -f concat -i join.txt -c copy output.mp4
 The above command will join part1.mp4, part2.mp4, part3.mp4, and part4,mp4 files into a single file called “output.mp4”.
+        ffmpeg -i "concat:0119_0159.mpg|0228_0342.mpg" -c copy output.mpg
 17. Add subtitles to a video file
 We can also add subtitles to a video file using FFmpeg. Download the correct subtitle for your video and add it your video as shown below.
 		ffmpeg -i input.mp4 -i subtitle.srt -map 0 -map 1 -c copy -c:v libx264 -crf 23 -preset veryfast output.mp4
@@ -459,6 +460,7 @@ Explanations:
 49. 视频剪切
         ffmpeg -i test.avi -r 1 -f imge2 imge.jpeg //视频截图
         ffmpeg -i input.avi -ss 0:1:30 -t 0:0:20 -vcoder copy -acoder copy output.avi //剪切视频： -r 提取图像频率， -ss 开始时间， -t 持续时间。
+        ffmpeg -i 180405.mpg -ss 02:28 -t 74 -c copy ~/work/videotodeal/0228_0342.mpg
 50. 视频录制
         ffmpeg -i rtsp://hostname/test -vcoder copy out.avi
 51. YUV序列播放
@@ -517,6 +519,33 @@ Explanations:
 59. 嵌入字幕
         ffmpeg -i input.mp4 -i subtitles.srt -c:s mov_text -c:v copy -c:a copy output.mp4
     在一个MP4文件里面添加字幕，不是把 .srt 字幕文件集成到 MP4 文件里，而是在播放器里选择字幕，这种集成字幕比较简单，速度也相当快
+60. 锐化
+语法：
+        -vf unsharp=l_msize_x:l_msize_y:l_amount:c_msize_x:c_msize_y:c_amount
+所有参数都是可选的，默认值是5:5:1.0:5:5:0.0
+l_msize_x:水平亮度矩阵，取值范围是3-13，默认值为5
+l_msize_y: 垂直亮度矩阵，取值范围3-13，默认值为5
+l_amount: 亮度强度，取值范围-2.0-5.0，负数为模糊效果，默认值1.0
+c_msize_x: 水平色彩矩阵，取值范围3-13，默认值5
+c_msize_y: 垂直色彩矩阵，取值范围3-13，默认值5
+c_amount: 色彩强度，取值范围-2.0-5.0，负数为模糊效果，默认值0.0
+举例：
+* NASA图片锐化举例
+    ![unsharp](ffmpeg_unsharp.png)
+    1. 是原图
+    2. `-vf unsharp`
+    3. `-vf unsharp=6:6:3`
+    4. `-vf unsharp=6:6:-2`
+* 使用默认值，亮度矩阵为5x5和亮度值为1.0
+        ffmpeg -i input -vf unsharp output.mp4
+* 高斯模糊效果（比较强的模糊效果）
+        ffplay -f lavfi -i testxrc -vf unsharp=13:13:-2
+* 降低锐化
+        ffmpeg -i input -vf unsharp=6:6:-2 output.mp4
+* ffmpeg预处理，增加亮度
+        ffmpeg -i E:\music\1\1.mov -vf "scale=-1:720,unsharp=luma_msize_x=7:luma_msize_y=7:luma_amount=1.5" -f mp4 E:\music\1\out_sharpen.mp4
+* 增加亮度
+        ffmpeg -i 0228_0342.mpg -vf unsharp=luma_msize_x=7:luma_msize_y=7:luma_amount=1.5 -f mp4 -strict -2 0228_0342_sharpen.mpg
 ## youtube-dl
 ## mplayer
 * Q = Quit
