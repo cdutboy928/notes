@@ -16,3 +16,4 @@ au VimEnter * !xmodmap -e 'clear Lock' -e 'keycode 0x42 = Escape'
 * 按实
 * 复习也是学习的过程，不会了就重新学，比如《童年》再跟着伴奏弹弹
 * 《童年》下扫重音把握节奏
+* 换弦要快要准，寸劲突然按好
