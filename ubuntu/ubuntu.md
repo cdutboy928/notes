@@ -623,6 +623,7 @@ c_amount: 色彩强度，取值范围-2.0-5.0，负数为模糊效果，默认�
 * install
         dpkg -i webtorrent-desktop_0.19.0-1_amd64.deb
 * put torrent to `https://instant.io/` if cannot play
+* can only be launched from gui
 ## xdg-open
 ### Examples
 
@@ -655,3 +656,47 @@ c_amount: 色彩强度，取值范围-2.0-5.0，负数为模糊效果，默认�
 3. 记得点下面的Set authentication details now，然后输入对方的用户名和密码，这样就不会出现等待验证的问题了。
 ![authentication](adding_shared_printers.jpg)
 4. 后面就是选择合适的驱动就行了。
+## To expand virtual disk for ubuntu in vmware workstation
+1. 先查看要扩展的vmdk文件是哪个
+2. 执行扩展命令：
+        vmware-vdiskmanger -x 80GB "G:\Ubuntu_64_new\Ubuntu_64-000003_single.vmdk"
+ - 如果是单个磁盘文件，则上述命令可以正常进行。
+ - 如果是分开的文件，会出现错误：`The called function cannot be performed on partial chains: please open the parent virtual disk. `需要先合并,在vmware的安装目录运行cmd：
+            vmware-vdiskmanager -r "G:\Ubuntu_64_new\Ubuntu_64-000003.vmdk" -t 0 "G:\Ubuntu_64_new\Ubuntu_64-000003_single.vmdk"
+3. 在vmware中虚拟机的硬盘查看磁盘大小是否已经变化
+4. 进入ubuntu进行配置
+ - 查看已有分区
+            sudo fdisk -l
+ - 分区
+            sudo fdisk /dev/sda
+            m
+            n
+            p
+            default
+            default
+            如果大小只有1023B，则再进行一遍：
+            m
+            n
+            p
+            default
+            default
+            出现大小50GB的分区则可以。
+ - 查看分区是否正确
+            sudo fdisk -l
+ - reboot (否则不能格式化分区）
+ - 格式化分区
+            sudo mkfs -t ext4 /dev/sda4
+ - 挂载分区
+    + 手动挂载
+            mkdir ~/disk
+            sudo mount /dev/sda4 /home/cdutboy/disk
+    + 自动挂载
+            sudo vim /etc/fstab
+            /dev/sda4 /home/cdutboy/disk ext4 defaults 0 0
+## vmware ubuntu share folder
+1. 安装vmware tools
+    - 挂载镜像文件
+        从虚拟机CD/DVD里挂载镜像文件，在vmware workstation的安装目录。
+    - 进入ubuntu后，打开DVD光驱，解压VMware*tar.gz的压缩包，然后`sudo ./vmware-install.pl`,然后一直默认回车。
+2. 添加共享目录，必须在虚拟机关机的状态下。
+3. 进入虚拟机ubuntu，如果`/mnt/hgfs`下有共享的目录就说明可以了。
