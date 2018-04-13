@@ -59,6 +59,8 @@ However, this is equivalent to running something like this:
         $ git rm README.md
         $ git add README
 Git figures out that it's a rename implicitly, so it doesn't matter if you rename a file that way or with the `mv` command. The only difference is that `git mv` is one command instead of three-it's a convenience function. More importantly, you can use any tool you like to rename a file, and address tha add/rm later, before you commit.
+Summary:for untracked files, use `rm`;
+        for tracked files and staged files: `git rm --cached` to delete from stage area and the file will become untracked; `git rm --f` to delete both from stage area and working directory.
 ### 2.3 Git Basics-Viewing the Commit History
 #### Viewing the Commit History
 After you have created several commits, or if you have cloned a repository with an existing commit history, you'll probaly want to look back to see what has happened. The most basic and powerful tool to do this is the `git log` command.
@@ -231,7 +233,104 @@ However, the time-limiting options such as `--since` and `--until` are very usef
         $ git log --since=2.weeks
 This command works with lots of formats-you can specify a specific date like "`2008-01-15`", or a relative date such as "`2 years 1 day 3 minutes ago`".
 You can also filter the list to commits that match some search criteria. The `--author` option allows you to filter on a specific author, and the `--grep` option lets you search for keywords in the commit messages.
-_Note: You can specify more than one isntance of both the --auothr and --grep 
+_Note: You can specify more than one isntance of both the --auothr and --grep search criteria, which will limit the commit output to commits that match any of the --author patterns and any of the --grep patterns; however, adding the --all-match option further limits the output to just those commits that match all --grep patters._
+Another really helpful filter is the `-S` option (colloquially referred to as Git's "pickaxe" option), which takes a string and shows only those commits that changed the number of occurrences of that string. For instance, if you wanted to find the last commit that added or removed a reference to a specific function, you could call:
+
+        $ git log -S function_name
+The last really useful option to pass to `git log` as filter is a path. If you specify a directory or file name, you can limit the log output to commits that introduced a change to those files. This is always the last option and is generally preceded by double dashes(`--`) to separate the paths from the options.
+Table 3. Options to limit the output of `git log`
+
+Option|Description
+---|---
+`-<n>`|Show only the last n commits
+`--since, --after`|Limit the commits to those made after the specified date.
+`--until, --before`|Limit the commits to those made before the specified date.
+`--author`|Only show commits in which the author entry matches the specified string.
+`--committer`|Only show commits in which the committer entry matches the specified string.
+`--grep`|Only show commits with a commit message containing the string.
+`-S`|Only show commits adding or removing code matching the string.
+For example, if you want to see which commits modifying test files in the Git source code history were committed by Junio Hamano in the month of Octorber 2008 and are not merge commits, you can run something like this:
+
+        $ git log --pretty="%h - %s" --author=gitster --since="2008-10-01"\
+            --before="2008-11-01" --no-merges -- t/
+        5610e3b - Fix testcase failure when extended attributes are in use
+        acd3b9e - Enhance hold_lock_file_for_{update,append}() API
+        f563754 - demonstrate breakage of detached checkout with symbolic link HEAD
+        d1a43f2 - reset --hard/read-tree --reset -u: remove unmerged new paths
+        51a94af - Fix "checkout --track -b newbranch" on detached HEAD
+        b0ad11e - pull: allow "git pull origin $something:$current_branch" into an unborn branch
+Of the nearly 40,000 commits in the Git source code history, this command shows the 6 that match those criteria.
+_Tip:
+Preventing the display of merge commits
+Depending on the workflow used in your repository, it's possible that a sizable percentage of the commits in your log history are just merge commits, which typically aren't very informative. To prevent the display of merge commits cluttering up your log history, simply add the log option `--no-merges`._
+### 2.4 Git Basics-Undoing things
+#### Undoing Things
+At any stage, you may want to undo something. Here, we'll review a few basic tools for undoing changes that you've made. Be careful, because you can't always undo some of these undos. This is one of the few areas in Git where you may lose some work if you do it wrong.
+One of the common undos takes place when you commit too early and possibly forget to add some files, or you mess up your commit message. If you want to redo that commit, make the additional changes you forgot, stage them, and commit again using the `--amend` option:
+
+        $ git commit --amend
+This command takes your staging area and uses it for the commit. If you've made no changes since your last commit (for instance, you run this command immediately after your previous commit), then your snapshot will look exactly the same, and all you'll change is your commit message.
+The same commit-message editor fires up, but it already contains the message of your previous commit. You can edit the message the same as always, but it overwrites your previous commit.
+As an example, if you commit and then realize you forgot to stage the changes in a file you wanted to add to this commit, you can do something like this:
+
+        $ git commit -m 'initial commit'
+        $ git add forgotten_file
+        $ git commit --amend
+You end up with a single commit-the second commit replaces the results of the first.
+_Note:
+It's important to understand that when you're amending your last commit, you're not so much fixing it as replacing it entirely with a new, improved commit that pushes the old commit out of the way and puts the new commit in tis place. Effectively, it's as if the previous commit never happened, and it won't show up in your repository history.
+The obvious value to amending commits is to make minor improvements to your last commit, without cluttering your repository history with commit messages of the form, "Oops, forgot to add a file" or "Darn, fixing a typo in last commit"._
+#### Unstaging a staged file
+The next two sections demonstrate how to work wih your staging area and working directory changes. The nice part is that the command you use to determine the stage of those two areas also reminds you how to undo changes to them. For example, let's say you've changed two files and want to commit them as two separate changes, but you accidently type `git add *` and stage them both. How can you unstage one of the two? The `git status` command reminds you:
+
+        $ git add *
+        $ git status
+        On branch master
+        Changes to be committed:
+            (use "git reset HEAD <file>..." to unstage)
+
+              renamed:  README.md -> README
+              modified: CONTRIBUTING.md
+Right below the "Changes to be committed" test, it says use `git reset HEAD <file>...` to unstage. So, let's use that advice to unstage the `CONTRIBUTING.md` file:
+
+        $ git reset HEAD CONTRIBUTING.md
+        Unstaged changes after reset:
+        M CONTRIBUTING.md
+        $ git status
+        On branch master
+        Changes to be committed:
+            (use "git reset HEAD <file>..." to unstage)
+
+                renamed:    README.md -> README
+
+        Changes not staged for commit:
+            (use "git add <file>..." to update what will be committed)
+            (use "git checkout -- <file>..." to discard changes in working directory)
+                modified:   CONTRIBUTING.md
+The command is a bit strange, but it works. The `CONTRIBUTING.md` file is modified but once again unstaged.
+_Note: It's true that `git reset` can be a dangerous command, especially if you provide the `--hard` flag. However, in the scenario described above, thefile in your working directory is not touched, so it's relatively safe._
+For now this magic invocation is all you need to know about the `git reset` command. We'll go into much more detail about what `reset` does and how to master it to do really interesting things in Reset Demystifiled.
+#### Unmodifying a Modified File
+What if you realize that you don't want to keep your changes to the `CONTRIBUTING.md` file? How can you easily unmodify it-revert it back to what it looked like when you last committed (or initially cloned, or however you got it into your working directory)? Luckily, `git status` tells you how to do that, too. In the last example output, the unstaged area looks like this:
+
+        Changes not staged for commit:
+            (use "git add <file>..." to update that will be committed)
+            (use "git checkout -- <file>..." to discard changes in working directory)
+                
+                modified: CONTRIBUTING.md
+It tells your pretty explicitly how to discard the changes you've made. Let's do what it says:
+
+        $ git checkout -- CONTRIBUTING.md
+        $ git status
+        On branch master
+        Changes to be committed:
+            (use "git reset HEAD <file>..." to unstage)
+
+                renamed:    README.md -> README
+You can see that the changes have been reverted.
+_Important: It's important to understand the `git checkout -- <file>` is a dangerous command. Any changes you made to that file are gone-Git just copied another file over it. Don't ever use this command unless you absolutely know that you don't want the file._
+If you would like to keep the changes you've made to that file but still need to get it out of the way for now, we'll go over stashing and branching in Git Branching;these are generally better ways to go.
+Remember, anything that is _committed_ in Git can almost always be recovered. Even commits that were on branches that were deleted or commits that were overwritten with an `--amend` commit can be recoered (see Data Recovery for data recovery). However, anything you lose taht was never committed is likely never to be seen again.
 ## 10. Git Internals
 ### 10.3 Git References
 #### Remotes

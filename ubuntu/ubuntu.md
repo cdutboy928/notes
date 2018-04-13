@@ -700,3 +700,19 @@ c_amount: 色彩强度，取值范围-2.0-5.0，负数为模糊效果，默认�
     - 进入ubuntu后，打开DVD光驱，解压VMware*tar.gz的压缩包，然后`sudo ./vmware-install.pl`,然后一直默认回车。
 2. 添加共享目录，必须在虚拟机关机的状态下。
 3. 进入虚拟机ubuntu，如果`/mnt/hgfs`下有共享的目录就说明可以了。
+## top
+`top`
+`top -o P` (_if `top` cannot show pid_)
+top 交互命令：
+`h`: to show help information
+`0`: Zero-Suppress toggle
+`A`: Alternate-Display-Mode toggle
+`B`: Bold-Disable/Enable toggle
+`k`: Kill a task
+`q`: Quit
+`m`: Memory/Swap-Usage toggle
+`t`: 切换显示进程和CPU状态信息
+`c`: 切换显示命令名称和完整命令行
+`M`: 根据驻留内存大小进行排序
+`P`: 根据CPU使用百分比大小进行排序
+`T`: 根据时间/累计时间进行排序

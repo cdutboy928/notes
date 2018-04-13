@@ -1,0 +1,21 @@
+{
+  "settingsVersion": "1.63.3",
+  "exclusionRules": [],
+  "filterLinkHints": false,
+  "waitForEnterForFilteredHints": true,
+  "hideHud": true,
+  "keyMappings": "# Insert your preferred key mappings here.\nunmap d \nunmap u\nmap d removeTab\nmap u restoreTab\nmap <c-d> scrollPageDown\nmap <c-u> scrollPageUp\nunmap gT\nmap <c-p> previousTab\nmap a  LinkHints.activateModeToOpenInNewForegroundTab",
+  "linkHintCharacters": "sadfjklewcmpgh",
+  "linkHintNumbers": "0123456789",
+  "newTabUrl": "https://www.google.com",
+  "nextPatterns": "next,more,newer,>,›,→,»,≫,>>",
+  "previousPatterns": "prev,previous,back,older,<,‹,←,«,≪,<<",
+  "regexFindMode": false,
+  "ignoreKeyboardLayout": false,
+  "scrollStepSize": 45,
+  "smoothScroll": false,
+  "grabBackFocus": false,
+  "searchEngines": "w: http://www.wikipedia.org/w/index.php?title=Special:Search&search=%s Wikipedia\nyd: http://www.youdao.com/w/eng/%s/?spc=%s#keyfrom=dict.typo\n# More examples.\n#\n# (Vimium supports search completion Wikipedia, as\n# above, and for these.)\n#\ng: http://www.google.com/search?q=%s Google\n# l: http://www.google.com/search?q=%s&btnI I'm feeling lucky...\n y: http://www.youtube.com/results?search_query=%s Youtube\ngm: https://www.google.com/maps?q=%s Google maps\n# b: https://www.bing.com/search?q=%s Bing\n# d: https://duckduckgo.com/?q=%s DuckDuckGo\n# az: http://www.amazon.com/s/?field-keywords=%s Amazon\n# qw: https://www.qwant.com/?q=%s Qwant\n58: http://bj.58.com/sou/?key=%s&button=%E5%90%8C%E5%9F%8E%E6%90%9C%E7%B4%A2\nb: http://www.baidu.com/s?ie={inputEncoding}&wd=%s&tn=39042058_1_oem_dg&ch=1\ni: https://www.google.com/search?newwindow=1&safe=strict&hl=en&biw=958&bih=930&site=imghp&tbm=isch&sa=1&q=%s&oq=%s&gs_l=img.12...0.0.0.35526.0.0.0.0.0.0.0.0..0.0....0...1c..64.img..0.0.0.mBCuNs2sK_U\nv: https://www.google.com/search?q=%s&newwindow=1&source=lnms&tbm=vid&sa=X&ved=0ahUKEwiDgNfEwPzYAhUD6xQKHYQKChUQ_AUICigB&biw=1855&bih=958\n8: http://www.google.com/search?ie=UTF-8&oe=UTF-8&sourceid=navclient&gfns=1&q=%s\nq: http://www.quora.com/opensearch/query?q=%s&pw={startPage?}\njd: http://search.jd.com/Search?keyword=%s&enc=utf-8\ntb: http://s.taobao.com/search?q=%s\nzh: http://www.zhihu.com/search?q=%s\nwk: http://wenku.baidu.com/search?word=%s&org=0&ie=gbk\nm https://www.mathworks.com/help/search.html?qdoc=%s&submitsearch=\nz http://sou.zhaopin.com/jobs/searchresult.ashx?jl=%E5%8C%97%E4%BA%AC&kw=%s&p=1&isadv=0\nd: https://www.google.com.hk/search?q=definition%3A+%s&gws_rd=cr,ssl",
+  "searchUrl": "https://www.google.com/search?q=%s",
+  "userDefinedLinkHintCss": "div > .vimiumHintMarker {\n/* linkhint boxes */\nbackground: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#FFF785),\n  color-stop(100%,#FFC542));\nborder: 1px solid #E3BE23;\n}\n\ndiv > .vimiumHintMarker span {\n/* linkhint text */\ncolor: black;\nfont-weight: bold;\nfont-size: 12px;\n}\n\ndiv > .vimiumHintMarker > .matchingCharacter {\n}"
+}
