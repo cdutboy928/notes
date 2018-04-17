@@ -700,6 +700,7 @@ c_amount: 色彩强度，取值范围-2.0-5.0，负数为模糊效果，默认�
     - 进入ubuntu后，打开DVD光驱，解压VMware*tar.gz的压缩包，然后`sudo ./vmware-install.pl`,然后一直默认回车。
 2. 添加共享目录，必须在虚拟机关机的状态下。
 3. 进入虚拟机ubuntu，如果`/mnt/hgfs`下有共享的目录就说明可以了。
+4. 注意不用的时候kill掉此进程，因为占用CPU很多。
 ## top
 `top`
 `top -o P` (_if `top` cannot show pid_)
