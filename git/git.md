@@ -528,6 +528,171 @@ This time, if you run `git show` on the tag, you don't see the extra tag informa
         Date:   Mon Mar 17 21:52:11 2008 -0700
 
             changed the version number
+Tagging Later
+You can also tag commits after you've moved past them. Suppose your commit history looks like this:
+
+        $ git log --pretty=oneline
+        15027957951b64cf874c3557a0f3547bd83b3ff6 Merge branch 'experiment'
+        a6b4c97498bd301d84096da251c98a07c7723e65 beginning write support
+        0d52aaab4479697da7686c15f77a3d64d9165190 one more thing
+        6d52a271eda8725415634dd79daabbc4d9b6008e Merge branch 'experiment'
+        0b7434d86859cc7b8c3d5e1dddfed66ff742fcbc added a commit function
+        4682c3261057305bdd616e23b64b0857d832627b added a todo file
+        166ae0c4d3f420721acbb115cc33848dfcc2121a started write support
+        9fceb02d0ae598e95dc970b74767f19372d61af8 updated rakefile
+        964f16d36dfccde844893cac5b347e7b3d44abbc commit the todo
+        8a5cbc430f1a9c3d00faaeffd07798508422908a updated readme
+Now, suppose you forgot to tag the project at v1.2, which was the "updated rakefile" commit. You can add it after the fact. To tag that commit, you specify the commit checksum (or part of it) at the endd of the command:
+
+        $ git tag -a v1.2 9fceb02
+You can see that you've tagged the commit:
+
+        $ git tag
+        v0.1
+        v1.2
+        v1.3
+        v1.4
+        v1.4-lw
+        v1.5
+
+        $ git show v1.2
+        tag v1.2
+        Tagger: Scott Chacon <schacon@gee-mail.com>
+        Date:   Mon Feb 9 15:32:16 2009 -0800
+
+        version 1.2
+        commit 9fceb02d0ae598e95dc970b74767f19372d61af8
+        Author: Magnus Chacon <mchacon@gee-mail.com>
+        Date:   Sun Apr 27 20:43:35 2008 -0700
+
+            updated rakefile
+        ...
+#### Sharing Tags
+By default, the `git push` command doesn't transfer tags to remote servers. You will have to explicitly push tags to a shared server after you ahve created them.This process is just like sharing remote branches-you can run `git push origin <tagname>`.
+
+        $ git push origin v1.5
+        Counting objects: 14,done.
+        Delta compression using up to 8 threads.
+        Compressing objects: 100% (12/12), done.
+        Writing objects: 100% (14/14), 2.05 KiB | 0 bytes/s, done.
+        Total 14 (delta 3), reused 0 (delta 0)
+        To git@github.com:schacon/simplegit.git
+         * [new tag] v.15 -> v1.5
+If you have a lot of tags that you want to push up at once, you can also use the `--tags` option to the `git push` command. This will transfer all of your tags to the remote server that are not already there.
+
+        $ git push origin --tags
+        Counting objects: 1, done.
+        Writing objects: 100% (1/1), 160 bytes | 0 bytes/s, done.
+        Total 1 (delta 0), reused 0 (delta 0)
+        To git@github.com:schacon/simplegit.git
+         * [new tag]        v1.4 -> v1.4
+         * [new tag]        v1.4-lw -> v1.4-lw
+Now, when someone else clones or pulls from your repository, they will get all your tags as well.
+__Note: the command `git push <remote> <tag_name>` and `git push --tags` can both push up only tags, not other refs. If you want to push up both tags and other refs, run `git push --follow-tags` or `git push --tags HEAD`.
+`git push --follow-tags`: Push all the refs that would be pushed without this option, and also push annotated tags in refs/tags that are missing from the remote but are pointing at committish that are reachable from the refs being pushed.__
+#### Checking out Tags
+If you want to view the versions of files a tag is pointing to, you can do a git checkout, though this puts your repository in "detached HEAD" state, which has some ill side effects:
+
+        $ git checkout 2.0.0
+        Note: checking out '2.0.0'.
+
+        You are in 'detached HEAD' state. You can look aroung, make experimental changes and commit them, and you can discard any commis you make in this state without impacting any branches by performing another checkout.
+        If you want to create a new branch to retain commits you create, you may do so (now or later) by using -b with the checkout command again. Example:
+
+            git checkout -b <new-branch>
+        HEAD is now at 99ada87... Merge pull request #89 from schacon/appendix-final
+
+        $ git checkout 2.0-beta-0.1
+        Previous HEAD position was 99ada87... Merge pull request #89 from schacon/appendix-final
+        HEAD is now at df3f601... add atlas.json and cover image
+In "detached HEAD" state, if you make changes and then create a commit, the tag will stay the same but your new commit won't belong to any branch and will be unreachable, except by the exact commit hash. Thus, if you need to make changes-say you're fixing a bug on an older version, for instance-you will generally want to create a branch:
+
+        $ git checkout -b version2 v2.0.0
+        Switched to a new branch 'version2'
+If you do this and make a commit, your `version2` branch will be slightly different than your `v2.0.0` tag since it will move forward with your new changes, so do be careful.
+#### Deleting Tags
+* Delete the tag locally
+        git tag -d v1.0
+* Delete the tag on GitHub (which removes its download link)
+        git push origin :v1.0
+### 2.7 Git Basics-Git Aliases
+#### Git Aliases
+Before we finish this chapter on basic Git, there's just one little tip that can make your Git experience simpler, easier, and more familiar: aliases. We won't refer to them or assume you've used them later in the book, but you should probably know how to use them.
+Git doesn't automatically infer your command if you type it in partially. If you don't want to type the entire text of each of the Git commands, you can easily set up an alias for each command using `git config`. Here are a couple of examples you may want to set up:
+
+        $ git config --global alias.co checkout
+        $ git config --global alias.br branch
+        $ git config --global alias.ci commit
+        $ git config --global alias.st status
+This means that,for example, instead of typing `git commit`, you just need to type `git ci`. As you go on using Git, you'll probably use other commands frequently as well; don't hesitate to create new aliases.
+This technique can also be very useful in creating commands that you think should exist. For example, to correct the usability probem you encountered with unstaging a file, you can add your own unstage alias to Git:
+
+        $ git config --global alias.unstage 'reset HEAD --'
+This makes the following two commands equivalent:
+
+        $ git unstage fileA
+        $ git reset HEAD -- fileA
+This seems a bit clearer. It's also common to add a `last` command, like this:
+
+        $ git config --global alias.last 'log -1 HEAD'
+This way, you can see the last commit easily:
+
+        $ git last
+        commit 66938dae3329c7aebe598c2246a8e6af90d04646
+        Author: Josh Goebel <dreamer3@example.com>
+        Date:   Tue Aug 26 19:48:51 2008 +0800
+
+            test for current head
+
+            Signed-off-by: Scott Chacon <schacon@example.com>
+As you can tell, Git simply replaces the new command with whatever you alias it for.
+However, maybe you want to run an external command, rather than a Git subcommand. In that case, you start the command with a `!` character. This is useful if you write your own tools that work with a Git repository. We can demonstrate by aliasing `git visual` to run `gitk`:
+
+        $ gi config --global alias.visual '!gitk'
+### 2.8 Git Basics-Summary
+#### Summary
+At this point,you can do all the basic local Git operations-creating or cloning a repository, making changes, staging and committing those changes, and viewing the history of all the changes the repository has been through. Next, we'll cover Git's killer feature: its branching model.
+## 3. Git Branching
+### 3.1 Git Branching - Branches in a Nutshell
+Nearly every VCS has some form of branching support. Branching means you diverge from the main line of development and continue to do work without messing with that main line.
+In many VCS tools, this is a somewhat expensive process, often requiring you to create a new copy of your source code directory, which can take a long time for large projects.
+Some people refer to Git's branching model as its "killer feature", and it certainly sets Git apart in the VCS community. Why is it so special? The way Git branches is incredibly lightweight, making branching operations nearly instaneous, and switching back and forth between branches generally just as fast. Unlike many other VCSs, Git encourages workflows that branch and merge often, even multiple times in a day. Understanding and mastering this feature gives you a powerful and unique tool and can entirely change the way that you develop.
+#### Branches in a Nutshell
+To really understand the way Git does branching, we need to take a step back and examine how Git stores its data.
+As you may remember from Getting Started, Git doesn't store data as a series of changesets or differences, but instead as a series of snapshots.
+When you make a commit, Git stores a commit object that contains a pointer to the snapshot of the content you staged. This object also contains the author's name and email, the message that you typed, and pointers to the commit or commits that directly came before this commit (it parent or parents): zero parents for the initial commit, one parent for a normal commit, and multiple parents for a commit that results from a merge of two or more branches.
+To visualize this, let's assume that you have a directory containing three files, and you stage them all and commit. Staging the files computes a checksum for each one (the SHA-1 hash we mentioned in Getting Started), stores tha version of the file in the Git repository (Git refers to them as blobs), and adds that checksum to the staging area:
+
+        $ git add README test.rb LICENSE
+        $ git commit -m 'The initial commit of my project'
+When you create the commit by running `git commit`, Git checksums each subdirectory (in this case, just the root project directory) and stores those tree objects in the Git repository. Git then creates a commit object that has the metadata and pointer to the root project tree so it can re-create that snapshot when needed.
+Your Git repository now contains five objects: one blob for the contents of each of your three files, one tree tha lists the contents of the directory and specifies which file names are stored as which blobs, and one commit with the pointer to that root tree and all the commit metadata.
+![commit,tree, and blobs](commit-and-tree.png)
+Figure 9. A commit and its tree
+If you make some changes and commit again, the next commit stores a pointer to the commit that came immediately before it.
+![commits and there parents](commits-and-parents.png)
+Figure 10. Commits and their parents
+A branch in Git is simply a lightweight movable pointer to one of these commits. The default branch name in Git is `master`. As you start making commits, you're given a `master` branch that points to the last commit you made. **Every time you commit, it moves forward automatically.**
+_Note: The "master" branch in Git is not a special branch. It is exactly like any other branch. The only reason nearly every repository has one is that the `git init` command creates it by default and most people don't bother to change it._
+![branch and history](branch-and-history.png)
+Figure 11. A branch and its commit history
+#### Creating a New Branch
+What happens when you create a new branch? Well, doing so creates a new pointer for you to move around. Let's say you create a new branch called testing. You do this with the `git branch` command:
+
+        $ git branch testing
+This creates a new pointer to the same commit you're currently on.
+![creating a new branch](two-branches.png)
+Figure 12. Two branches pointing into the same series of commits
+How does Git know what branch you're currently on? It keeps a special pointer called `HEAD`. Note that this is a lot different than the concept of `HEAD` in other VCSs you may be used to, such as Subversion or VCS. In Git, this is a pointer to the local branch you're currently on. In this case, you're still on `master`. The `git branch` command only created a new branch-it didn't switch to that branch.
+![HEAD pointing to the current branch](head-to-master.png)
+Figure 13. HEAD pointing to the current branch
+You can easily see this by running a simple `git log` command that shows you where the branch pointers are pointing. This option is called `--decorate`.
+
+        $ git log --oneline --decorate
+        f30ab (HEAD -> master, testing) add feature #32 - ability to add new formats to the central interface
+        34ac2 Fixed bug #1328 - stack overflow under certain conditions
+        98ca9 The initial commit of my project
+You can see the "master" and "testing" branches that are right there next to the `f30ab` commit.
 ## 10. Git Internals
 ### 10.3 Git References
 #### Remotes
