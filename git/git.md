@@ -731,6 +731,25 @@ You can also see this easily with the `git log` command. If you run `git log --o
         * 98ca9 initial commit of my project
 Because a branch in Git is actually a simple file that contains the 40 character SHA-1 checksum of the commit it points to, branches are cheap to create and destroy. Creating a new branch is as quick and simple as writing 41 bytes to a file (40 characters and a newline).
 This is in sharp contrast to the way most older VCS tools branch, which involves copying all of the project's files into a second directory. This can take several seconds or even minutes, depending on the size of the project, whereas in Git the process is always instantaneous. Also, because we're recording the parents when we commit, finding a proper merge base for merging is automatically done for us and is generally very easy to do. These features help encourage developers to create and use branches often.
+### Git Branching-Basic Branching and Merging
+#### Basic Branching and Merging
+Let's go through a simple example of branching and merging with a workflow that you might use in the real world. You'll follow these steps:
+1. Do some work on a website.
+2. Create a branch for a new story you're working on.
+3. Do some work in that branch.
+At this stage, you'll receive a call that another issue is critical and you need a hotfix. You'll do the following:
+1. Switch to your production branch.
+2. Create a branch to add the hotfix.
+3. After it's tested, merge the hotfix branch, and push to production.
+4. Switch back to your original story and continue working.
+#### Basic Branching
+First,let's say you're working on your project and have a couple of commits already on the `master` branch.
+![A simple commit history](basic-branching-1.png)
+Figure 18. A simple commit history
+You've decided that you're going to work on issue #53 in whatever issue-tracking system your company uses. To create a new branch and switch to it at the same time, you can run the `git checkout` command with the `-b` switch:
+
+        $ git checkout -b iss53
+        Switched to a new branch "iss53"
 ## 10. Git Internals
 ### 10.3 Git References
 #### Remotes
