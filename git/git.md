@@ -1064,7 +1064,84 @@ It's important to note that these numbers are only since the last time you fetch
 While the `git fetch` command will fetch down all the changes on the server that you don't have yet, it will not modify your working directory at all. It will simply get the data for you and merge it yourself. However, there is a command called `git pull` which is essentially a `git fetch` immediately followed by a `git merge` in most cases. If you have a tracking branch set up as demonstrated in the last section, either by explicitly setting it or by having it created for you by the `clone` or `checkout` commands, `git pull` will look up what server and branch your current branch is tracking, fetch from that server and then try to merge in that remote branch.
 Generally it's better to simply use the `fetch` and `merge` commands explicitly as the magic of `git pull` can often be confusing.
 #### Deleting Remote Branches
+Suppose you're done with a remote branch-say you and your collaborators are finished with a feature and have merged it into your remote's `master` branch (or whatever branch your stable codeline is in). You can delete a remote branch using the `--delete` option to `git push`. If you want to delete your `serverfix` branch from the server, you run the following:
 
+        $ git push origin --delete serverfix
+        To https://github.com/schacon/simplegit
+         - [deleted]        serverfix
+Basically all this done is to remove the pointer from the server. The Git server will generally keep the data there for a while until a garbage runs, so if it was accidentally deleted, it's often easy to recover.
+### 3.6 Git Branching - Rebasing
+#### Rebasing
+In Git, there are two main ways to integrate changes from one branch into another: the `merge` and the `rebase`. In this section you'll learn what rebasing is, how to do it, why it's a pretty amazing tool, and in what cases you won't want to use it.
+#### The Basic Rebase
+If you go back to an earlier example from Basic Merging, you can see that you diverged your work and made commits on two different branches.
+![simple divergent history](basic-rebase-1.png)
+Figure 35. Simple divergent history
+The easiest way to integrate the branches, as we've already covered, is the `merge` command. It performs a three-way merge between the two latest branch snapshots (`C3` and `C4`) and the most recent common ancestor of the two (`C2`), creating a new snapshot (and commit).
+![merging to integrate diverged work history](basic-rebase-2.png)
+Figure 36. Merging to integrate diverged work history
+However, there is another way: you can take the patch of the change that was introduced in `C4` and reapply it on top of `C3`. In Git, this is called _rebasing_. With the `rebase` command, you can take all the changes that were committed on one branch and replay them on another one.
+In this example, you'd run the following:
+
+        $ git checkout experiment
+        $ git rebase master
+        Firtst, rewinding head to replay your work on top of it...
+        Applying: added staged coommand
+It works by going to the common ancestor of the two branches (the one you're on and the one you're rebasing onto), getting the diff introduced by each commit of the branch you're on, saving those diffs to temporary files, resetting the current branch to the same commit as the branch you are rebasing onto, and finally applying each change in turn.
+![rebasing the change introduced in `C4` onto `C3`](basic-rebase-3.png)
+Figure 37. Rebasing the change introduced in `C4` onto `C3`
+At this point, you can go back to the `master` branch and do a fast-forward merge.
+
+        $ git checkout master
+        $ git mege experiment
+![fast-forwarding the master branch](basic-rebase-4.png)
+Figure 38. Fast-forwarding the master branch
+Now, the snapshot pointed to by `C4'` is exactly the same as the one that was pointed to by `C5` in the merge example. There is no difference in the end product of the integration, but rebasing makes for a cleaner history. If you examine the log of a rebased branch, it looks like a linear history: it appears that all the work happened in series, even when it originally happened in parallel.
+Often, you'll do this to make sure your commits apply cleanly on a remote branch-perhaps in a project to which you're trying to contribute but that you don't maintain. In this case, you'd do your work in a branch and then rebase your work onto `origin/master` when you were ready to submit your patches to the main project. That way, the maintainer doesn't have to do any integration work-just a fast-forward or a clean apply.
+Note that the snapshot pointed by the final commit you end up with, whether it's the last of the rebased commits for a rebase or the final merge commit after a merge, is the same snapshot-it's only the history that is different. Rebasing replays changes from one line of work onto another in the order they were introduced, whereas merging takes the endpoints and merges them together.
+#### More Interesting Rebases
+You can also have your rebase replay on something other than the rebase target branch. Take a history like A history with a topic branch off another topic branch, for example. You branched off a topic branch (`server`) to add some server-side functionality to your project, and made a commit. Then, you branched off that to make the client-side changes (`client`) and committed a few times. Finally, you went back to your server branch and did a few more commits.
+![a history with a topic branch off another topic branch](interesting-rebase-1.png)
+Figure 39. A history wit a topic branch off another topic branch
+Suppose you decide that you want to merge your client-side changes into your mainline for a rebase, but you want to hold off on the server-side changes until it's tested further. You can take the changes on client that aren't on server (`C8` and `C9`) and replay them on your `master` branch by using the `--onto` option of `git rebase`:
+
+        $ git rebase --onto master server client
+This basically says, "Take the `client` branch, figure out the patches since it diverged fro the `server` branch, and replay these patches in the `client` branch as if it was based directly off the `master` branch instead." It's a bit complex, but the result is pretty cool.
+![rebasing a topic branch off another topic branch](interesting-rebase-2.png)
+Figure 40. Rebasing a topic branch of another topic branch
+Now you can fast-forward your `master` branch (see Fast-forwarding your master branch to include the client branch changes):
+
+        $ git checkout master
+        $ git merge client
+![fast-forwarding your master branch to include the client branch changes](interesting-rebase-3.png)
+Figure 41. Fast-forwarding your master branch to include the client branch changes
+Let's say you decide to pull in your server branch as well. You can rebase the server branch onto the `master` branch without having to check it out first by running `git rebase <basebranch> <topicbranch>`-which checks out the topic branch (in this case, `server`) for you and replays it onto the base branch (`master`):
+
+        $ git rebase master server
+This replays your `server` work on top of your `master` work, as shown in Rebasing your server branch on top of your master branch.
+![rebasing your server branch on top of your master branch](interesting-rebase-4.png)
+Figure 42. Rebasing your server branch on top of your master branch
+Then, you can fast-forward the base branch (`master`):
+
+        $ git checkout master
+        $ git merge server
+You can remove the `client` and `server` branches because all the work is integrated and you don't need them anymore, leaving your history for this entire process looking like Final commit history:
+
+        $ git branch -d client
+        $ git branch -d server
+![final commit history](interesting-rebase-5.png)
+Figure 43. Final commit history
+#### The Perils of Rebasing
+Ahh, but the bliss of rebasing isn't without its drawbacks, which can be summed up in a single line:
+**Do not rebase commits that exist outside your repository.**
+If you follow that guide line, you'll be fine. If you don't, people will hate you, and you'll be scorned by friends and family.
+When you rebase stuff, you're abandoning existing commits and creating new ones that are similar but different. If you push commits somewhere and others pull them down and base work on them, and then you rewrite those commits with `git rebase` and push them up again, your collaborators will have to re-merge their work and things will get messy when you try to pull their work back into yours.
+Let's look at an example of how rebasing work that you've made public can cause problems. Suppose you clone from a central server and then do some work off that. Your commit history looks like this:
+![clone a repository, and base some work on it](perils-of-rebasing-1.png)
+Figure 44. Clone a repository, and base some work on it
+Now, someone else does more work that includes a merge, and pushes that work to the central sever. You fetch it and merge the new remote branch into your work, making your history look like this:
+![fetch more commits, and merge them into your work](perils-of-rebasing-2.png)
+Figure 45. Fetch more commits, and merge them into your work
 
 
 
