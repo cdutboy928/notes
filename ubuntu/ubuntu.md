@@ -717,3 +717,45 @@ top 交互命令：
 `M`: 根据驻留内存大小进行排序
 `P`: 根据CPU使用百分比大小进行排序
 `T`: 根据时间/累计时间进行排序
+## [BaiduPCS-Go](https://github.com/iikira/BaiduPCS-Go)
+### Install and run
+* Install Go language
+        sudo apt install golang-go
+* [Download the zip](https://github.com/iikira/BaiduPCS-Go/releases)
+* unzip to ~
+* type `./BaiduPCS-Go` to run
+### Commands
+#### about accounts
+* `login`   to login
+* `loglist` to list logging accounts
+* `su <uid>` to switch account
+* `logout` to log out
+#### directories and files
+* `quota` 获取网盘配额
+* `cd <directory>` 切换工作目录
+* `cd -l <directory>` 切换工作目录后自动列出工作目录下的文件和目录
+* `pwd` 输出工作目录
+* `ls` 列出当前工作目录的文件和目录或指定目录
+* `ls <directory>` 
+* `tree <directory>` 列出当前工作目录的文件和目录或指定目录的树形图
+* `meta <file/directory>` 获取单个文件/目录的元信息
+#### download
+* `download <网盘文件或目录的路径1> <文件或目录2> <文件或目录3> ...`
+* `d <网盘文件或目录的路径1> <文件或目录2> <文件或目录3> ...`
+##### 可选参数
+* `--test`: 测试下载, 此操作不会保存文件到本地
+* `--status`: 输出所有线程的工作状态
+* `--save`: 将下载的文件直接保存到当前工作目录
+* `--saveto`: 将下载的文件直接保存到指定的目录
+_下载的文件默认保存到 程序所在目录 的 download/ 目录, 支持设置指定目录, 重名的文件会自动跳过!_
+#### upload
+* `upload <本地文件/目录的路径1> <文件/目录2> <文件/目录3> ... <目标目录>`
+* `u <本地文件/目录的路径1> <文件/目录2> <文件/目录3> ... <目标目录>`
+    * 上传的文件将会保存到, <目标目录>.
+    * 遇到同名文件将会自动覆盖!!
+    * 当上传的文件名和网盘的目录名称相同时, 不会覆盖目录, 防止丢失数据.
+#### config
+* `config` or `config set` 显示和修改程序配置项
+* `config -h` or `config set -h`: 显示所有可以设置的值
+* `config set --savedir /home/cdutboy/Downloads`:设置下载文件的储存目录
+* `config set --max_parallel 150`: 设置下载最大并发量为 150
