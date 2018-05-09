@@ -91,3 +91,6 @@
   * 哥58
   * 查桌椅餐具
   * 问税务
+  * wine
+  * move to chrome✓
+  * disk capacity

@@ -1210,7 +1210,7 @@ Smart HTTP operates very similarly to the SSH or Git protocols but runs over sta
 It has probably become the most popular way to use Git now, since it can be set up to both serve anonymously like the `git://` protocol, and can also be pushed over with authentication and encryption like the SSH protocol. Instead of having to set up different URLs for these things, you can now use a single URL for both. If you try to push and the repository requires authentication (which it normally should), the server can prompt for a username and password. The same goes for read access.
 In fact, for services like GitHub, the URL you use to view the repository online (for example, https://github.com/schacon/simplegit) is the same URL you can use to clone and, if you have access, push over.
 ##### Dumb HTTP
-If the sever does not respond with a Git HTTP smart service, the Git client will try to fall back to the simpler _Dumb_ HTTP protocol. The Dumb protocol expects the bare Git repository to be served like normal files from the web server. The beauty of Dumb HTTP is the simplicity of setting it up. Basically, all you have to do is put a bare Git repository under your HTTP document root and set up a specific `post-udpate` hook, and you're done ([See Git Hooks](#8.3-Git-Hooks)). At that point, anyone who can access the web server under which you put the repository can also clone your repository. To allow read access to your repository over HTTP, do something like this:
+If the sever does not respond with a Git HTTP smart service, the Git client will try to fall back to the simpler _Dumb_ HTTP protocol. The Dumb protocol expects the bare Git repository to be served like normal files from the web server. The beauty of Dumb HTTP is the simplicity of setting it up. Basically, all you have to do is put a bare Git repository under your HTTP document root and set up a specific `post-udpate` hook, and you're done ([See Git Hooks](#Git_Hooks)). At that point, anyone who can access the web server under which you put the repository can also clone your repository. To allow read access to your repository over HTTP, do something like this:
 
         $ cd /var/www/htdocs/
         $ git clone --bare /path/to/git_project gitproject.git
@@ -1222,11 +1222,15 @@ That's all. The `post-update` hook that comes with Git by default runs the appro
         $ git clone https://example.com/gitproject.git
 In this particular case, we're using the `/var/www/htdocs` path that is common for Apache setups, but you can use any static web server-just put the bare repository in its path. The Git data is served as basic static files (see the Git Internals chapter for details about exactly how it's served).
 Generally you would either choose to run a read/write Smart HTTP server or simply have the files accessible as read-only in the Dumb manner. It's rare to run a mix of the two services.
-
+##### The Pros
+We'll concentrate on the pros of the Smart version of the HTTP protocol.
+The simplicity of having a single URL for all types of access and have the server prompt only when authentication is needed makes things very easy for the end user. Being able to authenticate with a username and password is also a big advantage over SSH, since users don't have to generate SSH keys locally and upload their public key to the server before being able to interact with it. For less sophisticated users, or users on systems where SSH is less common, this is a major advantage in usability. It is also a very fast and efficient protocol, similar to the SSH one.
+You can also serve you repositories read-only over HTTPS, which means you can encrypt the content transfer; or you can go so far as to make the clients use specific signed SSL certificates.
+Another nice thing is that HTTPS are such commonly used protocols that corporate firewalls are often set up to allow traffic through these ports.
 
 
 ## 8. Customizing Git
-### 8.3 Git Hooks
+### 8.3 Git Hooks <a name=Git_Hooks></a>
 #### Git Hooks
 Like many other Version Control Systems, Git has a way to fire off custom scripts when certain important actions occur. There are two groups of these hooks: client-side and server-side. Client-side hooks are triggered by operations such as committing and merging, while server-side hooks run on network operations such as receiving pushed commits. You can use these hooks for all sorts of reasons.
 #### Installing a Hook

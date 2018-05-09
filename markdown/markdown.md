@@ -79,7 +79,7 @@ alert(s);
   [another fun place]: www.stumbleupon.com
 * anchors in Github wiki page
     If you have a wiki page named Questions.md and you create heading tags ## Latest and ### Ask Your Question, woking links will be like this:
-    * from the same page
+    * from the same page (**sometimes doesn't work, especially on lower headers**)
 	 * `[See the latest questions](#latest)`
 	 * `[Ask me something](#ask-your-question)`
     * from a different page

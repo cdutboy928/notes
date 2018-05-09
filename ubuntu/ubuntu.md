@@ -693,6 +693,7 @@ c_amount: 色彩强度，取值范围-2.0-5.0，负数为模糊效果，默认�
     + 自动挂载
             sudo vim /etc/fstab
             /dev/sda4 /home/cdutboy/disk ext4 defaults 0 0
+ - `df -hl` 查看已有分区的使用情况。
 ## vmware ubuntu share folder
 1. 安装vmware tools
     - 挂载镜像文件
