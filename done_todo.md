@@ -81,6 +81,9 @@
   * 现代语》古语✓
   *  扩展g盘空间✓
   * 哥手机✓
+  * wine✓
+  * move to chrome✓
+  * disk capacity✓
   * 医保银行
   * 印度代购药，防伪唯一机制，md5?区块链？
   *  url="http://auto.tom61.com/down/mp3book/gscjx/古诗精选-采葛（诗经-王风）.mp3?176013719797087x1517986929x176013721672955-77ca97c604691230b0bec04e98642197"
@@ -89,8 +92,6 @@
   * 乱码问题
   * 哥下歌
   * 哥58
-  * 查桌椅餐具
-  * 问税务
-  * wine
-  * move to chrome✓
-  * disk capacity
+  * google assistant
+  * vim too slow
+  * guitar english songs

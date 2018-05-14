@@ -1227,6 +1227,162 @@ We'll concentrate on the pros of the Smart version of the HTTP protocol.
 The simplicity of having a single URL for all types of access and have the server prompt only when authentication is needed makes things very easy for the end user. Being able to authenticate with a username and password is also a big advantage over SSH, since users don't have to generate SSH keys locally and upload their public key to the server before being able to interact with it. For less sophisticated users, or users on systems where SSH is less common, this is a major advantage in usability. It is also a very fast and efficient protocol, similar to the SSH one.
 You can also serve you repositories read-only over HTTPS, which means you can encrypt the content transfer; or you can go so far as to make the clients use specific signed SSL certificates.
 Another nice thing is that HTTPS are such commonly used protocols that corporate firewalls are often set up to allow traffic through these ports.
+##### The Cons
+Git over HTTPS can be a little more tricky to set up compared to SSH on some servers. Other than that, there is very little advantage that other protocols have over Smart HTTP for serving Git content.
+If you're using HTTP for authentication pushing, providing your credentials is sometimes more complicated than using keys over SSH. There are, however, several credential caching tools you can use, including Keychain access on macOS and Credential Manager on Windows, to make this pretty painless. Read [Credential Storage](https://git-scm.com/book/en/v2/ch00/_credential_caching) to see how to set up secure HTTP password caching on your system.
+#### The SSH Protocol
+A common transport protocol for Git when self-hosting is over SSH. This is because SSH access to servers is already set up in most places-and if it isn't, it's easy to do. SSH is also an authenticated network protocol and, because it's ubiquitous, it's generally easy to set up and use.
+To clone a Git repository over SSH, you can specify an `ssh://` URL like this:
+
+        $ git clone ssh://[user@]server/project.git
+Or you can use the shorter scp-like syntax for the SSH protocol:
+
+        $ git clone [user@]server:project.git
+In both cases above, if you don't specify the optional username, Git assumes the user you're currently logged in as.
+##### The Pros
+The pros of using SSH are many. First, SSH is relatively easy to set up-SSH daemons are commonplace, many network admins have experience with them, and many OS distributions are set up with them or have tools to manage them. Next, access over SSH is secure-all data transfer is encrypted and authenticated. Last, like the HTTPS, Git and Local protocols, SSH is efficient, making the data as compact as possible before transferring it.
+##### The Cons
+The negative aspect of SSH is that it doesn't support anonymous access to your Git repository. If you're using SSH, people _must_ have SSH access to your machine, even in a read-only capacity, which doesn't make SSH conducive to open source projects for which people might simply want to clone your repository to examine it. If you're using it only within your corporate network, SSH many be the only protocol you need to deal with. If you want to allow anonymous read-only access to your projects and also want to use SSH, you'll have to set up SSH for you to push over but something else for others to fetch from.
+### The Git Protocol
+Next is the Git protocol. This is a special daemon that comes packaged with Git; it listens on a dedicated port (9418) that provides a service similar to the SSH protocol, but with absolutely no authentication. In order for a repository to be served over the Git protocol, you must create a `git-daemon-export-ok` file-the daemon won't serve a repository without that file in it-but other than that there is no security. Either the Git repository is available for everyone to clone, or it isn't. This means that there is generally no pushing over this protocol. You can enable push access but, given the lack of authentication, anyone on the internet who finds your project's URL could push to that project. Suffice it to say that this is rare.
+##### The Pros
+The Git protocol is often the fastest network transfer protocol available. If you're serving a lot of traffic for a public project or serving a very large project that doesn't require user authentication for read access, it's likely that you'll want to set up a Git daemon to serve your project. It uses the same data-transfer mechanism as the SSH protocol but without the encryption and authentication overhead.
+##### The Cons
+The downside of the Git protocol is the lack of authentication. It's generally undesirable for the Git protocol to be the only access to your project. Generally, you'll pair it with SSH or HTTPS access for the few developers who have push (write) access and have everyone else use `git://` for read-only access. It's also probably the most difficult protocol to set up. It must run its own daemon, which requires `Xinetd` configuration or the like, which isn't always a walk in the park. It also requires firewall access to port 9418, which isn't a standard port that corporate firewalls always allow. Behind big corporate firewalls, this obscure port is commonly blocked.
+### 4.2 Git on the server-Getting Git on a Server
+#### Getting Git on a Server
+Now we'll cover setting up a Git service running these protocols on your own server.
+_Note: Here we'll be demonstrating the commands and steps needed to do basic, simplified installations on a Linux-based server, though it's also possible to run these services on Mac or Windows servers. Actually setting up a production server within your infrastructure will certainly entail differences in security measures or operating system tools, but hopefully this will give you the general idea of what's involved._
+In order to initially set up any Git server, you have to export an existing repository into a new bare repository-a repository that doesn't contain a working directory. This is generally straightforward to so. In order to clone your repository to create a new bare repository, you run the clone command with the `--bare` option. By convention, bare repository directory names end with the suffix `.git`, like so:
+
+        $ git clone --bare my_project my_project.git
+        Cloning into bare repository 'my_project.git'...
+        done.
+You should now have a copy of the Git directory data in your `my_project.git` directory.
+This is roughly equivalent to something like
+
+        $ cp -Rf my_project/.git my_project.git
+There are a couple of minor differences in the configuration file but, for your purpose, this is close to the same thing. It takes the Git repository by itself, without a working directory, and creates a directory specially for it alone.
+#### Putting the Bare Repository on a Server
+Now that you have a bare copy of your repository, all you need to do is put it on a server and set up your protocols. Let's say you've set up a server called `git.example.com` to which you have SSH access, and you want to store all your Git repositories under the `/srv/git` directory. Assuming that `/srv/git` exits on that server, you can set up your new repository by copying your bare repository over:
+
+        $ scp -r my_project.git user@git.example.com:/srv/git
+_Note: `scp` copies files between hosts on a network. It uses ssh for data transfer, and uses the same authentication and provides the same security as ssh. `scp` will ask for passwords or passphrases if they are needed for authentication._
+At this point, other users who have SSH-based read access to the `/srv/git` directory on that server can clone your repository by running
+
+        $ git clone user@git.example.com:/srv/git/my_project.git
+If a user SSHs into a server and has write access to the `/srv/git/my_project.git` directory, they will also automatically have push access.
+Git will automatically add group write permissions to a repository properly if you run the `git init` command with the `--shared` option.
+
+        $ ssh user@git.example.com
+        $ cd /srv/git/my_project.git
+        $ git init --bare --shared
+You see how eays it is to take a Git repository, create a bare version, and place it on a server to which you and your collaborators have SSH access. Now you're ready to collaborate on the same project.
+It's important to note that this is literally all you need to do to run a useful Git server to which several people have access-just add SSH-able accounts on a server, and stick a bare repository somewhere that all those users have read and write access to. You're ready to go-nothing else needed.
+In the next few sections, you'll see how to expand to more sophisticated setups. This discussion will include not having to create user accounts for each user, adding public read access to repositories, setting up web UIs and more. However, keep in mind that to collaborate with a couple of people on a private project, all you need is an SSH server and a bare repository.
+#### Small Setups
+If you're a small outfit or are just trying out Git in your organization and have only a few developers, things can be simple for you. One of the most complicated aspects of setting up a Git server is user management. If you want some repositories to be read-only for certain users and read/write for others, access and permissions can be a bit more difficult to arrange.
+#### SSH Access
+If you have a server to which all your developers already have SSH access, it's generally easiest to set up your first repository there, because you have to do almost no work (as we covered in the last section). If you want more complex access control type permissions on your repositories, you can handle them with the normal filesystem permissions of you server's operating system.
+If you want to place your repositories on a server that doesn't have accounts for everyone on your team for whom you want to grant write access, then you must set up SSH access for them. We assume that if you have a server with which to do this, you already have an SSH server installed, and that's how you're accessing the server.
+There are a few ways you can give access to everyone on your team. The first is to set up accounts for everybody, which is straightforward but can be cumbersome. You may not want to run `adduser` and set temporary passwords for every user.
+A second method is to create a single _git_ user account on the machine, ask every user who is to have write access to send you an SSH public key, and add that key to the `~/.ssh/authorized_keys` file of that new account. At that point, everyone will be able to access that machine via the _git_ account. This doesn't affect the commit data in any way-the SSH user you connect as doesn't affect the commits you've recorded.
+Another way to do it is to have your SSH server authenticate from an LDAP sever or some other centralized authentication source that you may already have set up. As long as each user can get shell access on the machine, any SSH authentication mechanism you can think of should work.
+### 4.3 Git on the Server-Generating Your SSH Public Key
+#### Generating Your SSH Public Key
+Many Git servers authenticate using SSH public keys. In order to provide a public key, each user in your system must generate one if they don't already have one. This process is similar across all operating systems. First, you should check to make sure you don't already have a key. By default, a user's SSH keys are stored in that user's `~/.ssh` directory. You can easily check to see if you have a key already by going to that directory and listing the contents:
+
+        $ cd ~/.ssh
+        $ ls
+        authorized_keys2    id_dsa      known_hosts
+        config              id_dsa.pub
+You're looking for a pair of files named something like `id_dsa` or `id_rsa` and a matching file with a `.pub` extension. The `.pub` file is your public key, and the other is your private key. If you don't have these files (or you don't even have a `.ssh` directory), you can create them by running a program called `ssh-keygen`, which is provided with the SSH package on Linux/Mac systems and comes with Git for Windows:
+
+        $ ssh-keygen
+        Generating public/private rsa key pair.
+        Enter file in which to save the key (/home/schacon/.ssh/id_rsa):
+        Created directory '/home/schacon/.ssh'.
+        Enter passphrase (empty for no passphrase):
+        Enter same passphrase again:
+        Your identification has been saved in /home/schacon/.ssh/id_rsa.
+        Your public key has been saved in /home/schacon/.ssh/id_rsa.pub.
+        The key fingerprint is:
+        d0:82:24:8e:d7:f1:bb:9b:33:53:96:93:49:da:9b:e3 schacon@mylaptop.local
+First it confirms where you want to save the key (`.ssh/id_rsa`), and then it asks twice for a passphrase, which you can leave empty if you don't want to type a password when you use the key.
+Now, each user that does this has to send their public key to you or whoever is administrating the Git server (assuming you're using an SSH server setup that requires public keys). All they have to do is copy the contents of the `.pub` file and email it. The public keys look something like this:
+
+        $ cat ~/.ssh/id_rsa.pub
+        ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAklOUpkDHrfHY17SbrmTIpNLTGK9Tjom/BWDSU
+        GPl+nafzlHDTYW7hdI4yZ5ew18JH4JW9jbhUFrviQzM7xlELEVf4h9lFX5QVkbPppSwg0cda3
+        Pbv7kOdJ/MTyBlWXFCR+HAo3FXRitBqxiX1nKhXpHAZsMciLq8V6RjsNAQwdsdMFvSlVK/7XA
+        t3FaoJoAsncM1Q9x5+3V0Ww68/eIFmb1zuUFljQJKprrX88XypNDvjYNby6vw/Pb0rwert/En
+        mZ+AW4OZPnTPI89ZPmVMLuayrD2cE86Z/il8b+gw3r3+1nKatmIkjn2so1d01QraTlMqVSsbx
+        NrRFi9wrf+M7Q== schacon@mylaptop.local
+### 4.4 Git on the Server-Setting up the Server
+#### Setting Up the Server
+Let's walk through setting up SSH access on the server side. In this example, you'll use the `autorized_keys` method for authenticating your users. We also assume you're running a standard Linux distribution like Ubuntu.
+_Note: A good deal of what is described where can be automated by using the `ssh-copy-id' command, rather than manually copying and installing public keys._
+First, you create a `git` user and a `.ssh` directory for that user.
+
+        $ sudo adduser git
+        $ su git
+        $ cd
+        $ mkdir .ssh && chmod 700 .ssh
+        $ touch .ssh/authorized_keys && chmod 600 .ssh/authorized_keys
+Next, you need to add some developer SSH public keys to the `authorized_keys` file for the `git` user. Let's assume you have some trusted public keys and have saved them to temporary files. Again, the public keys look something like this:
+
+        $ cat /tmp/id_rsa.john.pub
+        ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCB007n/ww+ouN4gSLKssMxXnBOvf9LGt4L
+        ojG6rs6hPB09j9R/T17/x4lhJA0F3FR1rP6kYBRsWj2aThGw6HXLm9/5zytK6Ztg3RPKK+4k
+        Yjh6541NYsnEAZuXz0jTTyAUfrtU3Z5E003C4oxOj6H0rfIF1kKI9MAQLMdpGW1GYEIgS9Ez
+        Sdfd8AcCIicTDWbqLAcU4UpkaX8KyGlLwsNuuGztobF8m72ALC/nLF6JLtPofwFBlgc+myiv
+        O7TCUSBdLQlgMVOFq1I2uPWQOkOWQAHukEOmfjy2jctxSDBQ220ymjaNsHT4kgtZg2AYYgPq
+        dAv8JggJICUvax2T9va5 gsg-keypair
+You just append them to the `git` user's `authorized_keys` file in its `.ssh` directory:
+
+        $ cat /tmp/id_rsa.john.pub >> ~/.ssh/authorized_keys
+        $ cat /tmp/id_rsa.josie.pub >> ~/.ssh/authorized_keys
+        $ cat /tmp/id_rsa.jessica.pub >> ~/.ssh/authorized_keys
+Now, you can set up an empty repository for them by running `git init` with the `--bare` option, which initializes the repository without a working directory:
+
+        $ cd /srv/git
+        $ mkdir project.git
+        $ cd project.git
+        $ git init --bare
+        Initialized empty Git repostiroy in /srv/git/project.git/
+Then, John, Josie, or Jessica can push the first version of their project into that repository by adding it as a remote and pushing up a branch. Note that someone must shell onto the machine and create a bare repository every time you want to add a project. Let's use `gitserver` as the hostname of the server on which you've set up your `git` user and repository. If you're running it internally, and you set up DNS for `gitserver` to point to that server, then you can use the commands pretty much as is (assuming that `myproject` is an existing project with files in it):
+
+        # On John's computer
+        $ cd myproject
+        $ git init
+        $ git add .
+        $ git commit -m 'initial commit'
+        $ git remtoe add origin git@gitserver:/srv/git/project.git
+        $ git push origin master
+At this point, the others can clone it down and push changes back up just as easily:
+
+        $ git clone git@gitserver:/srv/git/project.git
+        $ cd project
+        $ vim README
+        $ git commit -am 'fix for the README file'
+        $ git push origin master
+With this method, you can quickly get a read/write Git server up and running for a handful of developers.
+You should note that currently all these users can also log into the server and get a shell as the `git` user. If you want to restrict that, you will have to change the shell to something else in the `passwd` file.
+You can easily restrict the `git` user to only doing Git activities with a limited shell toll called `git-shell` that comes with Git. If you set this as your `git` user's login shell, then the `git` user can't have normal shell access to your server. To use this, specify `git-shell` instead of bash or csh for your user's login shell. To do so, you must first add `git-shell` to `/etc/shells` if it's not already there:
+
+        $ cat /etc/shells # see if `igt-shell` is already in there. If not...
+        $ which git-shell # make sure git-shell is installed on your system
+        $ sudo vim /etc/shells # and add the path to git-shell from last command
+Now you can edit the shell for a user using `chsh <username> -S <shell>`:
+
+        $ sudo chsh git -S $(which git-shell)
+Now, the `git` user can only use the SSH connection to push and pull Git repositories and can't shell onto the machine. If you try, you'll see a login rejection like this:
+
+        $ ssh git@gitserver
+        fatal: Interactive git shell is not enabled.
+        hint: ~/git-shell-commands should exist and have read and execute access.
+        Connection to gitserver closed.
+Now Git network commands will still work just fine but the users won't be able to get a shell. As the output states, you can also set up a directory in the `git` user's home directory that customizes the `git-shell` command a bit. For instance, you an restrict the Git commands that the server will accept or you can customize the message that users see if they try to SSH in like that. Run `git help shell` for more information on customizing the shell.
 
 
 ## 8. Customizing Git

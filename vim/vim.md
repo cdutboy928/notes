@@ -216,3 +216,9 @@ put the following codes in .vimrc:
 * `zR` to open all folds
 * `zm` to close one more level of folds through out the whole buffer
 * `zM` to close all folds
+
+## vim slow
+* run `vim --startuptime timefile git.md`
+* run `vim timefile` to see which plugins make vim slow
+* comment the plugin in `.vimrc`
+* Open a new terminal tab and run `sudo vim`, and run `PluginUpdate`

@@ -45,6 +45,10 @@
  * PluginSearch markdown
    * i for isntall; c for clean; 
  * PluginClean
+ * to uninstall a plugin:
+  * comment the plugin in `.vimrc`
+  * Open a new tab and run `sudo vim`
+  * run `PluginUpdate` (if this does not work,rm the directory of plugin under `.vim/bundle`)
 ## pathogen
 * installation
 mkdir -p ~/.vim/autoload ~/.vim/bundle && \
