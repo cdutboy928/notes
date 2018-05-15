@@ -222,3 +222,7 @@ put the following codes in .vimrc:
 * run `vim timefile` to see which plugins make vim slow
 * comment the plugin in `.vimrc`
 * Open a new terminal tab and run `sudo vim`, and run `PluginUpdate`
+
+## highlight bold and italic words
+`highlight htmlBold gui=bold guifg=#af0000 ctermfg=34`
+`highlight htmlItalic gui=italic guifg=#ff8700 ctermfg=214`

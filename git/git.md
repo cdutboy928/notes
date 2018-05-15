@@ -1158,6 +1158,7 @@ For instance, in the previous scenario, if instead of doing a merge when we're a
 * Determine which are not merge commits (C2, C3, C4)
 * Determine which have not been rewritten into the target branch (just C2 and C3, since C4 is the same patch as C4')
 * Apply those commits to the top of `teamone/master`
+
 So instead of the result we see in You merge in the same work again into a new merge commit, we would end up with something more like Rebase on top of force-pushed rebase work.
 ![rebase on top of force-pushed rebase work](perils-of-rebasing-5.png)
 Figure 48. Rebase on top of force-pushed rebase work
@@ -1166,7 +1167,9 @@ You can also simplify this by running a `git pull --rebase` instead of a normal 
 If you are using `git pull` and want to make `--rebase` the default, you can set the `pull.rebase` config value with something like `git config --global pull.rebase true`.
 If you treat rebasing as a way to clean up and work with commits before you push them, and if you only rebase commits that have never been available publicly, then you'll be fine. If you rebase commits that have already been pushed publicly, and people may have based work on those commits, then you may be in for some frustrating trouble, and the scorn of your teammates.
 If you or a partner find it necessary at some point, make sure everyone knows to run `git pull --rebase` to try to make the pain after it happens a little bit simpler.
+
 #### Rebase vs. Merge
+
 Now that you've seen rebasing and merging in action, you may be wondering which one is better. Before we can answer this, let's step back a bit and talk about what history means.
 One point of view on this is that your repository's commit history is a **record of what actually happened.** It's a historical document, valuable in its own right, and shouldn't be tampered with. From this angle, changing the commit history is almost blasphemous; you're lying about what actually transpired. So what if there was a messy series of merge commits? That's how it happened, and the repository should preserve that for posterity.
 The opposing point of view is that the commit history is the **story of how your project was made.** You wouldn't publish the first draft of a book, and the manual for how to maintain your software deserves careful editing. This is the camp that uses tools like rebase and filter-branch to tell the story in the way that's best for future readers.
@@ -1174,9 +1177,12 @@ Now, to the question of whether merging or rebasing is better: hopefully you'll 
 In general the way to get the best of both worlds is to rebase local changes you've made but haven't shared yet before you push them in order to clean up your story, but never rebase anything you've pushed somewhere.
 ### 3.7 Git Branching -Summary
 #### Summary
+
 We've covered basic branching and merging in Git. You should feel comfortable creating and switching to new branches, switching between branches and merging local branches together. You should also be able to share your branches by pushing them to a shared server, working with others on shared branches and rebasing your branches before they are shared. Next, we'll cover what you'll need to run your own Git repository-hosting server.
+
 ## 4. Git on the Server
 ### 4.1 Git on the Server - The Protocols
+
 At this point, you should be able to do most of the day-to-day tasks for which you'll be using Git. However, in order to do any collaboration in Git, you'll need to have a remote Git repository. Although you can technically push changes and pull changes from individuals' repositories, doing so is discouraged because you can fairly easily confuse what they're working on if you're not careful. Furthermore, you want your collaborators to be able to access the repository even if your computer is offline-having a more reliable common repository if often useful. Therefore, the preferred method for collaborating with someone is to set up an intermediate repository that you both have access to, and push to and pull from that.
 Running a Git server is fairly straightforward. First, you choose which protocols you want your server to communicate with. The first section of this chapter will cover the available protocols and the pros and cons of each. The next sections will explain some typical setups using those protocols and how to get your server running with them. Last, we'll go over a few hosted options, if you don't mind hosting your code on someone else's server and don't want to go through the hassle of setting up and maintaining your own server.
 If you have no interest in running your own server, you can skip to the last section of the chapter to see some options for setting up a hosted account and then move on to the next chapter, where we discuss the various ins and outs of working in a distributed source control environment.
@@ -1210,7 +1216,7 @@ Smart HTTP operates very similarly to the SSH or Git protocols but runs over sta
 It has probably become the most popular way to use Git now, since it can be set up to both serve anonymously like the `git://` protocol, and can also be pushed over with authentication and encryption like the SSH protocol. Instead of having to set up different URLs for these things, you can now use a single URL for both. If you try to push and the repository requires authentication (which it normally should), the server can prompt for a username and password. The same goes for read access.
 In fact, for services like GitHub, the URL you use to view the repository online (for example, https://github.com/schacon/simplegit) is the same URL you can use to clone and, if you have access, push over.
 ##### Dumb HTTP
-If the sever does not respond with a Git HTTP smart service, the Git client will try to fall back to the simpler _Dumb_ HTTP protocol. The Dumb protocol expects the bare Git repository to be served like normal files from the web server. The beauty of Dumb HTTP is the simplicity of setting it up. Basically, all you have to do is put a bare Git repository under your HTTP document root and set up a specific `post-udpate` hook, and you're done ([See Git Hooks](#Git_Hooks)). At that point, anyone who can access the web server under which you put the repository can also clone your repository. To allow read access to your repository over HTTP, do something like this:
+If the server does not respond with a Git HTTP smart service, the Git client will try to fall back to the simpler _Dumb_ HTTP protocol. The Dumb protocol expects the bare Git repository to be served like normal files from the web server. The beauty of Dumb HTTP is the simplicity of setting it up. Basically, all you have to do is put a bare Git repository under your HTTP document root and set up a specific `post-udpate` hook, and you're done ([See Git Hooks](#Git_Hooks)). At that point, anyone who can access the web server under which you put the repository can also clone your repository. To allow read access to your repository over HTTP, do something like this:
 
         $ cd /var/www/htdocs/
         $ git clone --bare /path/to/git_project gitproject.git
@@ -1277,7 +1283,7 @@ Git will automatically add group write permissions to a repository properly if y
         $ ssh user@git.example.com
         $ cd /srv/git/my_project.git
         $ git init --bare --shared
-You see how eays it is to take a Git repository, create a bare version, and place it on a server to which you and your collaborators have SSH access. Now you're ready to collaborate on the same project.
+You see how easy it is to take a Git repository, create a bare version, and place it on a server to which you and your collaborators have SSH access. Now you're ready to collaborate on the same project.
 It's important to note that this is literally all you need to do to run a useful Git server to which several people have access-just add SSH-able accounts on a server, and stick a bare repository somewhere that all those users have read and write access to. You're ready to go-nothing else needed.
 In the next few sections, you'll see how to expand to more sophisticated setups. This discussion will include not having to create user accounts for each user, adding public read access to repositories, setting up web UIs and more. However, keep in mind that to collaborate with a couple of people on a private project, all you need is an SSH server and a bare repository.
 #### Small Setups
@@ -1383,7 +1389,12 @@ Now, the `git` user can only use the SSH connection to push and pull Git reposit
         hint: ~/git-shell-commands should exist and have read and execute access.
         Connection to gitserver closed.
 Now Git network commands will still work just fine but the users won't be able to get a shell. As the output states, you can also set up a directory in the `git` user's home directory that customizes the `git-shell` command a bit. For instance, you an restrict the Git commands that the server will accept or you can customize the message that users see if they try to SSH in like that. Run `git help shell` for more information on customizing the shell.
-
+### 4.5 Git on the Server-Git Daemon
+#### Git Daemon
+Next we'll set up a daemon serving repositories using the "Git" protocol. This is a common choice for fast, unauthenticated access to your Git data. Remember that since this is not an authenticated service, anything you serve over this protocol is public within its network.
+If you're running on server outside your firewall, it should be used only for projects that are publicly visible to the world. If the server you're running it on is inside your firewall, you might use it for projects that a large number of people or computers (continuous integration or build servers) have read-only access to, when you don't want to add an SSH key for each.
+**Bold** **bold** j **have** **a** *test* a test
+**`***bold***`**
 
 ## 8. Customizing Git
 ### 8.3 Git Hooks <a name=Git_Hooks></a>

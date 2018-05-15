@@ -760,3 +760,9 @@ _下载的文件默认保存到 程序所在目录 的 download/ 目录, 支持�
 * `config -h` or `config set -h`: 显示所有可以设置的值
 * `config set --savedir /home/cdutboy/Downloads`:设置下载文件的储存目录
 * `config set --max_parallel 150`: 设置下载最大并发量为 150
+
+## unzip
+* unzip the test.zip to the current directory: `unzip test.zip`
+* 将压缩文件text.zip在指定目录/tmp下解压缩，如果已有相同的文件存在，要求unzip命令不覆盖原先的文件: `unzip -n test.zip -d /tmp`
+* 将压缩文件test.zip在指定目录/tmp下解压缩，如果已有相同的文件存在，要求unzip命令覆盖原先的文件: `unzip -o test.zip -d /tmp`
+* 查看压缩文件目录，但不解压: `unzip -v test.zip`

@@ -29,6 +29,47 @@
     * `[]`
     * ]c
     * ]u
+## 5. [mkdx.vim](https://github.com/SidOfc/mkdx)
+### Install
+Vundle
+            Plugin 'SidOfc/mkdx'
+
+            :so $MYVIMRC
+            :PluginInstall
+
+### `g:mkdx#settings.map.prefix`
+            " :h mkdx-setting-map-prefix
+            let g:mkdx#settings = { 'map': { 'prefix': '<leader>' } }
+### Folds
+            let g:mkdx#settings = { 'fold': { 'enable': 0 } }
+
+### Insert mode fragment completion
+### Dead link detection
+### Insert fenced code block
+### Insert `<kbd></kbd>` shortcut
+### Inserting list items
+![Unordered](vim-mkdx-unordered-list.gif)
+![Numbered list](vim-mkdx-numbered-list.gif)
+`g:mkdx#settings.enter.enable = 1`
+
+### `Toggling lines from / to task items`
+### `Toggling lines from/to list items`
+### `Toggling lines from/to checklist items`
+### completing Checkboxes/Checklists
+### Toggling and promoting/demoting Headers
+### Toggling <kbd/> shortcuts
+### Toggling Quotes
+### Wrap as link
+### wrap as bold/italic/inline-code/strikethrough
+* Normal mode
+    ![normal mode](vim-mkdx-wrap-text-normal.gif)
+* Visual mode
+    ![Visual mode](vim-mkdx-wrap-text-visual.gif)
+* `<PREFIX>/` => italic
+* `<PREFIX>b` => bold
+* `<PREFIX>`\` => inline code
+* `<PREFIX>s` => strikethrough
+
 # vim-plug and vundle and pathogen
 ## [vim-plug](https://github.com/junegunn/vim-plug) 
 * commands:

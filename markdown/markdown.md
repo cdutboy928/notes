@@ -10,6 +10,7 @@ There is no need to trans when in code format
 * 好象是list里面第二级只需比第一级缩进1位，第三级要比第二级缩进2位，第四级要比第三级缩进3位甚至更多，反正是越往后的级数要比前一级缩进的越多。
 * add blank lin before the header when the text before the header is in normal format
 * Actually there must be blank line both before and after the normal text.
+* To conceal: `au FileType markdown setl conceallevel=2`
 
 ##  Text format  
 * Italics and Bold  
@@ -27,21 +28,21 @@ Note: The * and the _ is replacable.
   _*Note: can only be used in one line*_
 * code block 
          indenting by 4 spaces will turn an entire paragraph into a code-block
-Blocks of code are either fenced by lines with three back-ticks ```, or are indented with four spaces. I recommend only using the fenced code blocks -- they're easier and only they support syntax highlighting.
-        ```javascript
-        var s = "JavaScript syntax highlighting";
-        alert(s);
-        ```
-         
-         ```python
-         s = "Python syntax highlighting"
-         print s
-         ```
-          
-          ```
-          No language indicated, so no syntax highlighting. 
-          But let's throw in a <b>tag</b>.
-          ```
+Blocks of code are either fenced by lines with three back-ticks \`\`\`, or are indented with four spaces. I recommend only using the fenced code blocks -- they're easier and only they support syntax highlighting.
+ ```javascript
+ var s = "JavaScript syntax highlighting";
+ alert(s);
+ ```
+
+ ```python
+ s = "Python syntax highlighting"
+ print s
+ ```
+
+ ```
+ No language indicated, so no syntax highlighting. 
+ But let's throw in a <b>tag</b>.
+ ```
 ```javascript
 var s = "JavaScript syntax highlighting";
 alert(s);
