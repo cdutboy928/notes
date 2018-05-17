@@ -85,6 +85,7 @@
   * move to chrome✓
   * disk capacity✓
   * vim too slow✓
+  * vim markdown shortcuts (check the mkdx.vim and the markdown-shortcuts)✓
   * 医保银行
   * 印度代购药，防伪唯一机制，md5?区块链？
   *  url="http://auto.tom61.com/down/mp3book/gscjx/古诗精选-采葛（诗经-王风）.mp3?176013719797087x1517986929x176013721672955-77ca97c604691230b0bec04e98642197"
@@ -95,19 +96,4 @@
   * 哥58
   * google assistant
   * guitar english songs
-  * vim markdown shortcuts (check the mkdx.vim and the markdown-shortcuts)
-      * **method**
-          * vmap <leader>b <plugin>(command)
-          * ftplugin
-              `command! MarkdownToggleBold :call mdshortcuts#ToggleMultipleCharactersAroundWord(2, '*')`
-          * autoload
-              * functions
-                   * visual mode
-                   * count number
-                   * I
-                   * insert string (\* or \*\*)
-                   * esc
-                   * move right count
-                   * a
-                   * append string (\* or \*\*)
-                   * esc
+  * 微信添加信用卡

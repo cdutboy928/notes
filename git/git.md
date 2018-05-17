@@ -1393,8 +1393,129 @@ Now Git network commands will still work just fine but the users won't be able t
 #### Git Daemon
 Next we'll set up a daemon serving repositories using the "Git" protocol. This is a common choice for fast, unauthenticated access to your Git data. Remember that since this is not an authenticated service, anything you serve over this protocol is public within its network.
 If you're running on server outside your firewall, it should be used only for projects that are publicly visible to the world. If the server you're running it on is inside your firewall, you might use it for projects that a large number of people or computers (continuous integration or build servers) have read-only access to, when you don't want to add an SSH key for each.
-**Bold** **bold** j **have** **a** *test* a test
-**`***bold***`**
+In any case, the Git protocol is relatively easy to set up. Basically, you need to run this command in a daemonized manner:
+
+        $ git daemon --reuseaddr --base-path=/srv/git/ /srv/git/
+The `--reuseaddr` option allows the server to restart without waiting for old connections to time out, while the `--base-path` option allows people to clone projects without specifying the entire path, and the path at the end tells the Git daemon where to look for repositories to export. If you're running a firewall, you'll also need to punch a hole in it at port 9418 on the box you're setting this up on.
+You can daemonize this process a number of ways, depending on the operating system you're running.
+Since `systemd` is the most common init system among modern Linux distributions, you can use it for that purpose. Simply place a file in `/etc/systemd/system/git-daemon.service` with these contents:
+
+        [Unit]
+        Description=Start Git Daemon
+
+        [Service]
+        ExecStart=/usr/bin/git daemon --reuseaddr --base-path=/srv/git/ /srv/git/
+        Restart=always
+        Restart=500ms
+
+        StandardOutput=syslog
+        StandardError=syslog
+        SyslogIdentifier=git-daemon
+
+        User=git
+        Group=git
+
+        [Install]
+        WantedBy=multi-user.target
+You might have noticed that Git daemon is started here with `git` as both group and user. Modify it to fit your needs and make sure the provided user exists on the system. Also, check that the Git binary is indeed located at `/usr/bin/git` and change the path if necessary.
+Finally, you'll run `systemctl enable git-daemon` to automatically start the service on boot, and can start and stop the service with, respectively, `systemctl start git-daemon` and `systemctl stop git-daemon`.
+Until LTS 14.04, Ubuntu used upstart service unit configuration. Therefore, on Ubuntu before 14.04 you can use an Upstart script. So, in the following file
+
+        /etc/init/locoal-git-daemon.conf
+you put this script:
+
+        start on startup
+        stop on shutdown
+        exec /usr/bin/git daemon \
+            --user=git --group=git \
+            --reuseaddr \
+            --base-path=/srv/git/ \
+            /srv/git/
+        respawn
+For security reasons, it is strongly encouraged to have this daemon run as a user with read-only permissions to the repositories-you can easily do this by creating a new user *git-ro* and running the daemon as them. For the sake of simplicity we'll simply run ti as the same *git* user that `git-shell` is running as.
+When you restart your machine, your Git daemon will start automatically and respawn if it goes down. To get it running without having to reboot, you can run this:
+
+        $ initctl start local-git-daemon
+On other systems, you may want to use `Xinetd`, a script in your `sysvinit` system, or something else-as long as you get that command daemonized and watched somehow.
+Next, you have to tell Git which repositories to allow unauthenticated Git server-based access to. You can do this in each repository by creating a file named `git-daemon-export-ok`.
+
+        $ cd /path/to/project.git
+        $ touch git-daemon-export-ok
+
+### 4.6 Git on the Server-Smart HTTP
+#### Smart HTTP
+We now have authenticated access through SSH and unauthenticated access through `git://`, but there is also a protocol that can do both at the same time. Setting up Smart HTTP is basically just enabling a CGI script that is provided with Git called `git-http-backend` on the server. This CGI will read the path and headers sent by a `git fetch` or `git push` to an HTTP URL and determine if the client can communicate over HTTP (which is true for any client since version 1.6.6). If the CGI sees that the client is smart, it will communicate smartly with it; otherwise it will fall back to the dumb behavior (so it is backward compatible for reads with older clients).
+Let's walk through a very basic setup. We'll set this up with Apache as the CGI server. If you don't have Apache setup, you can do so on a Linux box with something like this:
+
+        $ sudo apt-get install apache2 apache2-utils
+        $ a2enmod cgi alias env
+This also enables the `mod_cgi`, `mod_alias`, and `mod_env` modules, which are all needed for this to work properly.
+You'll also need to set the Unix user group of the `/srv/git` directories to `WWW-data` so your web server can read-and-write access the repositories, because the Apache instance running the CGI script will (by default) be running as that user:
+
+        $ chgrp -R WWW-data /srv/git
+Next we need to add some things to the Apache configuration to run the `git-http-backend` as the handler for anything coming into the `/git` path of your web server.
+
+        SetEnv GIT_PROJECT_ROOT /srv/git
+        SetEnv GIT_HTTP_EXPORT_ALL
+        ScriptAlias /git/ /usr/lib/git-core/git-http-backend/
+If you leave out `GIT_HTTP_EXPORT_ALL` environment variable, then Git will only serve to unauthenticated clients the repositories with the `git-daemon-export-ok` file in them, just like the Git daemon did.
+Finally you'll want to tell Apache to allow requests to `git-http-backend` and make writes be authenticated somehow, possibly with an Auth block like this:
+
+        <Files "git-http-backend">
+            AuthType Basic
+            AuthName "Git Access"
+            AuthUserFile /srv/git/.htpasswd
+            Require expr !(%{QUERY_STRING} -strmatch '*service=git-receive-pack*' || %{REQUEST_URI} =~ m#/git-receive-pack$#)
+            Require valid-user
+        </Files>
+That will require you to create a `.htpasswd` file containing the passwords of all the valid users. Here is an example of adding a "schacon" user to the file:
+
+        $ htpasswd -c /srv/git/.htpasswd schacon
+
+There are a tons of ways to have Apache authenticate users, you'll have to choose and implement one of them. This is just the simplest example we could come up with. You'll also almost certainly want to set this up over SSL so all this data is encrypted.
+We don't want to go too far down the rabbit hole of Apache configuration specifics, since you could well be using a different server or have different authentication needs. The idea is that Git comes with CGI called `git-http-backend` that when invoked will do all the negotiation to send and receive data over HTTP. It does not implement any authentication itself, but that can easily be controlled at the layer of the web server that invokes it. You can do this with nearly any CGI-capable web server, so go with the one that you know best.
+_Note: For more information on configuring authentication in Apache, check out the Apache docs here:http://httpd.apache.org/docs/current/howto/auth.html_
+
+### 4.7 Git on the Server-GitWeb
+#### GitWeb
+Now that you have basic read/write and read-only access to your project, you may want to set up a simple web-based visualizer. Git comes with a CGI script called GitWeb that is sometimes used for this.
+![GitWeb web-based user interface](git-instaweb .png)
+Figure 49. The GitWeb web-based user interface.
+If you want to check out what GitWeb would look like for your project, Git comes with a command to fire up a temporary instance if you have a lightweight web server on your system like `lighttpd` or `webrick`. On Linux machines, `lighttpd` is often installed, so you may be able to get it to run by typing `git instaweb` in your project directory. If you're running a Mac, Leopard comes preinstalled with Ruby, so `webrick` may be your best bet. To start `instaweb` with a non-lighttpd handler, you can run it with the `--httpd` option.
+
+        $ git instaweb --httpd=webrick
+        [2009-02-21 10:02:21] INFO WEBrick 1.3.1
+        [2009-02-21 10:02:21] INFO ruby 1.8.6 (2008-03-03) [universal-darwin9.0]
+That starts up an HTTPD server on port 1234 and then automatically starts a web browser that opens on that page. It's pretty easy on your part. When you're done and want to shut down the server, you can run the same command with the `--stop` option:
+
+        $ git instaweb --http=webric --stop
+If you want to run the web interface on a server all the time for your team for for an open source project you're hosting, you'll need to set up the CGI script to be served by your normal web server. Some Linux distributions have `gitweb` package that you may be able to install via `apt` or `dnf`, so you may want to try that first. We'll walk through installing GitWeb manually very quickly. First, you need to get the Git source code, which GitWeb comes with, and generate the custom CGI script:
+
+        $ git clone git://git.kernel.org/pub/scm/git/git.git
+        $ cd git/
+        $ make GITWEB_PROJECTROOT="/srv/git" prefix=/usr gitweb
+            SUBDIR gitweb
+            SUBDIR ../
+        make[2]: 'GIT-VERSION-FILE' is up to date.
+            GEN gitweb.cgi
+            GEN static/gitweb.js
+        $ sudo cp -Rf gitweb /var/www/
+Notice that you have to tell the command where to find your Git repositories with the `GITWEB_PROJECTROOT` variable. Now, you need to make Apache use CGI for that script, for which you can add a VirtualHost:
+
+        <VirtualHost *:80>
+            ServerName gitserver
+            DocumentRoot /var/WWW/gitweb
+            <Directory /var/WWW/gitweb>
+                Options +ExecCGI +FollowSymLinks +SymLinksIfOwnerMatch
+                AllowOverride All
+                order allow, deny
+                Allow from all
+                AddHandler cgi-script cgi
+                DirectoryIndex gitweb.cgi
+            </Directory>
+        </VirtualHost>
+
+Again, GitWeb can be served with any CGI or Perl capable web server; if you prefer to use something else, it shouldn't be difficult to set up. At this point, you should be able to visit `http://gitserver/` to view your repositories online.
 
 ## 8. Customizing Git
 ### 8.3 Git Hooks <a name=Git_Hooks></a>

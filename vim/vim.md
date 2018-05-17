@@ -118,7 +118,7 @@
  * 通过Ctrl+/或Ctrl+Shift+－或者ctrl+7都是toggle有菜单的中文动态模式。（最常用）
 * 无菜单模式
     在normal 模式下输入gi 即可进入无菜单的中文输入：输入拼音后按空格键选词,按空格键或者Ctrl+n是向下翻词,Ctrl+p 是向上翻,Ctrl+o 是把词语分成字来选。
-**注意:
+**注意:**
     * 按gi 之后是在光标的后边输入汉字;
     * 选好词或者字之后就继续打后面的词语就行了,不必再按空格键了。
     * 标点符号也是可以翻词的。比如点号翻成句号。
@@ -226,3 +226,55 @@ put the following codes in .vimrc:
 ## highlight bold and italic words
 `highlight htmlBold gui=bold guifg=#af0000 ctermfg=34`
 `highlight htmlItalic gui=italic guifg=#ff8700 ctermfg=214`
+## write my own vimscript (in `.vimrc`)
+* First, write the following function in `.vimrc`:
+
+        function! Bold() range
+            let amount = virtcol("'>") - virtcol("'<") + 2
+            execute "normal gv"
+            execute "normal! A" . "**" . "\<Esc>"
+            execute "normal!" . amount . "h"
+            execute "normal! i" . "**" . "\<Esc>"
+        endfunction
+* Second, set the mapping and invoking of the above function in `.vimrc`
+
+        vnoremap <LocalLeader>b :call Bold()<cr>
+## Write and install my own vim plugin
+* First, create the plugin directory
+    * `cd ~/.vim/plugin` (can also be other directory)
+    * `mkdir -p vim_markdown_shortcuts.vim/ftplugin`
+* Second, create and write the plugin file
+    * `cd ~/.vim/plugin/vim_markdown_shortcuts.vim/ftplugin`
+    * `vim markdown_shortcuts.vim`
+    * the example code
+
+            function! MarkdownBoldFunction() range
+                let amount = virtcol("'>") - virtcol("'<") + 2
+                execute "normal gv"
+                execute "normal! A" . "**" . "\<Esc>"
+                execute "normal!" . amount . "h"
+                execute "normal! i" . "**" . "\<Esc>"
+            endfunction
+            
+            function! MarkdownItalicFunction() range
+                let amount = virtcol("'>") - virtcol("'<") + 1
+                execute "normal gv"
+                execute "normal! A" . "*" . "\<Esc>"
+                execute "normal!" . amount . "h"
+                execute "normal! i" . "*" . "\<Esc>"
+            endfunction
+            
+            function! MarkdownCodeFunction() range
+                let amount = virtcol("'>") - virtcol("'<") + 1
+                execute "normal gv"
+                execute "normal! A" . "`" . "\<Esc>"
+                execute "normal!" . amount . "h"
+                execute "normal! i" . "`" . "\<Esc>"
+            endfunction
+* Third, add the `runtimepath` for the plugin
+    * put the `set runtimepath+=,/home/cdutboy/.vim/plugin/vim_markdown_shortcuts.vim` to the `.vimrc` (note: should be the absolute path)
+* Fourth, set the key map (in the `.vimrc`)
+
+        vnoremap <buffer> <localleader>b :call MarkdownBoldFunction()<cr>
+        vnoremap <buffer> <localleader>i :call MarkdownItalicFunction()<cr>
+        vnoremap <buffer> <localleader>c :call MarkdownCodeFunction()<cr>
