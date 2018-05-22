@@ -1517,6 +1517,108 @@ Notice that you have to tell the command where to find your Git repositories wit
 
 Again, GitWeb can be served with any CGI or Perl capable web server; if you prefer to use something else, it shouldn't be difficult to set up. At this point, you should be able to visit `http://gitserver/` to view your repositories online.
 
+### 4.8 Git on the Server-GitLab
+#### GitLab
+GitWeb is pretty simplistic though. If you're looking for a more modern, fully featured Git server, there are some several open source solutions out there that you can install instead. As GitLab is one of the more popular ones, we'll cover installing and using it as an example. This is a bit more complex than the GitWeb option and likely requires more maintenance, but it is a much more fully featured option.
+#### Installation
+GitLab is a database-backed web application, so its installation is a bit more involved than some other Git servers. Fortunately, this process is very well-documented and supported.
+There are a few methods you can pursue to install GitLab. To get something up and running quickly, you can download a virtual machine image or a one-click installer from https://bitnami.com/stack/gitlab, and tweak the configuration to match your particular environment. One nice touch Bitnami has included is the login screen (accessed by typing alt+→); it tells you the IP address and defaul username and password for the installed GitLab.
+![the Bitnami GitLab virtual machine login screen](bitnami.png)
+Figure 50. The Bitnami GitLab virtual machine login screen.
+For anything else, follow the guidance in hte GitLab Community Edition readme, which can be found at https://gitlab.com/gitlab-org/gitlab-ce/tree/master. There you'll find assistance for installing GitLab using Chef recipes, a virtual machine on Digital Ocean, and RPM and DEB packages (which, as of this writing, are in beta). There's also "unofficial" guidance on getting GitLab running with non-standard operating systems and databases, a fully-maunal installation script, and many other topics.
+#### Administration
+GitLab's administration interface is accessed over the web. Simply point your browser to the hostname or IP address where GitLab is installed, and log in as an admin user. The default username is `admin@local.hos`, and the default password is `5iveL!fe` (which you will be prompted to change as soon as you enter it). Once logged in, click the `Admin area` icon in the menu at the top right.
+![the GitLab menu](gitlab-menu.png)
+Figure 51. The "Admin area" item in the GitLab menu.
+#### Users
+Users in GitLab are accounts that correspond to people. User accounts don't have a lot of complexity; mainly it's a collection of personal information attached to login data. Each user account comes with a **namespace**, which is a logical grouping of projects that belong to that user. If the user `jane` had a project named `project`, that project's url would be http://server/jane/project.
+![the GitLab user administration screen](gitlab-users.png)
+Figure 52. The GitLab user administration screen.
+Removing a user can be done in two ways. "Blocking" a user prevents them from logging into the GitLab instance, but all of the data under that user's namespace will be preserved, and commits signed with that user's email address will still link back to their profile.
+"Destroying" a user, on the other hand, completely removes them from the database and filesystem. All projects and data in their namespace is removed, and any groups they own will also be removed. This is obviously a much more permanent and destructive action, and its uses are rare.
+#### Groups
+A GitLab group is an assemblage of projects, along with data about how users can access those projects. Each group has a project namespace (the same way that users do), so if the group `training` has a project `materials`, its url would be http://server/training/materials.
+![The GitLab group administration screen](gitlab-groups.png)
+Figure 53. The GitLab group administration screen.
+Each group is associated with a number of users, each of which has a level of permissions for the group's projects and the group itself. These range from "Guest" (issues and chat only) to "Owner" (full control of the group, its members, and its projects). The types of permissions are too numerous to list here, but GitLab has a helpful link on the administration screen.
+#### Projects
+A GitLab project roughly corresponds to a single Git repository. Every project belongs to a single namespace, either a user or a group. If the project belongs to a user, the owner of the project has direct control over who has access to the project; if the project belongs to a group, the group's user-level permissions will also take effect.
+Every project has a visibility level, which controls who has read access to that project's pages and repository. If a project is *Private*, the project's owner must explicitly gran access to specific users. An *Internal* project is visible to any logged-in user, and a *Public* project is visible to anyone. Note that this controls both `git fetch` access as well as access to the web UI for that project.
+#### Hooks
+GitLab includes support for hooks, both at a project or system level. For either of these, the GitLab server will perform an HTTP POST with some descriptive JSON whenever relevant events occur. This is a great way to connect your Git repositories and GitLab instance to the rest of your development automation, such as CI server, chat room, or deployment tools.
+#### Basic Usage
+The first thing you'll want to do with GitLab is create a new project. This is accomplished by clicking the "+" icon on the toolbar. You'll be asked for the project's name, which namespace it should belong to, and what its visibility level should be. Most of what you specify here isn't permanent, and can be re-adjusted later through the settings interface. Click "Create Project", and you're done.
+Once the project exists, you'll probably want to connect it with a local Git repository. Each project is accessible over HTTPS or SSH, either of which can be used to configure a Git remote. The URLs are visible at the top of the project's home page. For an existing local repository, this command will create a remote named `gitlab` to the hosted location:
+
+        $ git remote add gitlab https://server/namespace/project.git
+If you don't have a local copy of the repository, you can simply do this:
+
+        $ git clone https://server/namespace/project.git
+The web UI provides access to several useful views of the repository itself. Each project's home page shows recent activity, and links along the top will lead you to views of the project's files and commit log.
+#### Working Together
+The simplest way of working together on a GitLab project is by giving another user direct push access to the Git repository. You can add a user to a project by going to the "Members" section of that project's settings, and associating the new user with an access level (the different access levels are discussed a bit in Groups). By giving a user an access level of "Developer" or above, that user can push commits and branches directly to the repository with impunity.
+Another, more decoupled way of collaboration is by using merge requests. This feature enables any user that can see a project to contribute to it in a controlled way. Users with direct access can simply create a branch, push commits to it, and open a merge request from their branch into `master` or any other branch. Users who don't have push permissions for a repository can "fork" it (create their own copy), push commits to *that* copy, and open a merge request from their fork back to the main project. This model allows the owner to be in full control of what goes into the repository and when, while allowing contributions from untrusted users.
+Merge requests and issues are the main units of long-lived discussion in GitLab. Each mere request allows a line-by-line discussion of the proposed change (which supports a lightweight kind of code review), as well as a general overall discussion thread. Both can be assigned to users, or organized into milestone.
+This section is focused mainly on the Git-related features of GitLab, but as a mature project, it provides many other features to help your team work together, such as project wikis and system maintenance tools. One benefit to GitLab is that, once the server is set up and running, you'll rarely need to tweak a configuration file or access the server via SSH; most administration and general usage can be accomplished through the in-browser interface.
+### 4.9 Git on the Server-Third Party Hosted Options
+#### Third Party Hosted Options
+If you don't want to go through all of the work involved in setting up your own Git server, you have several options for hosting your Git projects on an external dedicated hosting site. Doing so offers a number of advantages:a hosting site is generally quick to set up and easy to start projects on, and no server maintenance or monitoring is involved. Even if you set up and run your own server internally, you may still want to use a public hosting site for your open source code-it's generally easier for the open source community to find and help you with.
+These days, you have a huge number of hosting options to choose from, each with different advantages and disadvantages. To see an up-to-date list, check out the GitHosting page on the main Git wiki at https://git.wiki.kernel.org/index.php/GitHosting
+We'll cover using GitHub in detail in GitHub, as it is the largest Git host out there and you may need to interact with projects hosted on it in any case, but there are dozens more to chose from should you not want to set up your own Git server.
+### 4.10 Git on the Sever-Summary
+#### Summary
+You have several options to get a remote Git repository up and running so that you can collaborate with others or share your work.
+Running your own server gives you a lot of control and allows you to run the server within your own firewall, but such a server generally requires a fair amount of your time to set up and maintain. If you place your data on a hosted server, it's easy to set up and maintain; however, you have to be able to keep your code on someone else's servers, and some organizations don't allow that.
+It should be fairly straightforward to determine which solution or combination of solutions is appropriate for you and your organization.
+## 5. Distributed Git
+### 5.1 Distributed Git-Distributed Workflows
+Now that you have a remote Git repository set up as a focal point for all the developers to share their code, and you're familiar with basic Git commands in a local workflow, you'll look at how to utilize some of the distributed workflows that Git affords you.
+In this chapter, you'll see how to work with Git in a distributed environment as a contributor and an integrator. That is, you'll learn how to contribute code successfully to a project and make it as easy on you and the project maintainer as possible, and also how to maintain a project successfully with a number of developers contributing.
+#### Distributed Workflows
+Unlike Centralized Version Control Systems (CVCSs), the distributed nature of Git allows you to be far more flexible in how developers collaborate on projects. In centralized systems, every developer is a node working ore or less equally on a central hub. In Git, however, every developer is potentially both a node and a hub-that is, every developer can both contribute code to other repositories and maintain a public repository on which others can base their work and which they can contribute to. This opens a vast range of workflow possibilities for your project and/or your team, so we'll cover a few common paradigms that take advantage of this flexibility. We'll go over the strengths and possible weaknesses of each design; you can choose a single one to use, or you can mix and match features from each.
+##### Centralized Workflow
+In centralized systems, there is generally a single collaboration model-the centralized workflow. One central hub, or repository, can accept code, and everyone synchronizes their work to it. A number of developers are nodes-consumers of that hub-and synchronize to that one place.
+![Centralized Workflow](centralized_workflow.png)
+This means that if two developers clone from the hub and both make changes, the first developer to push their changes back up can do so with no problems. The second developer must merge in the first one's work before pushing changes up, so as not to overwrite the first developer's changes. This concept is as true in Git as it is in Subversion (or any CVCS), and this model works perfectly well in Git.
+If you are already comfortable with a centralized workflow in you company or team, you can easily continue using that workflow with Git. Simply set up a single repository, and give everyone on your team push access; Git won't let users overwrite each other. Say John and Jessica both start working at the same time. John finishes his change and pushes it to the server. Then Jessica tries to push her changes, but the server rejects them. She is told that she's trying to push non-fast-forward changes and that she won't be able to do so until she fetches and merges. This workflow is attractive to a lot of people because it's a paradigm that many are familiar and comfortable with.
+This is also not limited to small teams. With Git's branching model, it's possible for hundreds of developers to successfully work on a single project through dozens of branches simultaneously.
+##### Integration-Manager Workflow
+Because Git allows you to have multiple remote repositories, it's possible to have a workflow where each developer has write access to their own public repository and read access to everyone else's. This scenario often includes a canonical repository that represents the "official" project. To contribute to that project, you create your own public cone of the project and push your changes to it. Then, you can send a request to the maintainer of the main project to pull in your changes. The maintainer can then add your repository as a remote, test your changes locally, merge them into their branch, and push back to their repository. The process works as follows
+1. The project maintainer pushes to their public repository.
+2. A contributor clones that repository and makes changes.
+3. The contributor pushes to their own public copy.
+4. The contributor sends the maintainer and email asking them to pull changes.
+5. The maintainer adds the contributor's repository as a remote and merges locally.
+6. The maintainer pushes merge changes to the main repository.
+![Integration-manager workflow](integration-manager.png)
+Figure 55. Integration-manager workflow.
+This is a very common workflow with hub-based tools like GitHub or GitLab, where it's easy to fork a project and push your changes into your fork for everyone to see. One of the main advantages of this approach is that you can continue to work, and the maintainer of the main repository can pull in your changes at any time. Contributors don't have to wait for the project to incorporate their changes-each party can work at their own pace.
+##### Dictator and Lieutenants Workflow
+This is a variant of a multiple-repository workflow. It's generally used by huge projects with hundreds of collaborators; one famous example is the Linux kernel. Various integration managers are in charge of certain parts of the repository; they're called *lieutenants*. All the lieutenants have one integration manager known as the benevolent dictator. The benevolent dictator pushes from his directory to a reference repository from which all the collaborators need to pull. The process works like this:
+1. Regular developers work on their topic branch and rebase their work on top of `master`. The `master` branch is that of the reference repository to which the dictator pushes.
+2. Lieutenants merge the developers' topic branches into their `master` branch.
+3. The dictator merges the lieutenant's `master` branches into the dictator's `master` branch.
+4. Finally, the dictator pushes that `master` branch to the reference repository so the other developers can rebase on it.
+![dictator and lieutenant workflow](benevolent-dictator.png)
+Figure 56. Benevolent dictator workflow
+This kind of workflow isn't common, but can be useful in very big projects, or in highly hierarchical environments. It allows the project leader (the dictator) to delegate much of the work and collect large subsets of code at multiple points before integrating them.
+#### Workflows Summary
+These are some commonly used workflows that are possible with a distributed system like Git, but you can see that many variations are possible t suit your particular real-world workflow. Now that you can (hopefully) determine which workflow combination may work for you, we'll cover some more specific examples of how to accomplish the main roles that make up the different flows. In the next section, you'll learn about a few common patterns for contributing to a project.
+### 5.2 Distributed Git-Contributing to a Project
+#### Contributing to a Project
+The main difficulty with describing how to contribute to a project are the numerous variations on how to do that. Because Git is very flexible, people can do work together in many ways, and it's problematic to describe how you should contribute-every project is different. Some of the variables involved are active contributor count, chosen workflow, you commit access, and possibly the external contribution method.
+The first variable is active contributor count-how many users are actively contributing code to this project, and how often? In many instances, you'll have two or three developers with a few commits a day, or possibly less for somewhat projects. For larger companies or projects, the number of developers could be in the thousands, with hundreds or thousands of commits coming in each day. This is important, because with more and more developers, you run into more issues with making sure you code applies cleanly or can be easily merged. Changes you submit may be rendered obsolete or severely broken by work that is merged in while you were working or while your changes were waiting to be approved or applied. How can you keep your code consistently up to date and your commits valid?
+The next variable is the workflow in use for the project. Is it centralized, with each developer having equal write access to the main codeline? Does the project have a maintainer or integration manager who checks all the patches? Are all the patches peer-reviewed and approved? Are you involved in that process? Is a lieutenant system in place, and do you have to submit your work to them first?
+The next variable is your commit access. The workflow required in order to contribute to a project is much different if you have write access to the project than id you don't. If you don't have write access, how does the project prefer to accept contributed work? Does it even have a policy? How much work are you contributing at a time? How often do you contribute?
+All these questions can affect how you contribute effectively to a project and what workflows preferred or available to you. We'll cover aspects of each of these in a series of use cases, moving from simple to more complex; you should be able to construct the specific workflows you need in practice from these examples.
+##### Commit Guidelines
+Before we start looking at the specific use cases, here's a quick note about commit messages. Having a good guideline for creating commits and sticking to it makes working with Git and collaborating with others a lot easier. The Git project provides a document that lays out a number of good tips for creating commits from which to submit patches-you can read it in the Git source code in the `Documentation/SubmittingPatches` file.
+First, your submissions should not contain any whitespace errors. Git provides an easy way to check for this-before you commit, run `git diff --check`, which identifies possible whitespace errors and lists them for you.
+![git diff --check for whitespaces](git-diff-check.png)
+Figure 57. Output of `git diff --check`
+If you run that command before committing, you can tell if you're about to commit whitespace issues that may annoy other developers.
+
+
 ## 8. Customizing Git
 ### 8.3 Git Hooks <a name=Git_Hooks></a>
 #### Git Hooks
