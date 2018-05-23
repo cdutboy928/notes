@@ -1617,7 +1617,139 @@ First, your submissions should not contain any whitespace errors. Git provides a
 ![git diff --check for whitespaces](git-diff-check.png)
 Figure 57. Output of `git diff --check`
 If you run that command before committing, you can tell if you're about to commit whitespace issues that may annoy other developers.
+Next, try to make each commit a logically separate changeset. If you can, try to make your changes digestible-don't code for a whole weekend on five different issues and then submit them all as one massive commit on Monday. Even if you don't commit during the weekend, use the staging area on Monday to split your work into at least one commit per issue, with a useful message per commit. If some of the changes modify the same file, try to use `git add --patch` to partially stage files (covered in detail in Interactive Staging). The project snapshot at the tip of the branch is identical whether you do one commit or five, as long as all the changes are added at some point, so try to make things easier on your fellow developers when they have to review your changes.
+This approach also makes it easier to pull out or revert one of the changesets if you need to later. [Rewriting History](https://git-scm.com/book/en/v2/ch00/_rewriting_history) describes a number of useful Git tricks for rewriting history and interactively staging files-use these tools to help craft a clean and understandable history before sending the work to someone else.
+The last thing to keep in mind is the commit message. Getting in the habit of creating quality commit messages makes using and collaborating with Git a lot easier. As a general rule, you messages should start with a single line that's no more than about 50 characters and that describes the changeset concisely, followed by a blank line, followed by a more detailed explanation. The Git project requires that the more detailed explanation include your motivation for the change and contrast its implementation with previous behavior-this is a good guideline to follow. It's also a good idea to use the imperative present tense in these messages. In other words, use commands. Instead of "I added tests for" or "Adding tests for," use "Add tests for." Here is a template originally written by Tim Pope:
 
+        Short (50 chars or less) summary of changes
+
+        More detailed explanatory text, if necessary. Wrap it to about 72 characters or so. In some contexts, the first line is treated as the subject of an email and the rest of the text as the body. The blank line separating the summary from the body is critical (unless you omit the body entirely); tools like rebase can get confuseed if you run the two together.
+
+        Further paragraphs comes after blank lines.
+
+        - Bullet points are okay, too
+
+        - Typically a hyphen or asterisk is used for the bullet, preceded by a single space, with blank lines in between, but conventions vary here.
+If all your commit messages follow this model, things will be much easier for you and the developers with whom you collaborate. The Git project has well-formatted commit messages-try running `git log --no-merges` there to see what a nicely-formatted project-commit history looks like.
+_Note:
+Do as we say, not as we do.
+For the sake of brevity, many of the examples in this book don't have nicely-formatted commit messages like this; instead, we simply use the `-m` option to `git commit`.
+In short, do as we say, not as we do._
+##### Private Small Team
+The simplest setup you're likely t encounter is a private project with one or two other developers. "Private," in this context, means closed-source-not accessible to the outside world. You and other developers all have push access to the repository.
+In this environment, you can follow a workflow similar to what you might do when using Subversion or another centralized system. You still get the advantages of things like offline committing and vastly simpler branching and merging, but the workflow can be very similar; the main difference is that merges happen client-side rather than on the server at commit time. Let's see what it might look like when two developers start to work together with a shared repository. The first developer, John, clones the repository, makes a change, and commits locally. (The protocol messages have been replaced with `...` in these examples to shorten them somewhat.)
+
+        # John's Machine
+        $ git clone john@githost:dimplegit.git
+        Cloning into 'simplegit'...
+        ...
+        $ cd simplegit/
+        $ vim lib/simplegit.rb
+        $ git commit -am 'remove invalid default value'
+        [master 738ee87] remove invalid default value
+        1 files changed, 1 insertions(+), 1 deletions(-)
+The second developer, Jessica, does the same thing-clones the repository and commits a change:
+
+        # Jessica's Machine
+        $ git clone jessica@githost:simplegit.git
+        Cloning into 'simplegit'...
+        ...
+        $ cd simplegit/
+        $ vim TODO
+        $ git commit -am 'add reset task'
+        [master fbff5bc] add reset task
+        1 files changed, 1 insertions(+), 0 deletions(-)
+Now, Jessica pushes her work to he server, which works just fine:
+
+        # Jessica's Machine
+        $ git push origin master
+        ...
+        To jessica@githost:simplegit.git
+            1edee6b..fbff5bc master -> master
+The last line of the output above shows a useful return message from the push operation. The basic format is `<oldref>..<newref> fromref -> toref`, where `oldref` means the old reference, `newref` means the new reference, `fromref` is the name of the local reference being pushed, and `toref` is the name of the remote reference being updated. You'll see similar output like this below in the discussions, so having a basic idea of the meaning will help in understanding the various state of the repositories. More details are available in the documentation for [git-push](https://git-scm.com/docs/git-push).
+Continuing with this example, shortly afterwards, John makes some changes, commits them to his local repository, and tries to push them to the same server:
+
+        # John's Machine
+        $ git push origin master
+        To john@githost:simplegit.git
+            ! [rejected]        master  -> master (non-fast forward)
+        error: failed to push some refs to 'john@githost:simplegit.git'
+In this case, John's push fails because of Jessica's earlier push of *her* changes. This is especially important t understand if you're used to Subversion, because you'll notice that the two developers didn't edit the same file. Although Subversion automatically does such a merge on the server if different files are edited, with Git, you must *first* merge the commits locally. In other words, John must first fetch Jessica's upstream changes and merge then into his local repository before he will be allowed to push.
+As a first step, John fetches Jessica's work (this only *fetches* Jessica's upstream work, it does not yet merge it into John's work):
+
+        $ git fetch origin
+        ...
+        From john@githost:simplegit
+            + 049d078...fbff5bc master      -> origin/master
+At this point, John's local repository looks something like this:
+![fetched history](small-team-1.png)
+Figure 58. John's divergent history.
+Now John can merge Jessica's work that he fetched into his own local work:
+
+        $ git merge origin/master
+        Merge made by the 'recursive' strategy.
+            TODO |  1+
+            1 fiels changed, 1 insertions(+), 0 deletions(-)
+As long as that local merge goes smoothly, John's updated history will now look like this:
+![repository after merging `origin/master`](small-team-2.png)
+Figure 59. John's repository after merging `origin/master`.
+At this point, John might want to test this new code to make sure none of Jessica's work affects any of this and, as long as everything seems fine, he can finally push the new merged work up to the server:
+
+        $ git push origin master
+        ...
+        To john@githost:simplegit.git
+            fbff5bc..72bbc59    master -> master
+In the end, John's commit history will look like this:
+![John's history after pushing to the `origin` server](small-team-3.png)
+Figure 60. John's history after pushing to the `origin` server.
+In the meantime, Jessica has created a new topic branch called `issue54`, and made three commits to that branch. She hasn't fetched John's changes yet, so her commit history looks like this:
+![Jessica's topic branch](small-team-4.png)
+Figure 61. Jessica's topic branch.
+Suddenly, Jessica learns that John has pushed some new work to hte sever and she wants to take a look at it, so she can fetch all new content from the server that she does not yet have with:
+
+        # Jessica's Machine
+        $ git fetch origin
+        ...
+        From jessica@githost:simplegit
+            fbff5bc..72bbc59 master     -> origin/master
+That pulls down the work John has pushed up in the meantime. Jessica's history now looks like this:
+![Jessica's history after fetching John's changes](small-team-5.png)
+Figure 62. Jessica's history after fetching John's changes.
+Jessica thinks her topic branch is ready, but she wants to know what part of John's fetched work she has to merge into her work so that she can push. She runs `git log` to find out:
+
+        $ git og --no-merges issue54..origin/master
+        commit 738ee872852dfaa9d6634e0dea7a324040193016
+        Author: John Smith <jsmith@example.com>
+        Date: Fri May 29 16:01:27 2009 -0700
+
+            remove invalid default value
+The `issue54..origin/master` syntax is log filter that asks Git to display only those commits that are on the latter branch (in this case `origin/master`) that are not on the first branch (in this case `issue54`). We'll go over this syntax in detail in [Commit Ranges](https://git-scm.com/book/en/v2/ch00/_commit_ranges).
+From the above output, we can see that there is a single commit that John has made that Jessica has no merged into her local work. If she merges `origin/master`, that is the single commit that will modify her local work.
+Now, Jessica can merge her topic work into her master branch, merge John's work (`origin/master`) into her `master` branch, and then push back to the server again.
+First (having committed all of the work on her `issue54` topic branch), Jessica switches back to her master branch in preparation for integrating all this work:
+
+        $ git checkout master
+        Switched to branch 'master'
+        Your branch is behind 'origin/master' by 2 commits, and can be fast-forwarded.
+Jessica can merge either `origin/master` or `issue54` first-they're both upstream, so the order doesn't matter. The end snapshot should be identical no matter which order she chooses; only the history will be different. She chooses to merge the `issue54` branch first:
+
+        $ git merge issue54
+        Updating fbff5bc..4af4298
+        Fast forward
+            README      |   1+
+            lib/simplegit.rb    |   6+++++-
+            2 files changed, 6 insertions(+), 1 deletions(-)
+No problems occur; as you can see it was a simple fast-forward merge. Jessica now completes the local merging process by merging John's earlier fetched work that is sitting in the `origin/master` branch:
+
+        $ git merge origin/master
+        Auto-merging lib/simpelgit.rb
+        Merge made by the 'recursive' strategy.
+            lib/simplegit.rb    |   2 +-
+            1 files changed, 1 insertins(+), 1 deletions(-)
+Everything merges cleanly, and Jessica's history now looks like this:
+![Jessica's history after merging John's changes](small-team-6.png)
+Figure 63. Jessica's history after merging John's changes.
+Review about Rebase!!!
 
 ## 8. Customizing Git
 ### 8.3 Git Hooks <a name=Git_Hooks></a>
