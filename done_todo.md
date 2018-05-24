@@ -97,3 +97,5 @@
   * google assistant
   * guitar english songs
   * 微信添加信用卡
+  * vim markdown shortcuts (check the mkdx.vim and the markdown-shortcuts)
+  * 监控
