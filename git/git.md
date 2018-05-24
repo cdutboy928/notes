@@ -333,7 +333,7 @@ If you would like to keep the changes you've made to that file but still need to
 Remember, anything that is _committed_ in Git can almost always be recovered. Even commits that were on branches that were deleted or commits that were overwritten with an `--amend` commit can be recoered (see Data Recovery for data recovery). However, anything you lose taht was never committed is likely never to be seen again.
 ### 2.5 Git Basics-Working with Remotes
 #### Working with Remotes
-To be able to collaborate on any Git project, you need to know how to manage your remote reporitories. Remote repositories are versions of your project that are hosted on the Internet or network somewhere. You can have several of them, each of which generally is either read-only or read/write for you. Collaborating with others involves managing these remote repositories and pushing and pulling data to and from them when you need to share work. Managjing remote repositories includes knowing how to add remote repositories, remove remotes that are no longer valid, manage various remote branches and define them as being tracked or not, and more. In this section, we'll cover some of these remote-management skills.
+To be able to collaborate on any Git project, you need to know how to manage your remote repositories. Remote repositories are versions of your project that are hosted on the Internet or network somewhere. You can have several of them, each of which generally is either read-only or read/write for you. Collaborating with others involves managing these remote repositories and pushing and pulling data to and from them when you need to share work. Managing remote repositories includes knowing how to add remote repositories, remove remotes that are no longer valid, manage various remote branches and define them as being tracked or not, and more. In this section, we'll cover some of these remote-management skills.
 _Note: Remote repositories can be on your local machine. It is entirely possible that you can be working with a "remote" repository that is, in fact, on the same host you are. The word "remote" does not necessarily imply that the repository is somewhere else on the network or Internet, only that it is elsewhere. Working with such a remote repository would still involve all the standard pushing, pulling and fetching operations as with any other remote._
 #### Showing Your Remotes
 To see which remote servers you have configured, you can run the `git remote` command. It lists the shortnames of each remote handle you've specified. If you've cloned your repository, you should at least see `origin`-that is the default name Git gives to the server you cloned from:
@@ -367,7 +367,7 @@ If you have more than one remote, the command lists them all. For example, a rep
         koke     git://github.com/koke/grit.git (push)
         origin   git@github.com:mojombo/grit.git (fetch)
         origin   git@github.com:mojombo/grit.git (push)
-This means that we can pull contributions from any of these users pretty easily. We may additionally have permissin to push to one or more of these, though we can't tell that here.
+This means that we can pull contributions from any of these users pretty easily. We may additionally have permission to push to one or more of these, though we can't tell that here.
 Notice that these remotes use a variety of protocols; we'll cover more about this in Getting Git on a server.
 #### Adding Remote Repositories
 We've mentioned and given some demonstrations of how the `git clone` command implicitly adds the `origin` remote for you. Here's how to add a new remote explicitly. To add a new remote Git repository as a shortname you can reference easily, run `git remote add <shortname> <url>`:
@@ -418,7 +418,7 @@ If you want to see more information about a particular remote, you can use the `
             master merges with remote master
         Local ref configured for 'git push':
             master pushes to master (up to date)
-It lists the URL for the remote repository as well as the tracking branch information. The command helpfully tells you that if you're on the master branch and you run `git pull`, it will automatically merge in the maste branch on the remote after it fetches all the remote references. It also lists all the remote references it has pulled down.
+It lists the URL for the remote repository as well as the tracking branch information. The command helpfully tells you that if you're on the master branch and you run `git pull`, it will automatically merge in the master branch on the remote after it fetches all the remote references. It also lists all the remote references it has pulled down.
 That is a simple example you're likely to encounter. When you're using Git more heavily, however, you may see more information from `git remtoe show`:
         
         $ git remote show origin
@@ -1024,7 +1024,7 @@ To merge this work into your current working branch, you can run `git merge orig
         Branch serverfix set up tp track remtoe branch serverfix from origin
         Switched to a new branch 'serverfix'
 This gives you a local branch that you can work on that starts where `origin/serverfix` is.
-#### Tracking Branches
+#### Tracking Branches <a name=TrackingBranches> </a>
 Checking out a local branch from a remote-tracking branch automatically creates what is called a "tracking branch" (and the branch it tracks is called an "upstream branch").
 Tracking branches are local branches that have a direct relationship to a remote branch. If you're on a tracking branch and type `git pull`, Git automatically knows which server to fetch from and which branch to merge in.
 When you clone a repository, it generally automatically creates a `master` branch that tracks `origin/master`. However, you can set up other tracking branches if you wish-ones that track branches on other remotes, or don't track the `master` branch. The simple case is the example you just saw, running `git checkout -b <branch> <remote>/<branch>`. This is a common enough operation that Git provides the `--track` shorthand:
@@ -1060,6 +1060,123 @@ So here we can see that our `iss53` branch is tracking `origin/iss53` and is "ah
 It's important to note that these numbers are only since the last time you fetched from each server. This command does not reach out to the servers, it's telling you about what it has cached from these servers locally. If you want totally up to date ahead and behind numbers, you'll need to fetch from all your remotes right before running this. You could do that like this:
 
         $ git fetch --all; git branch -vv
+#### Fetching
+##### NAME
+git-fetch - Download objects and refs from another repository.
+##### Synopsis
+
+        git fetch [<options>] [<repository> [<refspec>...]]
+        git fetch [<options>] <group>
+        git fetch --multiple [<options>] [(<repository> | <group>)...]
+        git fetch --all [<options>]
+##### Description
+Fetch branches and/or tags (collectively, "refs") from one or more other repositories, along with the objects necessary to complete their histories. ???Remote-tracking branches are updated??? (see description of <refspec> below for ways to control this behavior).
+By default, any tag that points into the histories being fetched is also fetched; the effect is to fetch tags that point at branches that you are interested in. The default behavior can be changed by using the `--tags` or `--no-tags` options or by configuring `remote.<name>.tagOpt`. By using a refspec that fetches tags explicitly, you can fetch tags that do not point into branches you are interested in as well.
+`git fetch` can fetch from either a single repository or URL, or from several repositories at once if `<group>` is given and there is `remotes.<group>` entry in the configuration file. (See `git-config`)
+When no remote is specified, by default the *origin* remote will be used, unless there's an upstream branch configured for the current branch.
+The names of refs that are fetched, together with the object names they point at, are written to `.git/FETCH_HEAD`. This information may be used by scripts or other git commands, such as `git-pull`.
+##### Options
+* `--all`
+    Fetch all remotes.
+* `-a`, `--append`
+    Append ref names and object names of fetched refs to the existing contents of `.git/FETCG_HEAD`. Without this option old data in `.git/FETCH_HEAD` will be overwritten.
+* `--dry-run`
+    Show what would be done, without making any changes.
+* `-f`, `--force`
+    When `git fetch` is used with `<rbranch>:<lbranch>` refspec, it refuses to update the local branch `<lbranch>` unless the remote branch `<rbranch>` it fetches is a descendant of `<lbranch>`. This option overrides that check.
+* `--multiple`
+    Allow several `<repository>` and `<group>` arguments to be specified. No `<refspec>`s may be specified.
+* `-p`, `--prune`
+    After fetching, remove any remote-tracking references that no long exist on the remote. Tags are not subject to pruning if they are fetched only because of the default tag auto-following or due to a `--tags` option. However, if the tags are fetched due to an explicit refspec (either on the command line or in the remote configuration, for example if the remote was cloned with the `--mirror` option), then they are also subject to pruning.
+* `-n`, `--no-tags`
+    By default, tags that point at objects that are downloaded from the remote repository are fetched and stored locally. This option disables this automatic tag following. The default behavior for a remote may be specified with the `remote.<name>tagOpt` setting. See `git-config`.
+* `-t`, `--tags`
+    Fetch all tags from the remote (i.e., fetch remote tags `refs/tags/*` into local tags with the same name), in addition to whatever else would otherwise be fetched. Using this option alone does not subject tags to pruning, even if `--prune` is used (though tags may be pruned anyway if they are also the destination of an explicit refspec; see `--prune`).
+* `-v`, `--verbose`
+    Be verbose.
+* `<repository>`
+    The "remote" repository that is the source of a fetch or pull operation. This parameter can be either a URL (see the section *GIT URLS* below) or the name of a remote (see the section *REMOTES* below).
+* `<group>`
+    A name referring to a list of repositories as the value of `remotes.<group>` in the configuration file. (See `git-config`)
+* `<refspec>`
+    Specifies which refs to fetch and which local refs to update. When no <refspec>s appear on the command line, the refs to fetch are read from `remote.<repository>.fetch` variables instead (See CONFIGURED REMOTE-TRACKING BRANCHES below).
+    The format of a `<refspec>` is an optional plus `+`, followed by the source ref `<src>`, followed by a colon `:`, followed by the destination ref `<dst>`. The colon can be omitted when `<dst>` is empty.
+    `tag <tag>` means the same as `refs/tags/<tag>:refs/tags/<tag>`; it requests fetching everything up to the given tag.
+    The remote ref that matches `<src>` if fetched, and if `<dst>` is not empty string, the local ref that matches it is fast-forwarded using `<src>`. If the optional plus `+` is used, the local ref is updated even if it does not result in a fast-forward update.
+    Note: When the remote branch you want to fetch is known to be rewound and rebased regularly, it is expected that its new tip will not be descendant of its previous tip (as stored in your remote-tracking branch the last time you fetched). You would want to use the `+` sign to indicate non-fast-forward updates will be needed for such branches. ???There is no way to determine or declare that a branch will be made available in a repository with this behavior; the pulling user simply must know this is the expected usage pattern for a branch.???
+##### GIT URLS
+In general, URLs contain information about the transport protocol, the address of the remote server, and the path o the repository. Depending on the transport protocol, some of this information many be absent.
+Git support ssh, git, http, and https protocols (in addition, ftp, and ftps can be used for fetching, but this is inefficient and deprecated; do not use it).
+The native transport (i.e. git:// URL) does no authentication and should be used with caution on unsecured networks.
+The following syntaxes may be used with them:
+* `ssh://[user@]host.xz[:port]/path/to/repo.git/`
+* `git://host.xz[:port]/path/to/repo.git/`
+* `http[s]://host.xz[:port]/path/to/repo.git/`
+* `ftp[s]://host.xz[:port]/path/to/repo.git/`
+An alternative scp-like syntax may also be used with the ssh protocol:
+* `[user@]host.xz:path/to/repo.git/`
+This syntax is only recognized if there are no slashes before the first colon. This helps differentiate a local path that contains a colon. For example the local path `foo:bar` could be specified as an absolute path or `./foo:bar` to avoid being misinterpreted as an ssh url.
+The ssh and git protocols additionally support `~` username expansion:
+* `ssh://[user@]host.xz[:port]/~[user]/path/to/repo.git/`
+* `git://host.xz[:port]/~[user]/path/to/repo.git/`
+* `[user@]host.xz:/~[user]/path/to/repo.git/`
+For local repositories, also supported by Git natively, the following syntaxes may be used:
+* `path/to/repo.git/`
+* `file:///path/to/repo.git/`
+These two syntaxes are mostly equivalent, except when cloning, when the former implies `--local` option. See `git-clone` for details.
+If there are a large number of similar-named remote repositories and you want to use a different format for them (such that the URLs you use will be rewritten into URLs that work), you can create a configuration section of the form:
+
+        [url "<acutual url base>"
+                insteadof = <other url base>
+For example, with this:
+
+        [url "git://git.host.xz/"]
+                insteadof = hsot.xz:/path/to/
+                insteadof = work:
+a URL like `work:repo.git` or like `host.xz:/path/to/repo.git` will be rewritten in any context that takes a URL to be `git://git.host.xz/repo.git`.
+If you want to rewrite URLs for push only, you can create a configuration section of the form:
+
+        [url "<actual url base>"]
+                pushInsteadof = <other url base>
+For example, with this:
+
+        [url "ssh://example.org/"]
+                pushInsteadof = git://example.org/
+a URL like `git://example.org/path/to/repo.git` will be rewritten to `ssh://example.org/path/to/repo.git` for pushes, but pulls will still use the original URL.
+
+##### REMOTES
+The name of one of the following can e used instead of a URL as `<repository>` argument:
+* a remote in the Git configuration file: `$GIT_DIR/config`,
+* a file in the `$GIT_DIR/remotes` directory, or
+* a file in the `$GIT_DIR/branches` directory.
+All of these also allow you to omit the refspec from the command line because they each contain a refspec which git will use by default.
+
+###### Named remote in configuration file
+You can choose to provide the name of a remote which you had previously configured using `git-remote`, `git-config` or even by a manual edit to the `$GIT_DIR/config` file. The URL of this remote will be used to access the repository. The refspec of this remote will be used by default when you do not provide a refspec on the command line. The entry in the `config` file would appear like this:
+
+        [remote "<name>"]
+                url = <url>
+                pushurl = <pushurl>
+                push = <refspec>
+                fetch = <refspec>
+The `<pushurl>` is used for pushes only. It is optional and defaults to `<url>`.
+
+###### Named file in `$GIT_DIR/remotes`
+You can choose to provide the name of a file in `GIT_DIR/remotes`. The URL in this file will be used to access the repository. The refspec in this file will be used as default when you do not provide a refspec on the command line. This file should have the following format:
+
+        URL: one of the above URL format
+        Push: <refspec>
+        Pull: <refspec>
+`Push:` lines are used by `git push` and `Pull:` lines are used by `git pull` and `git fetch`. Multiple `Push:` and `Pull` lines may be specified for additional branch mappings.
+
+###### Named file in `$GIT_DIR/branches`
+You can choose to provide the name of a file in `$GIT_DIR/branches`. The URL in this file will be used to access the repository. This file should have the following format:
+        `<url>#<head>`
+`<url>` is required; `#<head>` is optional.
+Depending on the operation, git will use one of the following refspecs, if you don't provide one on the command line. `<branch>` is the name of this file in `$GIT_DIR/branches` and `<head>` defaults to `master`.
+git fetch uses:
+        `refs/heads/<head>:refs/heads/<branch> ??? <a name=head_vs_branch></a>
+
 #### Pulling
 While the `git fetch` command will fetch down all the changes on the server that you don't have yet, it will not modify your working directory at all. It will simply get the data for you and merge it yourself. However, there is a command called `git pull` which is essentially a `git fetch` immediately followed by a `git merge` in most cases. If you have a tracking branch set up as demonstrated in the last section, either by explicitly setting it or by having it created for you by the `clone` or `checkout` commands, `git pull` will look up what server and branch your current branch is tracking, fetch from that server and then try to merge in that remote branch.
 Generally it's better to simply use the `fetch` and `merge` commands explicitly as the magic of `git pull` can often be confusing.
@@ -1749,7 +1866,81 @@ No problems occur; as you can see it was a simple fast-forward merge. Jessica no
 Everything merges cleanly, and Jessica's history now looks like this:
 ![Jessica's history after merging John's changes](small-team-6.png)
 Figure 63. Jessica's history after merging John's changes.
-Review about Rebase!!!
+Now `origin/master` is reachable from Jessica's `master` branch, so she should be able to successfully push (assuming John hasn't pushed even more changes in the meantime):
+
+        $ git push origin master
+        ...
+        To jessica@githost:simplegit.git
+            72bbc59..8059c15    master -> master
+Each developer has committed a few times and merged each other's work successfully.
+![Jessica's history after pushing all changes back to the server](small-team-7.png)
+Figure 64. Jessica's history after pushing all changes back to the server.
+That is one of the simplest workflows. You work for while (generally in a topic branch), and merge that work into your `master` branch when it's ready to be integrated. When you want to share that work, you fetch and merge your `master` from `origin/master` if it has changed, and finally push to the `master` branch on the server. The general sequence is something like this:
+![General sequence of events for a simple multiple-developer Git workflow](small-team-flow.png)
+Figure 65. General sequence of events for a simple multiple-developer Git workflow.
+##### Private Managed Team
+In this next scenario, you'll look at contributor roles in a larger private group. You'll learn how to work in an environment where small groups collaborate on features, after which those team-based contributions are integrated by another party.
+Let's say that John and Jessica are working together on one feature (call this "featureA"), while Jessica and a third developer, Josie, are working on a second (say, "featureB"). In this case, the company is using a type of integration-manager workflow where the work of the individual groups is integrated only by certain engineers, and the `master` branch of the main repo can be updated only by those engineers. In this scenario, all work is done in team-based branches and pulled together by the integrators later.
+Let's follow Jessica's workflow as she works on her two features, collaborating in parallel with two different developers in this environment. Assuming she already has her repository cloned, she decides to work on `featureA` first. She creates a new branch for the feature and does some work on it there:
+
+        # Jessica's Machine
+        $ git checkout -b featureA
+        Switched to a new branch 'featureA'
+        $ vim lib/simplegit.rb
+        $ git commit -am 'add limit to log function'
+        [featureA 3300904] add limit to log function
+        1 files changed, 1 insertions(+), 1 deletions(-)
+At this point, she needs to share her work with John, so she pushes her `featureA` branch commits up to the server. Jessica doesn't have push access to the `master` branch-only the integrators do-so she has to push to another branch in order to collaborate with John:
+
+        $ git push -u origin featureA
+        ...
+        To jessica@githost:simplegit.git
+         * [new branch]     featureA -> featureA
+
+`git push -u` or `git push --set-upstream`: For every branch that is up to date or successfully pushed, add upstream (tracking) reference, used by argument-less `git pull` and other commands. This is used to configure the branches for easier pushing and pulling later.
+Jessica emails John to tell him that she's pushed some work into a branch named `featureA` and he can look at it now. While she waits for feedback from John, Jessica decides to start working on `featureB` with Josie. To begin, she starts a new feature branch, basing it off the server's `master` branch:
+
+        # Jessica's Machine
+        $ git fetch origin
+        $ git checkout -b featureB origin/master
+        Switched to a new branch 'featureB'
+Now Jessica makes a couple of commits on the `featureB` branch:
+
+        $ vim lib/simlegit.rb
+        $ git commit -am 'made the ls-tree function recursive'
+        [featureB e5b0fdc] made the ls-tree function recursive
+         1 files changed, 1 insertions(+), 1 deletions(-)
+        $ vim lib/simplegit.rb
+        $ git commit -am 'add ls-files'
+        [featureB 8512791] add ls-files
+         1 files changed, 5 insertions(+), 0 deletions(-)
+Jessica's repository now looks like this:
+![Jessica's initial commit history](managed-team-1.png)
+Figure 66. Jessica's initial commit history
+She's ready to push her work, but gets an email from Josie that a branch with some initial "featureB" work on it was already pushed to the server as the `featureBee` branch. Jessica needs to merge those changes with own before she can push her work to the server. Jessica first fetches Josie's changes with `git fetch`:
+
+        $ git fetch origin
+        ...
+        From jessica@githost:simplegit
+         * [new branch]     featureBee -> origin/featureBee
+Assuming Jessica is still on her checked-out `featureB` branch, she can now merge Josie's work into that branch with `git merge`:
+
+        $ gi merge origin/featureBee
+        Auto-merging lib/simplegit.rb
+        Merge made by the 'recursive' strategy.
+         lib/simplegit.rb  |    4 ++++
+         1 files changed, 4 insertions(+), 0 deletions(-)
+At this point, Jessica wants to push all of this merged "featureB" work back to the server, but she doesn't want to simply push her one `featureB` branch. Rather, since Josie has already started an up stream `featureBee` branch, Jessica wants to push to *that* branch which she does with:
+
+        $ git push -u origin featureB:featureBee
+        ...
+        To jessica@githost:simplegit.git
+            fba9af8..cd685d1    featureB -> featureBee
+This is called a *refspec*. See [The Refspec](#TheRefspec) for a more detailed discussion of Git refspecs and different things you can do with them.
+[tracking branches](#TrackingBranches)
+the default format meaning of `git push` and `git fetch`
+`man git-fetch`
+`man git-push`
 
 ## 8. Customizing Git
 ### 8.3 Git Hooks <a name=Git_Hooks></a>
@@ -1910,7 +2101,7 @@ Here, the `033b4` blob, which if you remember was the first version of your `rep
 The really nice thing about this is that it can be repacked at any time. Git will occasionally repack your database automatically, always trying to save more space, but you can also manualy repack at any time by running `git gc` by hand.
 
 ### [10.5 Git Internals- The Refspec](https://git-scm.com/book/en/v2/Git-Internals-The-Refspec)
-#### The Refspec
+#### The Refspec <a name=TheRefspec></a>
 Throughout this book, we've used simple mappings from remote branches to local references, but they can be more complex. Suppose you were following along with the last couple sections and had created a small local Git repository, and now wanted to add a remote to it:
 
         $ git remote add origin https://github.com/schacon/simplegit-progit

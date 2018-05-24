@@ -278,3 +278,5 @@ put the following codes in .vimrc:
         vnoremap <buffer> <localleader>b :call MarkdownBoldFunction()<cr>
         vnoremap <buffer> <localleader>i :call MarkdownItalicFunction()<cr>
         vnoremap <buffer> <localleader>c :call MarkdownCodeFunction()<cr>
+## search exactly
+`:/\<your_exact_word\>`
