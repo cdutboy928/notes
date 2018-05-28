@@ -61,7 +61,7 @@ However, this is equivalent to running something like this:
 Git figures out that it's a rename implicitly, so it doesn't matter if you rename a file that way or with the `mv` command. The only difference is that `git mv` is one command instead of three-it's a convenience function. More importantly, you can use any tool you like to rename a file, and address tha add/rm later, before you commit.
 Summary:for untracked files, use `rm`;
         for tracked files and staged files: `git rm --cached` to delete from stage area and the file will become untracked; `git rm --f` to delete both from stage area and working directory.
-### 2.3 Git Basics-Viewing the Commit History
+### 2.3 Git Basics-Viewing the Commit History <a name=gitlog> </a>
 #### Viewing the Commit History
 After you have created several commits, or if you have cloned a repository with an existing commit history, you'll probaly want to look back to see what has happened. The most basic and powerful tool to do this is the `git log` command.
 These examples use a very simple project called "simplegit". To get the project, run
@@ -1024,6 +1024,43 @@ To merge this work into your current working branch, you can run `git merge orig
         Branch serverfix set up tp track remtoe branch serverfix from origin
         Switched to a new branch 'serverfix'
 This gives you a local branch that you can work on that starts where `origin/serverfix` is.
+##### man git-push
+###### NAME
+git-push: Update remote refs along with associated objects
+###### SYNOPSIS
+`git push [-all | --mirror | --tags] [--follow-tags] [-n | --dry-run] [--repo=<repository>] [-f | --force] [-d | --delete] [--prune] [-v | --verbose] [-u | --set-upstream] [--[no]-signed|--sign=(true|false|if-asked)] [--no-verify] [<repository> [<refspec>...]]`
+###### Description
+Updates remote refs using local refs, while sending objects necessary to complete the given refs.
+You can make interesting things happen to a repository every time you push into it, by setting up *hooks* there. See documentation for `git-receive-pack`.
+When the command line does not specify where to push with the `<repository>` argument, `branch.*.remote` configuration for the current branch is consulted to determine where to push. If the configuration is missing, it defaults to `origin`.
+![configuration_variables](configuration_variables.png)
+When the command line does not specify what to push with `<refspec>...` arguments or `--all`, `--mirror`, `--tags` options, the command finds the default `<refspec>` by consulting `remote.*.push` configuration, and if it is not found, honors `push.default` configuration to decide what to push (See git-config for the meaning of `push.default`)
+When neither the command-line nor the configuration specify what to push, the default behavior is used, which corresponds to the `simple` value for `push.default`: the current branch is pushed to the corresponding upstream branch, but as a safety measure, the push is aborted if the upstream branch does not have the same name as the local one.
+###### `push.default`
+Defines the action `git push` should take if no refspec is explicitly given. Different values are well-suited for specific workflows; for instance, in a purely central workflow (i.e. the fetch source is equal to the push destination), `upstream` probably what you want. Possible values are: 
+* `nothing`
+    do not push anything (error out) unless a refspec is explicitly given. This is primarily meant for people who want to avoid mistakes by always being explicit.
+* `current`
+    push the current branch to update a branch with the same name on the receiving end. Works in both central and non-central workflows.
+* `upstream`
+    push the current branch back to the branch whose changes usually integrated into the current branch (which is called `@{upstream}`). This mode only makes sense if you are pushing to the same repository you would normally pull from (i.e. central workflow)
+* `tracking`
+    This is a deprecated synonym for `upstream`.
+* `simple`
+    in centralized workflow, work like `upstream` with an added safety to refuse to push if the upstream branch's name is different from the local one.
+    When pushing to a remote that is different from the remote you normally pull from, work as `current`. This is the safest option and is suited for beginners.
+    This mode has become the default in Git 2.0.
+* `matching`
+    push all branches having the same name on both ends. This makes the repository you are pushing to remember the set of branches that will be pushed out (e.g. if you always push *maint* and *master* there and no other branches, the repository you push to will have these two branches, and your local *maint* and *master* will be pushed there).
+    To use this mode effectively, you have to make sure *all* the branches you would push out are ready to be pushed out before running `git push`, as the whole point of this mode is to allow you to push all of the branches in one go. If you usually finish work on only one branch and push out the result, while other branches are unfinished, this mode is not for you. Also this mode is no suitable for pushing into a shared central repository, as other people may add new branches there, or update the tip of existing branches outside your control.
+    This used to be the default, but not since Git 2.0 (`simple` is the new default).
+###### OPTIONS
+####### `<repository>`
+The "remote" repository that is destination of a push operation. This parameter can be either a URL (see the section [GIT URLS](GIT_URLS)) or the name of a remote (see the section [REMOTES](#REMOTES))
+####### `<refspec>...`
+Specify what destination ref to update with what source object. The format of a `<refspec>` parameter is an optional plus `+`, followed by the source object `<src>`, followed by a colon `:`, followed by the destination ref `<dst>`.
+The `<src>` if often the name of the branch you would want to push, but it can be any arbitrary "SHA-1 expression", such as `master~4` or `HEAD` (see [gitrevisions]).
+
 #### Tracking Branches <a name=TrackingBranches> </a>
 Checking out a local branch from a remote-tracking branch automatically creates what is called a "tracking branch" (and the branch it tracks is called an "upstream branch").
 Tracking branches are local branches that have a direct relationship to a remote branch. If you're on a tracking branch and type `git pull`, Git automatically knows which server to fetch from and which branch to merge in.
@@ -1070,10 +1107,10 @@ git-fetch - Download objects and refs from another repository.
         git fetch --multiple [<options>] [(<repository> | <group>)...]
         git fetch --all [<options>]
 ##### Description
-Fetch branches and/or tags (collectively, "refs") from one or more other repositories, along with the objects necessary to complete their histories. ???Remote-tracking branches are updated??? (see description of <refspec> below for ways to control this behavior).
+**Fetch branches and/or tags (collectively, "refs") from one or more other repositories, along with the objects necessary to complete their histories. Remote-tracking branches are updated** (see description of <refspec> below for ways to control this behavior).
 By default, any tag that points into the histories being fetched is also fetched; the effect is to fetch tags that point at branches that you are interested in. The default behavior can be changed by using the `--tags` or `--no-tags` options or by configuring `remote.<name>.tagOpt`. By using a refspec that fetches tags explicitly, you can fetch tags that do not point into branches you are interested in as well.
 `git fetch` can fetch from either a single repository or URL, or from several repositories at once if `<group>` is given and there is `remotes.<group>` entry in the configuration file. (See `git-config`)
-When no remote is specified, by default the *origin* remote will be used, unless there's an upstream branch configured for the current branch.
+**When no remote is specified, by default the `origin` remote will be used, unless there's an upstream branch configured for the current branch.**
 The names of refs that are fetched, together with the object names they point at, are written to `.git/FETCH_HEAD`. This information may be used by scripts or other git commands, such as `git-pull`.
 ##### Options
 * `--all`
@@ -1099,13 +1136,13 @@ The names of refs that are fetched, together with the object names they point at
 * `<group>`
     A name referring to a list of repositories as the value of `remotes.<group>` in the configuration file. (See `git-config`)
 * `<refspec>`
-    Specifies which refs to fetch and which local refs to update. When no <refspec>s appear on the command line, the refs to fetch are read from `remote.<repository>.fetch` variables instead (See CONFIGURED REMOTE-TRACKING BRANCHES below).
+    Specifies which refs to fetch and which local refs to update. **When no <refspec>s appear on the command line, the refs to fetch are read from `remote.<repository>.fetch` variables instead** (See CONFIGURED REMOTE-TRACKING BRANCHES below).
     The format of a `<refspec>` is an optional plus `+`, followed by the source ref `<src>`, followed by a colon `:`, followed by the destination ref `<dst>`. The colon can be omitted when `<dst>` is empty.
     `tag <tag>` means the same as `refs/tags/<tag>:refs/tags/<tag>`; it requests fetching everything up to the given tag.
-    The remote ref that matches `<src>` if fetched, and if `<dst>` is not empty string, the local ref that matches it is fast-forwarded using `<src>`. If the optional plus `+` is used, the local ref is updated even if it does not result in a fast-forward update.
+    **The remote ref that matches `<src>` if fetched, and if `<dst>` is not empty string, the local ref that matches it is fast-forwarded using `<src>`. If the optional plus `+` is used, the local ref is updated even if it does not result in a fast-forward update.**
     Note: When the remote branch you want to fetch is known to be rewound and rebased regularly, it is expected that its new tip will not be descendant of its previous tip (as stored in your remote-tracking branch the last time you fetched). You would want to use the `+` sign to indicate non-fast-forward updates will be needed for such branches. ???There is no way to determine or declare that a branch will be made available in a repository with this behavior; the pulling user simply must know this is the expected usage pattern for a branch.???
-##### GIT URLS
-In general, URLs contain information about the transport protocol, the address of the remote server, and the path o the repository. Depending on the transport protocol, some of this information many be absent.
+##### GIT URLS <a name=GIT_URLS> </a>
+In general, URLs contain information about **the transport protocol, the address of the remote server, and the path o the repository.** Depending on the transport protocol, some of this information many be absent.
 Git support ssh, git, http, and https protocols (in addition, ftp, and ftps can be used for fetching, but this is inefficient and deprecated; do not use it).
 The native transport (i.e. git:// URL) does no authentication and should be used with caution on unsecured networks.
 The following syntaxes may be used with them:
@@ -1144,7 +1181,7 @@ For example, with this:
                 pushInsteadof = git://example.org/
 a URL like `git://example.org/path/to/repo.git` will be rewritten to `ssh://example.org/path/to/repo.git` for pushes, but pulls will still use the original URL.
 
-##### REMOTES
+##### REMOTES <a name=REMOTES> </a>
 The name of one of the following can e used instead of a URL as `<repository>` argument:
 * a remote in the Git configuration file: `$GIT_DIR/config`,
 * a file in the `$GIT_DIR/remotes` directory, or
@@ -1175,7 +1212,33 @@ You can choose to provide the name of a file in `$GIT_DIR/branches`. The URL in 
 `<url>` is required; `#<head>` is optional.
 Depending on the operation, git will use one of the following refspecs, if you don't provide one on the command line. `<branch>` is the name of this file in `$GIT_DIR/branches` and `<head>` defaults to `master`.
 git fetch uses:
-        `refs/heads/<head>:refs/heads/<branch> ??? <a name=head_vs_branch></a>
+        `refs/heads/<head>:refs/heads/<branch>` ??? <a name=head_vs_branch></a>
+git push uses:
+        `HEAD:refs/heads/<head>`
+
+##### CONFIGURED REMOTE-TRACKING BRANCHES
+You often interact with the same remote repository by regularly and repeatedly fetching from it. In order to keep track of the progress of such a remote repository, `git fetch` allows you to configure `remtoe.<repository>.fetch` configuration variables.
+Typically such a variable may look like this:
+
+        [remtoe "origin"]
+                fetch = +refs/heads/*:refs/remotes/origin/*
+![configuration_variables](configuration_variables.png)
+This configuration is used in two ways:
+* When `git fetch` is run without specifying what branches and/or tags to fetch on the command line, e.g. `git fetch origin` or `git fetch`, `remote.<repository>.fetch` values are used as the refspecs-they specify which refs to fetch and which local refs to update. The example above will fetch all branches that exist in the `origin` (i.e., any ref that matches the left-hand side of the value, `refs/head/*`) and update the corresponding remote-tracking branches in the `refs/remotes/origin/*` hierarchy.
+* When `git fetch` is run with explicit branches and/or tags to fetch on the command line, e.g. `git fetch origin master`, the <refspec>s given on the command line to determine what are to be fetched (e.g. `master` in the example, which is a short-hand for `master:`, which in turn means "fetch the `master` branch but I do not explicitly say what remote-tracking branch to update with it from the command line"), and the example command will fetch only the `master` branch. The `remote.<repository>.fetch` values determine which remote-tracking branch, if any, is updated. When used in this way, the `remote.<repository>.fetch` values do not have any effect in deciding what gets fetched (i.e. the values are not used as refspecs when the command-line lists refspecs); they are only used to decide where the refs that are fetched are stored by acting as a mapping.
+The latter use of the `remote.<repository>.fetch` values can be overridden by giving the `--refmap=<refspec>` parameter(s) on the command line.
+##### EXAMPLES
+* Update the remote-tracking branches
+    `git fetch origin`
+  The above command copies all branches from the remote `refs/heads/` namespace and stores them to the local `refs/remotes/origin/` namespace, unless the `branch.<name>.fetch` option is used to specify a non-default refspec.
+* Using refspecs explicitly:
+    `git fetch origin +pu:pu maint:tmp`
+    This updates (or creates, as necessary) branches `pu` and `tmp` in the local repository by fetching from the branches (respectively) `pu` and `maint` from the remote repository.
+    The `pu` branch will be updated even if it is not fast-forward, because it is prefixed with a plug sign; `tmp` will not be.
+* Peek at a remote's branch, without configuring the remote in your local repository:
+    `$ git fetch git://git.kernel.org/pub/scm/git/git.git maint`
+    ` git log FETCH_HEAD`
+    The first command fetches the `maint` branch from the repository at `git://git/kernel.org/pub/scm/git/git.git` and the second command uses `FETCH_HEAD` to examine the branch with `git-log`. The fetched objects will eventually be remove by git's built-in housekeeping (see `git-gc`).
 
 #### Pulling
 While the `git fetch` command will fetch down all the changes on the server that you don't have yet, it will not modify your working directory at all. It will simply get the data for you and merge it yourself. However, there is a command called `git pull` which is essentially a `git fetch` immediately followed by a `git merge` in most cases. If you have a tracking branch set up as demonstrated in the last section, either by explicitly setting it or by having it created for you by the `clone` or `checkout` commands, `git pull` will look up what server and branch your current branch is tracking, fetch from that server and then try to merge in that remote branch.
@@ -1721,6 +1784,7 @@ Figure 56. Benevolent dictator workflow
 This kind of workflow isn't common, but can be useful in very big projects, or in highly hierarchical environments. It allows the project leader (the dictator) to delegate much of the work and collect large subsets of code at multiple points before integrating them.
 #### Workflows Summary
 These are some commonly used workflows that are possible with a distributed system like Git, but you can see that many variations are possible t suit your particular real-world workflow. Now that you can (hopefully) determine which workflow combination may work for you, we'll cover some more specific examples of how to accomplish the main roles that make up the different flows. In the next section, you'll learn about a few common patterns for contributing to a project.
+
 ### 5.2 Distributed Git-Contributing to a Project
 #### Contributing to a Project
 The main difficulty with describing how to contribute to a project are the numerous variations on how to do that. Because Git is very flexible, people can do work together in many ways, and it's problematic to describe how you should contribute-every project is different. Some of the variables involved are active contributor count, chosen workflow, you commit access, and possibly the external contribution method.
@@ -1834,7 +1898,7 @@ That pulls down the work John has pushed up in the meantime. Jessica's history n
 Figure 62. Jessica's history after fetching John's changes.
 Jessica thinks her topic branch is ready, but she wants to know what part of John's fetched work she has to merge into her work so that she can push. She runs `git log` to find out:
 
-        $ git og --no-merges issue54..origin/master
+        $ git log --no-merges issue54..origin/master
         commit 738ee872852dfaa9d6634e0dea7a324040193016
         Author: John Smith <jsmith@example.com>
         Date: Fri May 29 16:01:27 2009 -0700
@@ -1997,6 +2061,106 @@ Then, you can see what the `master` branch on the `origin` remote was the last t
         $ cat .git/refs/remotes/origin/master
         ca82a6dff817ec66f44342007202690a93763949
 Remote references differ from branches (refs/heads references) mainly in that they're considered read-only. You can `git checkout` to one, but Git won't point HEAD at one, so you'll never update it with a `commit` command. Git manages them as bookmarks to the last known state of where those branches were on those servers.
+
+#### gitrevisions <a name=gitrevisions> </a>
+
+##### NAME
+gitrevisions-specifying revisions and ranges for Git
+
+##### SYNOPSIS
+gitrevisions
+
+##### DESCRIPTION
+Many Git commands take revision parameters as arguments. Depending on the command, they denote a specific commit or, for commands which walk the revision graph (such as [git-log](#gitlog)), all commits which are reachable from that commit. For commands that walk the revision graph one can also specify a range of revisions explicitly.
+In addition, some Git commands (such as `git show`) also take revision parameters which denote other objects than commits, e.g. blobs ("files") or trees ("directories of files").
+
+##### Specifying Revisions
+A revision parameter `<rev>` typically, but not necessarily, names a commit object. It uses what is called an *extended SHA-1* syntax. Here are various ways to spell object names. The ones listed near the end of this list name trees and blobs contained in a commit.
+* <sha1>, e.g. `dae86e1950b1277e545cee180551750029cfe735`, `dae86e`
+    The full SHA-1 object name (40-byte hexadecimal string), or a leading substring that is unique within the repository. E.g. `dae86e1950b1277e545cee180551750029cfe735` and `dae86e` both name the same commit object if there is no other object in your repository whose object name starts with `dae86e`.
+* <describeOutput>, e.g. `v1.7.4.2-679-g3bee7fb`
+    Output from `git describe`; i.e. a closest tag, optionally followed by a dash and number of commits, followed by a dash, a `g`, and an abbreviated object name.
+* <refname>, e.g. `master`, `heads/master`, `refs/heads/master`
+    A symbolic ref name. E.g. `master` typically means the commit object referenced by `refs/heads/master`. If you happen to have both `heads/master` and `tags/master`, you can explicitly say `head/master` to tell Git which one you mean. When ambiguous, a <refname> is disambiguated by taking the first match in the following rules:
+    1. If `$GIT_DIR/<refname>` exists, that is what you mean (this is usually useful only for `HEAD`, `FETCH_HEAD`, `ORIG_HEAD`, `MERGE_HEAD` and `CHERRY_PICK_HEAD`);
+    2. otherwise, `refs/<refname>` if it exists;
+    3. otherwise, `refs/tags/<refname>` if it exists;
+    4. otherwise, `refs/heads/<refname>` if it exists;
+    5. otherwise, `refs/remotes/<refname>` if it exists;
+    6. otherwise, `refs/remotes/<refname>/HEAD` if it exists.
+    `HEAD` names the commit on which you based the changes in the working tree. `FETCH_HEAD` records the branch which you fetched from a remote repository with your last `git fetch` invocation. `ORIG_HEAD` is created by commands that move your `HEAD` in a drastic way, to record the position of the `HEAD` before their operation, so that you can easily change the tip of the branch back to the state before you ran them. `MERGE_HEAD` records the commit(s) which you are merging into your branch when you run `git merge`. `CHERRY_PICK_HEAD` records the commit which you are cherry-picking when you run `git cherry-pick`.
+    Note that any of the `refs/*` cases above may come either from the `$GIT_DIR/refs` directory or from the `$GIT_DIR/packed-refs` file. While the ref name encoding is unspecified, UTF-8 is preferred as some output processing may assume ref names in UTF-8.
+* `@`
+    `@` alone is a shortcut for `HEAD`.
+* `<refname>@{<date>}`, e.g. `master@{yesterday}`, `HEAD@{5 minutes ago}`
+    A ref followed by the suffix `@` with a date specification enclosed in a brace pair (e.g. `{yesterday}`, `{1 month 2 weeks 3 days 1 hour 1 second ago}` or `{1979-02-26 18:30:00}`) specifies the value of the ref at a pior point in time. This suffix may only be used immediately following a ref name and the ref must have an existing log (`$GIT_DIR/logs/<ref>`). Note that this looks up the state of your **local** ref at a given time; e.g., what was in your local `master` branch last week. If you want to look at commits made during certain times, see `--since` and `--until`.
+* `<refname>@{<n>}`, e.g. `master@{1}`
+    A ref followed by the suffix `@` with an ordinal specification enclosed in a brace pair (e.g. `{1}`, `{15}`) specifies the n-th prior value of that ref. For example `master@{1}` is the immediate prior value of `master` while `master@{15}` is the 15th prior value of `master`. This suffix may only be used immediately following a ref name and the ref must have an existing log (`$GIT_DIR/logs/<refname>`).
+* `@{<n>}`, e.g. `@{1}`
+    You can use the `@` construct with an empty ref part to get at a reflog entry of the current branch. For example, if you are on branch `blabla` then `@{1}` means the same as `blabla@{1}`.
+* `@{<-n>}`, e.g. `@{-1}` ???
+    The construct `@{-<n>}` means the `<n>`th branch/commit checked out before the current one.
+* `<branchname>@{upstream}`, e.g. `master@{upstream}`, `@{u}`
+    The suffix `@{upstream}` to a branchname (short form `<branchname>@{u}`) refers to the branch that the branch specified by branchname is set to build on top of (configured with `branch.<name>.remote` and `branch.<name>.merge`). A missing branch name defaults to the current one.
+* `<branchname>@{push}`, e.g. `master@{push}`, `@{push}`
+    The suffix `@{push}` reports the branch "where we would push to" if `git push` were run while `branchname` was checked out (or the current `HEAD` if no branchname is specified). Since our push destination is in a remote repository, of course, we report the local tracking branch that corresponds to that branch (i.e., something in `refs/remotes/`).
+    Here's an example to make it more clear:
+
+            $ git config push.default current
+            $ git config remote.pushdefault myfork
+            $ git checkout -b mybranch origin/master
+
+            $ git rev-parse --symbolic-full-name @{upstream}
+            refs/remotes/origin/master
+
+            $ git rev-parse --symbolic-full-name @{push}
+            refs/remotes/myfork/maybranch
+    Note in the example that we set up a triangular workflow, where we pull from one location and push to another. In a non-triangular workflow, `@{push}` is the same as `@{upstream}`, and there is no need for it.
+* `<rev>^`, e.g. `HEAD^`, `v1.5.1^0`
+    A suffix `^` to a revision parameter means the first parent of that commit object. `^<n>` means the `<n>`th parent (i.e. `<rev>^` is equivalent to `<rev>^1`). As a special rule, `<rev>^0` means the commit itself and is used when `<rev>` is the object name of a tag object that refers to a commit object.
+* `<rev>~<n>`, e.g. `master~3`
+    A suffix `~<n>` to a revision parameter means the commit object that is the `<n>`th generation ancestor of the named commit object, following only the first parents. I.e. `<rev>~3` is equivalent to `<rev>^^^` which is equivalent to `<rev>^1^1^1`. See below for an illustration of the usage of this form.
+* `<rev>^{type}`, e.g. `v0.99.8^{commit}`
+    A suffix followed by an object type name enclosed in brace pair means dereference the object at `<rev>` recursively until an object of type `<type>` is found or the object cannot be dereferenced anymore (in which case, barf). For example, if `<rev>` is a commit-ish, `<rev>^{commit}` describes the corresponding commit object. Similarly, if `<rev>` is a tree-ish, `<rev>^{tree}` describes the corresponding tree object. `<rev>^0` is short-hand for `<rev>^{commit}`.
+    `<rev>^{object}` can be used to make sure `<rev>` names an object that exists, without requiring `<rev>` to be a tag, and without dereferencing `<rev>`; because a tag is already an object, it does not have to be dereferenced even once to get to an object.
+    `<rev>^{tag}` can be used to ensure that `<rev>` identifies an existing tag object.
+* `<rev>^{}`, e.g. `v0.99.8^{}`
+    A suffix `^` followed by an empty brace pair means the object could be a tag, and dereference the tag recursively until a non-tag object is found.
+* `<rev>^{/<text>}`, e.g. `HEAD^{/fix nasty bug}`
+    A suffix `^` to a revision parameter, followed by a brace pair that contains a text led by a slash, is the same as the `:/fix nasty bug` syntax below except that is returns the youngest matching commit which is reachable from the `<rev` before `^`.
+* `:/<text`, e.g. `:/fix nasty bug`
+    A colon, followed by a slash, followed by a text, names a commit whose commit message matches the specified regular expression. This name returns the youngest matching commit which is reachable from any ref. The regular expression can match any part of the commit message. To match messages starting with a string, one can use e.g. `:/^foo`. ???The special sequence `:/!` is reserved for modifiers to what is matched. `:/!-foo` performs a negative match, while `:/!!foo` matches a literal ! character, followed by `foo`. Any other sequence beginning with `:/!` is reserved for now.???
+* `<rev>:<path>`, e.g. `HEAD:README`, `:README`, `master:./README`
+    A suffix `:` followed by a path names the blob or tree at the given path in the tree-ish object named by the part before the colon. `:path` (with an empty art before the colon) is a special case of the syntax described next: content recorded in the index at the given path. A path starting with `./` or `../` is relative to the current working directory. The given path will be converted to be relative to the working tree's root directory. This is most useful to address a blob or tree from a commit or tree that has the same tree structure as the working tree.
+* `:<n>:<path>`, e.g. `0:README`, `:README`
+    A colon, optionally followed by a stage number (0 to 3) and a colon, followed by a path, names a blob object in the index at the given path. A missing stage number (and the colon that follows it) names a stage 0 entry. During a merge, stage 1 is the common ancestor, stage 2 is the target branch's version (typically the current branch), and stage 3 is the version from the branch which is being merged.
+    Here is an illustration, by Jon Loeliger. Both commit nodes B and C are parents of commit node A. Parent commits are ordered left-to-right.
+
+            G   H   I   J
+             \ /     \ /
+              D   E   F
+               \  |  / \
+                \ | /   |
+                 \|/    |
+                  B     C
+                   \   /
+                    \ /
+                     A
+
+        A =      = A^0
+        B = A^   = A^1     = A~1
+        C = A^2  = A^2
+        D = A^^  = A^1^1   = A~2
+        E = B^2  = A^^2
+        F = B^3  = A^^3
+        G = A^^^ = A^1^1^1 = A~3
+        H = D^2  = B^^2    = A^^^2  = A~2^2
+        I = F^   = B^3^    = A^^3^
+        J = F^2  = B^3^2   = A^^3^2
+![caretVStilde](caretVStilde.png)
+
+Way to remember: `~` is "fuzzy" or "approximate" (i.e, you only get the first parent); while `^` is precise (so goes through every single commit).
+One thing that is often unmentioned is *how* to know which is the first or second parent. You can use `git log` or `git show`. If it's a merged commit with multiple parents, the parents will be listed in order of first, second, etc.
 
 ### [10.4 Git Internals-Packfiles](https://git-scm.com/book/en/v2/Git-Internals-Packfiles)
 **Packfiles**

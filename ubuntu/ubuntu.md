@@ -88,7 +88,7 @@ Similarly, If blah1 is deleted, blah1-hard still holds the contents; if blah2 is
 * --section
     Capture a section. You will be able to select any child window by moving the mouse over it.
 * --web=[URL]
-    Capture a webpage. Providing an URL ist optional.
+    Capture a webpage. Providing an URL list optional.
 * -r, --redo
     Redo last screenshot.
 #### setting options

@@ -85,17 +85,15 @@
   * move to chrome✓
   * disk capacity✓
   * vim too slow✓
+  * 监控✓
   * vim markdown shortcuts (check the mkdx.vim and the markdown-shortcuts)✓
-  * 医保银行
+  * vim markdown shortcuts (check the mkdx.vim and the markdown-shortcuts)✓
+  * 医保银行✓
   * 印度代购药，防伪唯一机制，md5?区块链？
   *  url="http://auto.tom61.com/down/mp3book/gscjx/古诗精选-采葛（诗经-王风）.mp3?176013719797087x1517986929x176013721672955-77ca97c604691230b0bec04e98642197"
   * git pocerlain and plumbing commands corresponding
   * 查书
   * 乱码问题
-  * 哥下歌
-  * 哥58
   * google assistant
   * guitar english songs
   * 微信添加信用卡
-  * vim markdown shortcuts (check the mkdx.vim and the markdown-shortcuts)
-  * 监控
