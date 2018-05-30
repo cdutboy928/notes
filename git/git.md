@@ -2162,6 +2162,78 @@ A revision parameter `<rev>` typically, but not necessarily, names a commit obje
 Way to remember: `~` is "fuzzy" or "approximate" (i.e, you only get the first parent); while `^` is precise (so goes through every single commit).
 One thing that is often unmentioned is *how* to know which is the first or second parent. You can use `git log` or `git show`. If it's a merged commit with multiple parents, the parents will be listed in order of first, second, etc.
 
+##### Specifying Ranges
+History traversing commands such as `git log` operate on a set of commits, not just a single commit.
+For these commands, specifying a single revision, using the notation described in the previous section, means the set of commits `reachable` from the given commit.
+A commit's reachable set is the commit itself and the commits in its ancestry chain.
+
+###### Commit Exclusions
+* `^<rev>` (caret) Notation
+    To exclude commits reachable from a commit, a prefix `^` notation is used. E.g. `^r1 r2` means commits reachable from `r2` but exclude the ones reachable from `r1` (i.e. `r1` and its ancestors).
+
+###### Dotted Range Notations
+* The `..` (two-dot) Range Notation
+    The `^r1 r2` set operation appears so often that there is a shorthand for it. When you have two commits `r1` and `r2` (named according to the syntax explained in Specifying Revisions above), you can ask for commits that are reachable from `r2` excluding those that are reachable from `r1` by `^r1 r2` and it can be written as `r1..r2`.
+* The `...` (three dot) Symmetric Difference Notation
+    A similar notation `r1...r2` is called symmetric difference of `r1` and `r2` and is defined as `r1 r2 --not $(git merge-base --all r1 r2`). It is the set of commits that are reachable from either one of `r1` (left side) or `r2` (right side) but not from both.
+In these two shorthand notations, you can omit one end and let it default to `HEAD`. For example, `origin..` is a shorthand for `origin..HEAD` and asks "What did I do since I forked from the origin branch?" Similarly, `..origin` is a shorthand for `HEAD..origin` and asks "What did the origin do since I forked from them?" Note that `..` would mean `HEAD..HEAD` which is an empty range that is both reachable and unreachable from `HEAD`.
+
+####### Other `<rev>^` Parent Shorthand Notations
+Two other shorthands exist, particularly useful for merge commits, for naming a set that is formed by a commit and its parent commits.
+The `r1^@` notation means all parents of `r1`.
+The `r1^!` notation includes commit `r1` but excludes all of its parents. By itself, this notation denotes the single commit `r1`.
+While `<rev>^<n>` was about specifying a single commit parent, these two notations consider all its parents. For example you can say `HEAD^2^@`, however you cannot say `HEAD^@^2`.
+
+##### Revision Range Summary
+* `<rev>`
+    Include commits that are reachable from `<rev>` (i.e. `<rev>` and its ancestors).
+* `^<rev>`
+    Exclude commits that are reachable from `<rev>` (i.e. `<rev>` and its ancestors).
+* `<rev1>..<rev2>`
+    Include commits that are reachable from `<rev2>` but exclude those that are reachable from `<rev1>`. When either `<rev1>` or `<rev2>` is omitted, it defaults to `HEAD`.
+* `<rev1>...<rev2>`
+    Include commits that are reachable from either `<rev1>` or `<rev2>` but exclude those that are reachable from both. When either `<rev1>` or `<rev2>` is omitted, it defaults to `HEAD`.
+* `<rev>^@`, e.g. `HEAD^@`
+    A suffix `^` followed by an at sign is the same as listing all parents of `<rev>` (meaning, include anything reachable from its parents, but not the commit itself).
+* `<rev>^!`, e.g. `HEAD^!`
+    A suffix `^` followed by an exclamation mark is the same as giving commit `<rev>` and then all its parents prefixed with `^` to exclude them (and their ancestors).
+
+Here are a handful of examples using the Loeliger illustration above, with each step in the notation's expansion and selection carefully spelt out:
+
+
+            G   H   I   J
+             \ /     \ /
+              D   E   F
+               \  |  / \
+                \ | /   |
+                 \|/    |
+                  B     C
+                   \   /
+                    \ /
+                     A
+
+    Args   Expanded arguments    Selected commits
+
+    D                            G H D
+    D F                          G H I J D F
+    ^G D                         H D
+    ^D B                         E I J F B
+    ^D B C                       E I J F B C
+    C                            I J F C
+    B..C   = ^B C                C
+    B...C  = B ^F C              G H D E B C
+    C^@    = C^1
+    = F                   I J F
+    B^@    = B^1 B^2 B^3
+    = D E F               D G H E F I J
+    C^!    = C ^C^@
+    = C ^C^1
+    = C ^F                C
+    B^!    = B ^B^@
+    = B ^B^1 ^B^2 ^B^3
+    = B ^D ^E ^F          B
+    F^! D  = F ^I ^J D           G H D F
+
 ### [10.4 Git Internals-Packfiles](https://git-scm.com/book/en/v2/Git-Internals-Packfiles)
 **Packfiles**
 If you followed all of the instructions in the example from the previous section, you should now have a test Git repository with 11 objects-four blobs, three trees, three commits, and one tag:
@@ -2466,3 +2538,258 @@ This is very similar to invoking `git-upload-pack` over an SSH connection, but t
 Again, this is the same format as above. The response to this request indicates success or failure, and includes the packfile.
 #### Protocols Summary
 This section contains a very basic overview of the transfer protocols. The protocol includes many other features, such as `multi_ack` or `side-band` capabilities, but covering them is outside the scope of this book. We've tried to give you a sense of the general back-and-forth between client and server; if you need more knowledge than this, you'll probaly want to take a look at the Git source code.
+
+## 11. Manuals
+
+### 11.1 `man git rev-list`
+
+#### NAME
+git-rev-list: Lists commit objects in reverse chronological order.
+
+#### Synopsis
+
+#### Description
+List commit that are reachable by following the `parent` links from the given commit(s), but exclude commits that are reachable from the one(s) given with a `^` in front of them. The output is given in reverse chronological order by default.
+You can think of this as a set operation. Commits given on the command lien form a set of commits that are reachable from any of them, and then commits reachable from any of the ones given with `^` in front are subtracted from that set. The remaining commits are what comes out in the command's output. Various other options and paths parameters can be used to further limit the result.
+Thus, the following command:
+
+        $ git rev-list foo bar ^baz
+means "list all the commits which are reachable from `foo` or `bar`, but not from `baz`".
+A special notation `<commit1>..<commit2>` can be used as a shorthand for `^<commit1> <commit2>`. For example, either of the following may be used interchangeably:
+
+        $ git rev-list origin..HEAD
+        $ git rev-list HEAD ^origin
+
+Another special notation is `<commit1>...<commit2>` which is useful for merges. The resulting set of commits is the symmetric difference between the two operands. The following two commands are equivalent:
+
+        $ git rev-list A B --not $(git merge-base --all A B)
+        $ git rev-list A...B
+`rev-lsit` is a very essential Git command, since it provides the ability to build and traverse commit ancestry graphs. For this reason, it has a lot of different options that enables it to be used by commands as different as `git bisect` and `gi repack`.
+
+#### Options
+##### Commit Limiting
+Besides specifying a range of commits that should be listed using the special notations explained in the description, additional commit limiting may be applied.
+Using more options generally further limits the output (e.g. `--since=<date1>` limits to commits newer than `<date1>`, and using it with `--grep=<pattern>` further limits to commits whose log message has a line that matches `<pattern>`), unless otherwise noted.
+Note that these are applied before commit ordering and formatting options, such as `--reverse`.
+* `-<number>`, `-n <number>`, `--max-count=<number>`
+    Limit the number of commits to output.
+* `--skip=<number>`
+    Skip *number* commits before starting to show the commit output.
+* `--since=<date>`,`--after=<date>`
+    Show commits more recent than a specified date.
+* `--until=<date>`, `--before=<date>`
+    Show commits older than a specific date.
+* `--max-age=<timestamp>`, `--min-age=<timestamp>`
+    Limit the commits output to specified time range.
+* `--author=<pattern>`, `--committer=<pattern>`
+    Limit the commits output to ones with author/committer header lines that match the specified pattern (regular expression). With more than one `--author=<pattern>`, commits whose author matches any of the given patterns are chosen (similarly for multiple `--committer=<pattern>`).
+* `--grep-reflog=<pattern>`
+    Limit the commits output to ones with reflog entries that match the specified pattern (regular expression). With more than one `--grep-reflog`, commits whose reflog message matches any of the given patterns are chosen. It is an error to use this option unless `--walk-reflogs` is in use.
+* `--grep=<pattern>`
+    Limit the commits output to ones with log message that matches the specified pattern (regular expression). With more than one `--grep=<pattern>`, commits whose message matches any of the given patterns are chosen (but see `--all-match`).
+* `--all-match`
+    Limit the commits output to ones that match all given `--grep`, instead of ones that match at least one.
+* `--invert-grep`
+    Limit the commits output to ones with log message that do not match the pattern specified with `--grep=<pattern>`.
+* `-i`, or `--regexp-ignore-case`
+    Match the regular expression limiting patterns without regard to letter case.
+* `--basic-regexp`
+    Consider the limiting patterns to be basic regular expressions; this is the default.
+* `-E`, or `--extended-regexp`
+    Consider the limiting patterns to be extended regular expressions instead of the default basic regular expressions.
+* `-F`, or `--fixed-strings`
+    Consider the limiting patterns to be fixed strings (don't interpret pattern as a regular expression).
+* `--remove-empty`
+    Stop when a given path disappears from the tree.
+* `--merges`
+    Print only merge commits. This is exactly the same as `--min-parents=2`.
+* `--no-merges`
+    Do not print commits with more than one parent. This is exactly the same as `--max-parents=1`.
+* `--min-parents=<number>`, `--max-parents=<number>`, `--no-min-parents`, `--no-max-parents`
+    Show only commits which have at least (or at most) that many parent commits. In particular, `--max-parents=1` is the same as `--no-merges`, `--min-parents=2` is the same as `--merges`. `--max-parents=0` gives all root commits and `--min-parents=3` all octopus merges.
+    `--no-min-parents` and `--no-max-parents` reset these limits (to no limit) again. Equivalent forms are `--min-parents=0` (any commit has 0 or more parents) and `--max-parents=-1` (negative numbers denote no upper limit).
+* `--first-parent`
+    Follow only the first parent commit upon seeing a merge commit. This option can give a better overview when viewing the evolution of a particular topic branch, because merges into a topic branch tend to be only about adjusting to updated upstream from time to time, and this option allows you to ignore the individual commits brought in to your history by such a merge. Cannot be combined with `--bisect`.
+
+
+
+
+### 11.2 `man git rev-parse`
+#### NAME
+git-rev-parse: Pick out and message parameters
+
+#### Synopsis
+`git rev-parse [--option] <args>...`
+
+#### Description
+
+### 11.3 `man git reflog`
+
+#### NAME
+git-reflog: Manage reflog information.
+
+#### Synopsis
+`git reflog <subcommand> <options>`
+
+#### Description
+The command takes various subcommands, and different options depending on the subcommand:
+
+        git reflog [show] [log-options] [<ref>]
+        git reflog expire [--expire=<time>] [--expire-unreachable=<time>] [--rewrite] [--updateref] [--stale-fix] [--dry-run | -n] [--verbose] [--all | <refs>...]
+        git reflog delete [--rewrite] [--updateref] [--dry-run | -n] [--verbose] ref@{specifier}...
+        git reflog exsists <ref>
+Reference logs, or "reflogs", record when the tips of branches and other references were updated in the local repository. Reflogs are useful in various Git commands, to specify the old value of a reference. For example, `HEAD@{2}` means "where HEAD used to be two moves ago", `master@{one.week.ago}` means "where master used to point to one week ago in this local repository", and so on. See [gitrevisions](#gitrevisions) for more details.
+This command manages the information recorded in the reflogs.
+The `show` subcommand (which is also the default, in the absence of any subcommands) shows the log of the reference provided in the command-line (or `HEAD`, by default). The reflog covers all recent actions, and in addition the `HEAD` reflog records branch switching. `git reflog show` is an alias for `git log -g --abbrev-commit --pretty=oneline`; see git-log for more information.
+The `expire` subcommand prunes older reflog entries. Entries older than `expire` time, or entries older than `expire-unreachable` time and not reachable from the current tip, are removed from the reflog. This is typically not used directly by end users-instead, see git-gc.
+The `delete` subcommand deletes single entries from the reflog. Its argument must be an *exact* entry (e.g. `git reflog delete master@{2}`). This subcommand is also typically not used directly by end users.
+The `exist` subcommand checks whether a ref has a reflog. It exits with zero status if the reflog exists, and non-zero status if it does not.
+
+#### Options
+
+##### Options for `show`
+`git reflog show` accepts any of the options accepted by `git log`.
+![git reflog](reflog.png)
+![git reflog --all](reflog-all.png)
+
+##### Options for `expire`
+* `--all`
+    Process the reflogs of all references.
+* `--expire=<time>`
+    Prune entries older than the specified time. It this option is not specified, the expiration time is taken from the configuration setting `gc.reflogExpire`, which in turn defaults to 90 days. `--expire=all` prunes entries regardless of their age; `--expire=never` turns off pruning of reachable entries (but see `--expire-unreachable`).
+* `--expire-unreachable=<time>`
+    Prune entries older than `<time>` that are not reachable from the current tip of the branch. If this option is not specified, the expiration time is taken from the configuration setting `gc.reflogExpireUnreachable`, which in turn defaults to 30 days. `--expire-unreachable=all` prunes unreachable entries regardless of their age; `--expire-unreachable=never` turns off early pruning of unreachable entries (but see `--expire`).
+* `--updateref`
+    Update the reference to the value of the top reflog entry (i.e. `<ref>@{0}`) if the previous top entry was pruned. (This option is ignored for symbolic references.)
+* `--rewrite`
+    If a reflog entry's predecessor is pruned, adjust its "old" SHA-1 to be equal to the "new" SHA-1 field of the entry that now precedes it.
+* `--stale-fix`
+    Prune any reflog entries that point to "broken commits". A broken commit is a commit that is not reachable from any of the reference tips and that refers, directly or indirectly, to a missing commit, tree, or blob object.
+    This computation involves traversing all the reachable objects, i.e. it has the same cost as `git prune`. It is primarily intended to fix corruption caused by garbage collection using older versions of Git, which didn't protect objects referred to by reflogs.
+* `-n`, or `-dry-run`
+    Do not actually prune any entries; just show what would have been pruned.
+* `--verbose`
+    Print extra information on screen.
+
+##### Options for `delete`
+`git reflog delete` accepts options `--updateref`, `--rewrite`, `-n`, `--dry-run`, and `--verbose`, with the same meaning as when they are used with `expire`.
+### 11.4 `man git log`
+
+## 12 Discussions
+### 12.1 Visualize Merge History with `git log --graph`, `--first-parent`, and `--no-merges`
+Git merges can be complicated, but these arcane parameters can help.
+`git log` can display surprisingly confusing results when the history contains merges. In this post, I'll walk through a few parameters that can help clear things up.
+I'll start by showing how the default "chronological" order of `git log` can mislead you when the history contains merge commits. Then I'll show how you can visualize Git merge history using `git log --graph`, and how to see the "true" history of a single branch using `--first-parent`. I'll end by giving an example where `--first-parent` doesn't do what you'd want. In those cases, `--no-merges` may yield better results.
+By the time I'm done, I hope not only to teach you about a few useful parameters to `git log`, but to deepen your understanding of Git as a whole. In my experience at Redfin, developers frequently reach out to a local Git expert when they have a confusing experience with a Git merge. ("OMG I messed up my merge and now everything's broken!!!")
+In troubled times like these, Git wizards can use advanced `git log` parameters to cast Magic Missile at the darkness.
+
+#### Yes, I know what a rebase is:a defensive disclaimer
+Before I continue, I should point out that Git makes it possible to eliminate merge commits with `git rebase`, and somebody's going to read this post and run to Hack News to say how stupid I am, because you should only use `git rebase` and you should never have merge commits.
+Not you, dear reader, but I think we all know who it is I'm talking about.
+OK, it might be you. If it is you, please try to hold your breath until the end of this section.
+This post is long enough as it is, so I don't want to use space in this blog post to discuss when to rebase and when to merge. There are a million blog posts about that already. There are some smart people who say you should never have merge commits, and some other smart people who do lots of merge commits. For example, the Linux git repo has lots of interesting merges in its history.
+IMO (In my opinion), the general consensus is that sometimes we should merge, and sometimes we should rebase, but there isn't always a good consensus on which cases are which. Participating effectively in this discussion requires a good understanding of how Git handles merges.
+So, for the purpose of this post, I would like you to imagine, for the sake of discussion, that a group of developers might want to do a lot of merges, even though they know what rebasing means, and that sometimes they'd want to analyze some complex merge commits.
+
+#### "Chronological" ordering: time is an illusion; long time, doubly so
+Let's start with an [example repository](https://github.com/dfabulich/git-slightly-messy-merge/commits/master). You can generate a similar repo with [this script](https://gist.github.com/dfabulich/bdf255742fa79953f79486533204e23b).
+The script creates a repository with just a few merges, like this:
+1. We start by creating three branches off of the `master` branch: `branch1`, `branch2`, and `branch3`.
+2. Make a commit directly on `master`.
+3. Switch to `branch1`, and commit.
+4. Switch to `branch2`, and commit.
+5. Merge `branch2` back to the `master` branch.
+6. Switch to `branc3` and commit.
+7. Merge `branch1` to master.
+8. Merge `branch3` to master last.
+(We sleep for one second before each commit, so each commit gets a visibly different timestamp.)
+Here's what we see when we run `git log --pretty="format:%h %ar %s` (that "pretty" argument says to show the commit hash, the relative timestamp, and the commit message, all on one line per commit; despite the name, it's not that pretty).
+
+        8aec370 0 seconds ago Merge branch 'branch3'
+        b7b4b7c 1 second ago Merge branch 'branch1'
+        f88c7ba 2 seconds ago branch 3
+        7b79ec5 3 seconds ago Merge branch 'branch2'
+        accf1ce 4 seconds ago branch 2
+        974b6d7 5 seconds ago branch 1
+        a26aed9 6 seconds ago commit directly on master
+        2d56476 7 seconds ago initial
+
+![gitlogresult](gitlogresult.png)
+
+As you can see, `git log` prefers to show the commits in chronological order (`--date-order`). Those are the dates that the commits were created.
+But, even though we're running `git log` on the `master` branch, this is not the chronological history of `master`. If these timestamps were days ago instead of seconds ago, you might mistakenly believe that the `branch1` commit `974b6d7` was in `master` five days ago, when in fact it only merged in yesterday. You might also think that the `branch1` commit `974b6d7` landed on `master` before the `branch2` commit `accf1ce`, but the reverse is true; `accf1c` merged to `master` before the `branch1` commit `974b6d7`.
+
+#### Merge commits: when one parent commit loves another parent commit very, very much
+`git log` has a tool you can use to visualize all of this merging, `--graph`. The output looks like this:
+
+        *   8aec370 0 seconds ago Merge branch 'branch3'
+        |\
+        | * f88c7ba 2 seconds ago branch 3
+        * |   b7b4b7c 1 second ago Merge branch 'branch1'
+        |\ \
+        | * | 974b6d7 5 seconds ago branch 1
+        | |/
+        * |   7b79ec5 3 seconds ago Merge branch 'branch2'
+        |\ \
+        | * | accf1ce 4 seconds ago branch 2
+        | |/
+        * | a26aed9 6 seconds ago commit directly on master
+        |/
+        * 2d56476 7 seconds ago initial
+_Note: Look through the graph above from top down to bottom._
+This graph shows not only the commits (as asterisks `*`) but also their "parent" commits. Most commits-"ordinary" commits-have only one parent: the last commit of the branch you were on when the commit was created. In the above example, the initial commit `2d56476` is the only parent of the commit `a26aed9`.
+The initial commit in a repository, the "root commit", has no parents. It's possible for git repositories to have multiple root commits,typically due to errors rewriting Git history. The moral of this story is to avoid time travel whenever possible.
+When you merge two branches, you're creating a "merge" commit with two parents: the last commit of the branch you're on, and the last commit of the branch you're merging in. In the graph above, `8aec370` is a merge commit with two parents: `b7b4b7c` (the last commit on `master` at the time) and `f88c7ba` (the last commit on `branch3`). See how the merge commit `8aec370` has two liens sticking out of the bottom, whereas `f88c7ba` has only one? No? Well, scroll up and look at the graph again. This is important!
+It's also possible to perform "octopus" merge in git, which have two more parents. There's a commit in the Linux repo with 66 parents.
+Note that `git log --graph` does *not* show the commits in chronological order. The `git help` man pages cal it `--topo-order`, topological ordering. "Show no parents before all of its children are shown, and avoid showing commits on multiple lines of history intermixed."
+Did you know that "topological sorting" has essentially nothing to do with the modern mathematical definition of "topology"? I bet you do know that the definition of "topological sorting" has nothing to do with any Git problem you're trying to resolve. Git's help pages are full of technical jargon like this, terms that are technically correct but obscure the meaning of text rather than enlightening the reader.
+
+#### Use `--graph` as little as possible
+Using `git log --graph` can help, if you know about parent commits and you know how to read it, but it's still not very easy to understand the visualization as a whole; it would be a completely illegible mess with just a few more merges in it.
+Don't even try to visualize the entire messy history of `master` when there are a bunch of merges on it. Visualization is powerful mental technique, but visual aids can only really represent a few dozen things before they become as complicated as the thing you were trying to understand in the first place.
+And when analyzing messy merges, it's not just the commits we're trying to visualize, but the lines connecting the commits (the "edges" connecting the "nodes", in graph-theory terms). We can only visualize a few dozen of those, and that typically means we can visualize only a handful of merge commits at a time.
+If you have a bunch of merges into the `master` branch, you'll find that the history of `master` isn't a straight line of history; it's more like one of those slashy fanfics in which the Amazing Spider-Man and Dr.Octopus have cybernetic octo-spider babies.
+Instead of trying to understand the entire graph, its' better to look at the history of `master` itself, in isolation. That's what we'll do in the next section.
+
+#### The "first parent" is the true lineage of master (usually)
+In an ideal world, you'd be able to say to Git, "Show me just the commits that were created on the `master` branch." But for legacy reasons, Git commits don't record the name of the branch on which commits are created. (In my example, I embedded that information in the commit message to make it easier to understand.)
+From Git's perspective, by the time all of those merges are done, *all* of those commits are "on" the `master` branch. That's why it has to show you all of them when you ask for the history of `master`.
+But look at the graph again.
+
+***   8aec370 0 seconds ago Merge branch 'branch3'**
+|\
+| * f88c7ba 2 seconds ago branch 3
+*** |   b7b4b7c 1 second ago Merge branch 'branch1'**
+|\ \
+| * | 974b6d7 5 seconds ago branch 1
+| |/
+*** |   7b79ec5 3 seconds ago Merge branch 'branch2'**
+|\ \
+| * | accf1ce 4 seconds ago branch 2
+| |/
+*** | a26aed9 6 seconds ago commit directly on master**
+|/
+*** 2d56476 7 seconds ago initial**
+
+See the commit asterisks that appear on the left-hand rail? (I've bolded those lines.) Those commits are the ones that were "really" on the `master` branch, aren't they? How did Git know to put those commits all in a straight line like that, if all of the commits are equal in the eyes of the `master` branch?
+It turns out that, just like real children, Git doesn't treat a merge commit's two parents equally; merge commits have a "first parent" and a "second parent." The "first parent" is the branch you were already on when you typed `git merge` (or `git pull` or whatever caused the merge). The "second parent" is the branch that you were pulling in.
+Here's what is says when you `git show 8aec370` in our example repository.
+
+        commit 8aec37089204c7ec5d280779cdcfe5e378026c65
+        Merge: b7b4b7c f88c7ba
+        Author: Dan Fabulich <dan.fabulich@redfin.com>
+        Date:   Wed Mar 15 22:37:25 2017 -0700
+
+            Merge branch 'branch3'
+
+See that "Merge" line? It's showing you the two parents of the merge commit, in order. The first parent was `b7b4b7c` and the second parent was `f88c7ba`.
+Here's what we see when we `git log --first-parent`.
+
+        8aec370 0 seconds ago Merge branch 'branch3'
+        b7b4b7c 1 second ago Merge branch 'branch1'
+        7b79ec5 3 seconds ago Merge branch 'branch2'
+        a26aed9 6 seconds ago commit directly on master
+        2d56476 7 seconds ago initial
+`--first-parent` instructs `git log` to log only the first parent of each commit, ignoring all other parents and their parents (their "ancestors"). Since the first parent is the parent that was already on `master` at the time the merge was performed, looking at the first parent can reveal the "true history" of the `master` branch. The first-parent lineage shows you what you would have gotten if you'd peeked at the `master` branch at a particular point in time.
+That's about as close as you can get to viewing the history of the `master` branch in isolation. (But, as we'll see in a moment, there are problems with using `--first-parent` this way.)
+

@@ -5,6 +5,7 @@ Open ~/.bashrc in text editor and uncomment line:
 to be:
 `force_color_prompt=yes`
 save then execute source ~/.bashrc
+
 ## had link and soft link
 ![hard and soft link](hard_link_and_soft_link.jpg)
 "An example is worth a hundred paragraphs..."
@@ -766,3 +767,6 @@ _下载的文件默认保存到 程序所在目录 的 download/ 目录, 支持�
 * 将压缩文件text.zip在指定目录/tmp下解压缩，如果已有相同的文件存在，要求unzip命令不覆盖原先的文件: `unzip -n test.zip -d /tmp`
 * 将压缩文件test.zip在指定目录/tmp下解压缩，如果已有相同的文件存在，要求unzip命令覆盖原先的文件: `unzip -o test.zip -d /tmp`
 * 查看压缩文件目录，但不解压: `unzip -v test.zip`
+
+## how to type faster
+**type the whole word** uninterruptedly
