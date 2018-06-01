@@ -1751,17 +1751,21 @@ You have several options to get a remote Git repository up and running so that y
 Running your own server gives you a lot of control and allows you to run the server within your own firewall, but such a server generally requires a fair amount of your time to set up and maintain. If you place your data on a hosted server, it's easy to set up and maintain; however, you have to be able to keep your code on someone else's servers, and some organizations don't allow that.
 It should be fairly straightforward to determine which solution or combination of solutions is appropriate for you and your organization.
 ## 5. Distributed Git
+
 ### 5.1 Distributed Git-Distributed Workflows
 Now that you have a remote Git repository set up as a focal point for all the developers to share their code, and you're familiar with basic Git commands in a local workflow, you'll look at how to utilize some of the distributed workflows that Git affords you.
 In this chapter, you'll see how to work with Git in a distributed environment as a contributor and an integrator. That is, you'll learn how to contribute code successfully to a project and make it as easy on you and the project maintainer as possible, and also how to maintain a project successfully with a number of developers contributing.
+
 #### Distributed Workflows
 Unlike Centralized Version Control Systems (CVCSs), the distributed nature of Git allows you to be far more flexible in how developers collaborate on projects. In centralized systems, every developer is a node working ore or less equally on a central hub. In Git, however, every developer is potentially both a node and a hub-that is, every developer can both contribute code to other repositories and maintain a public repository on which others can base their work and which they can contribute to. This opens a vast range of workflow possibilities for your project and/or your team, so we'll cover a few common paradigms that take advantage of this flexibility. We'll go over the strengths and possible weaknesses of each design; you can choose a single one to use, or you can mix and match features from each.
+
 ##### Centralized Workflow
 In centralized systems, there is generally a single collaboration model-the centralized workflow. One central hub, or repository, can accept code, and everyone synchronizes their work to it. A number of developers are nodes-consumers of that hub-and synchronize to that one place.
 ![Centralized Workflow](centralized_workflow.png)
 This means that if two developers clone from the hub and both make changes, the first developer to push their changes back up can do so with no problems. The second developer must merge in the first one's work before pushing changes up, so as not to overwrite the first developer's changes. This concept is as true in Git as it is in Subversion (or any CVCS), and this model works perfectly well in Git.
 If you are already comfortable with a centralized workflow in you company or team, you can easily continue using that workflow with Git. Simply set up a single repository, and give everyone on your team push access; Git won't let users overwrite each other. Say John and Jessica both start working at the same time. John finishes his change and pushes it to the server. Then Jessica tries to push her changes, but the server rejects them. She is told that she's trying to push non-fast-forward changes and that she won't be able to do so until she fetches and merges. This workflow is attractive to a lot of people because it's a paradigm that many are familiar and comfortable with.
 This is also not limited to small teams. With Git's branching model, it's possible for hundreds of developers to successfully work on a single project through dozens of branches simultaneously.
+
 ##### Integration-Manager Workflow
 Because Git allows you to have multiple remote repositories, it's possible to have a workflow where each developer has write access to their own public repository and read access to everyone else's. This scenario often includes a canonical repository that represents the "official" project. To contribute to that project, you create your own public cone of the project and push your changes to it. Then, you can send a request to the maintainer of the main project to pull in your changes. The maintainer can then add your repository as a remote, test your changes locally, merge them into their branch, and push back to their repository. The process works as follows
 1. The project maintainer pushes to their public repository.
@@ -1784,6 +1788,7 @@ Figure 56. Benevolent dictator workflow
 This kind of workflow isn't common, but can be useful in very big projects, or in highly hierarchical environments. It allows the project leader (the dictator) to delegate much of the work and collect large subsets of code at multiple points before integrating them.
 #### Workflows Summary
 These are some commonly used workflows that are possible with a distributed system like Git, but you can see that many variations are possible t suit your particular real-world workflow. Now that you can (hopefully) determine which workflow combination may work for you, we'll cover some more specific examples of how to accomplish the main roles that make up the different flows. In the next section, you'll learn about a few common patterns for contributing to a project.
+
 
 ### 5.2 Distributed Git-Contributing to a Project
 #### Contributing to a Project
@@ -2610,7 +2615,41 @@ Note that these are applied before commit ordering and formatting options, such 
     `--no-min-parents` and `--no-max-parents` reset these limits (to no limit) again. Equivalent forms are `--min-parents=0` (any commit has 0 or more parents) and `--max-parents=-1` (negative numbers denote no upper limit).
 * `--first-parent`
     Follow only the first parent commit upon seeing a merge commit. This option can give a better overview when viewing the evolution of a particular topic branch, because merges into a topic branch tend to be only about adjusting to updated upstream from time to time, and this option allows you to ignore the individual commits brought in to your history by such a merge. Cannot be combined with `--bisect`.
-
+* `--not`
+    Reverses the meaning of the `^` prefix (or lack thereof) for all following revision specifiers, up to the next `--not`.
+* `--all`
+    Pretend as if all the refs in `refss/`, along with `HEAD`, are listed on the command line as `<commit>`.
+* `--branches[=<pattern>]`
+    Pretend as if all the refs in `refs/heads` are listed on the command line as `<commit>`. If `<pattern>` is given, limit branches to ones matching given shell glob. If pattern lacks `?,` `*,` or `[,` `/*` at the end is implied.
+* `--tags[=<pattern>]`
+    Pretend as if all the refs in `refs/tags` are listed on the command line as `<commit>`. If `<pattern>` is given, limit tags to ones matching given shell glob. If pattern lacks `?`, `*`, or `[`, `/*` at the end is implied.
+* `--remotes[=<pattern>]`
+    Pretend as if all the refs in `refs/remotes` are listed on the command line as `<commit>`. If `<pattern>` is given, limit remote-tracking branches to ones matching given shell glob. If pattern lacks `?`, `*`, or `[`, `/*` at the end is implied.
+* `--glob=<glob-pattern>`
+    Pretend as if all the refs matching shell glob `<glob-pattern>` are listed on the command line as `<commit>`. Leading `refs/` is automatically prepended if missing. If pattern lacks `?`, `*`, or `[`, `/*` at the end is implied.
+* `--exclude=<glob-pattern>`
+    Do not include refs matching `<glob-pattern>` that the next `--all`, `--branches`, `--tags`, `--remtoes`, or `--glob` would otherwise consider.
+    The patterns given should not begin with `refs/heads`, `refs/tags`, or `refs/remotes` when applied to `--branches`, `--tags`, or `--remotes`, respectively, and they must begin with `refs/` when applied to `--glob` or `--all`. If a trailing `/*` is intended, it must be given explicitly.
+* `--reflog`
+    Pretend as if all objects mentioned by reflogs are listed on the command line as `<commit>`.
+* `--single-worktree`
+    Be default, all working trees will be examined by the following options when there are more than one: `--all`, `--reflog` and `--indexed-bojects`. This option forces them to examine the current working tree only.
+* `--ignore-missing`
+    Upon seeing an invalid object name in the input, pretend as if the bad input was not given.
+* `--stdin`
+    In addition to the `<commit>` listed on the command line, read them from the standard input. If a `--` separator is seen, stop reading commits and start reading paths to limit the result.
+* `--quiet`
+    Don't print anything to standard output. This form is primarily meant to allow the caller to test the exit status to see if a range of objects is fully connected (or not). It is faster than redirecting stdout to `/dev/null` as the output does not have to be formatted.
+* `--cherry-pick`
+    Omit any commit that introduces the same change as another commit on the "other side" when the set of commits are limited with symmetric difference.
+    For example, if you have two branches, `A` and `B`, a usual way to list all commits on only one side of them is with `--left-right` (see the example below in the description of the `--left-right` option). However, it shows the commits that were cherry-picked from the other branch (for example, `3rd on b` may be cherry-picked from branch `A`). With this option, such pairs of commits are excluded from the output. With this option, such pairs of commits are excluded from the output.
+* `--cherry-mark`
+    Like `--cherry-pick` (see above) but mark equivalent commits with `=` rather than omitting them, and inequivalent ones with `+`.
+* `--left-only`, `--right-only`
+    List only commits on the respective side of a symmetric difference, i.e only those which would be marked `<` resp. `>` by `--left-right`.
+    For example, `--cherry-pick --right-only A...B` omits those commits from `B` which are in `A` or are patch-equivalent to a commit in `A`. In other words, this lists the `+` commits from `git cherry A B`. More precisely, `--cherry-pick --right-only --no-merges` gives the exact list.
+* `--cherry`
+    A synonym for `--right-only --cherry-mark --no-merges`; useful to limit the output to the commits on our side and mark those that have been applied to the other side of a forked history with `git log --cherry upstream...mybranch`, similar to `git cherry upstream mybranch`.
 
 
 
@@ -2675,6 +2714,133 @@ The `exist` subcommand checks whether a ref has a reflog. It exits with zero sta
 `git reflog delete` accepts options `--updateref`, `--rewrite`, `-n`, `--dry-run`, and `--verbose`, with the same meaning as when they are used with `expire`.
 ### 11.4 `man git log`
 
+### 11.5 `man git cherry-pick`
+#### NAME
+`git cherry-pick`: Apply the changes introduced by some existing commits.
+
+#### Synopsis
+
+        git cherry-pick [--edit] [-n] [-m parent-number] [-s] [-x] [--ff] [-S[<keyid>]] <commit>...
+        git cherry-pick --continue
+        git cherry-pick --quit
+        git cherry-pick --abort
+
+#### Description
+Given one or more existing commits, apply the change each one introduces, recording a new commit for each. This requires your working tree to be clean (no modifications from the `HEAD` commit).
+When it is no obvious how to apply a change, the following happens:
+1. The current branch and `HEAD` pointer stay at the last commit successfully made.
+2. The `CHERRY_PICK_HEAD` ref is set to point at the commit that introduced the change that is difficult to apply.
+3. Paths in which the change applied cleanly are updated both in the index file and in your working tree.
+4. For conflicting paths, the index file records up to three versions, as described in the "TRUE MERGE" section of git-merge. The working tree files will include a description of the conflict bracketed by the usual conflict markers `<<<<<<<` and `>>>>>>>`.
+5. No other modifications are made.
+See git-merge for some hints on resolving such conflicts.
+
+### 11.5 `man git merge`
+#### NAME
+`git merge`: Join two or more development histories together.
+
+#### Synopsis
+
+        git merge [-n] [--stat] [--no-commit] [--squash] [--[no-]edit] [-s <strategy>] [-X <strategy-option>] [-S [<keyid>]] [--[no-]allow-unrelated-histories] [--[no-]rerere-autoupdate] [-m <msg>] [<commit>...]
+        git merge <msg> HEAD <commit>...
+        git merge --abort
+        git merge --continue
+
+#### Description
+Incorporates changes from the named commits (since the time their histories diverged from the current branch) into the current branch. This command is used by `git pull` to incorporate changes from another repository and can be used by hand to merge changes from one branch into another.
+Assume the following history exists and the current branch is `master`:
+
+
+                     A---B---C topic
+                    /
+               D---E---F---G master
+Then `git merge topic` will replay the changes made on the `topic` branch since it diverged from `master` (i.e., `E`) until its current commit (`C`) on top of `master`, and record the result in a new commit along with the names of the two parent commits and a log message from the user describing the changes.
+
+
+                     A---B---C topic
+                    /         \
+               D---E---F---G---H master
+The second syntax (`<msg> HEAD <commit>...`) is supported for historical reasons. Do not use it from the command line or in new scripts. It is the same as `git merge -m <msg> <commit>...`.
+The third syntax (`git merge --abort`) can only be run after the merge has resulted in conflicts. `git merge --abort` will abort the merge process and try to reconstruct the pre-merge state. However, if there were uncommitted changes when the merge started (and especially if those changes were further modified after the merge was started), `git merge --abort` will in some cases be unable to reconstruct the original (pre-merge) changes. Therefore:
+**Warning**: Running `git merge` with non-trivial uncommitted changes is discouraged: while possible, it may leave you in a state that is hard to back out of in the case of a conflict.
+
+#### Options
+* `--commit`, `--no-commit`
+    Perform the merge and commit the result. This option can be used to override `--no-commit`.
+    With `--no-commit` perform the merge but pretend the merge failed and do not autocommit, to give the user a chance to inspect and further tweak the merge result before committing.
+* `--edit`, `-e`, `--no-edit`
+    Invoke an editor before committing successful mechanical merge to further edit the auto-generated merge message, so that the user can explain and justify the merge. The `--no-edit` option can be used to accept the auto-generated message (this is generally discouraged). The `--edit` (or `-e`) option is still useful if you are giving a draft message with the `-m` option from the command line and want to edit it in the editor.
+    Older scripts may depend on the historical behavior of not allowing the user to edit the merge log message. They will see an editor opened when they run `git merge`. To make it easier to adjust such scripts to the updated behavior, the environment variable `GIT_MERGE_AUTOEDIT` can be set to `no` at the beginning of them.
+* `-ff`
+    When the merge resolves as a fast-forward, only update the branch pointer, without creating a merge commit. This is the default behavior.
+* `--no-ff`
+    Create a merge commit even when the merge resolves as a fast-forward. This is the default behavior when merging an annotated (and possibly signed) tag.
+* `--ff-only`
+    Refuse to merge and exit with a non-zero status unless the current `HEAD` is already up-to-date or the merge can be resolved as a fast-forward.
+* `--log[=<n>]`, `--no-log`
+    In addition to branch names, populate the log message with one-line descriptions from at most <n> actual commits that are being merged. See also `git-fmt-merge-msg`.
+    With `--no-log` do not list one-line descriptions from the actual commits being merged.
+* `--stat`, `-n`, `--no-stat` ???
+    Show a diffstat at the end of the merge. The diffstat is also controlled by the configuration option merge.stat.
+    With `-n` or `--no-stat` do not show a diffstat at the end of the merge.
+* `--squash`, `--no-squash`
+    Produce the working tree and index state as if a real merge happened (except for the merge information), but do not actually make a commit, move the `HEAD`, or record `$GIT_DIR/MERGE_HEAD` (to cause the next `git commit` command to create a merge commit). This allows you to create a single single commit on top of the current branch whose effect is the same as merging another branch (or more in case of an octopus).
+    With `--no-squash` perform the merge and commit the result. This option can be used to override `--squash`.
+    This is a way to merge all changes from one branch into another, but squash to a single commit at the same time.
+    A word of caution: this works, but the default commit message includes the log from the branch being merged. The problem is it looks similar to the format you normally see where the entire text shown does not actually become part of the commit message, but in this case it does. So if you don't want all that, you need manually remove all of it from your commit message. I should have tested this before using it.
+* `-s <strategy>`, `--strategy=<strategy>`
+    Use the given merge strategy; can be supplied more than once to specify them in the order they should be tried. If there is no `-s` option, a built-in list of strategies is used instead (`git merge-recursive` when merging a single head, `git merge-octopus` otherwise).
+* `-X <option>`, `--strategy-option=<option>`
+    Pass merge strategy specific option through to the merge strategy.
+* `--summary`, `--no-summary`
+    Synonyms to `--stat` and `--no-stat`; these are deprecated and will be remove in the future.
+* `-q`, `--quiet`
+    Operate quietly. Implies `--no-progress`.
+* `-v`, `--verbose`
+    Be verbose.
+* `--progress`, `--no-progress`
+    Turn progress on/off explicitly. If neither is specified, progress is shown if standard error is connected to a terminal. Note that not all merge strategies may support progress reporting.
+* `--allow-unrelated-histories`
+    By default, `git merge` command refuses to merge histories that do not share a common ancestor. This option can be used to override this safety when merging histories of two projects that started their lives independently. As that is a very rare occasion, no configuration variable to enable this be default exists and will not be added.
+* `-S[<keyid>]`, `--gpg-sign[=<keyid>]`
+    GPG-sign the resulting merge commit. The `<keyid>` argument is optional and defaults to the committer identity; if specified, it must be stuck to the option without a space.
+* `-m <msg>`
+    Set the commit message to be used for the merge commit (in case one is created).
+    If `--log` is specified, a shortlog of the commits being merged will be appended to the specified message.
+    The `git fmt-merge-msg` command can be used to give a good default for automated `git merge` invocations. The automated message can include the branch description.
+* `--[no-]rerere-autoupdate`
+    Allow the rerere mechanism to update the index with the result of auto-conflict resolution if possible.
+    `git rerere`: Reuse recorded resolution of conflicted merges.
+* `--abort`
+    Abort the current conflict resolution process, and try to reconstruct the pre-merge state.
+    If there were uncommitted worktree changes present when the merge started, `git merge --abort` will in some cases be unable to reconstruct these changes. It is therefore recommended to always commit or stash your changes before running `git merge`.
+    `git merge --abort` is equivalent to `git reset --merge` when `MERGE_HEAD`is present.
+* `<commit>...`
+    Commits, usually other branch heads, to merge into our branch. Specifying more than one commit will create a merge with ore than two parents (affectionately called an Octopus merge).
+    If no commit is given from the command line, merge the remote-tracking branches that the current branch is configured to use as its upstream. See also the configuration section of this manual page.
+    When `FETCH_HEAD` (and no other commit) is specified, the branches recorded in the `.git/FETCH_HEAD` file by the previous invocation of `git fetch` for merging are merged to the current branch.
+
+#### PRE-MERGE CHECKS
+Before applying outside changes, you should get your own work in good shape and committed locally, so it will not be clobbered if there are conflicts. See also `git-stash`. `git pull` and `git merge` will stop without doing anything when local uncommitted changes overlap with files that `git pull`/`git merge` may need to update.
+To avoid recording unrelated changes in the merge commit, `git pull` and `git merge` will also abort if there are any changes registered in the index relative to the `HEAD` commit. (One exception is when the changed index entries are in the state that would result from the merge already.)
+If all named commits are already ancestors of `HEAD`, `git merge` will exit early with the message "Already up-to-date."
+
+#### FAST-FORWARD MERGE
+Often the current branch head is an ancestor of the named commit. This is the most common case especially when invoked from `git pull`: you are tracking an upstream repository, you have committed no local changes, and now you want to update to a newer upstream revision. In this case, a new commit is not needed to store the combined history; instead, the `HEAD` (along with the index) is updated to point at the named commit, without creating an extra merge commit.
+This behavior can be suppressed with the `--no-ff` option.
+
+#### TRUE MERGE
+Except in a fast-forward merge (see above), the branches to be merged must be tied together by a merge commit that has both of them as its parents.
+A merged version reconciling the changes from all branches to be merged is committed, and your `HEAD`, index, and working tree are updated to it. It is possible to have modifications in the working tree as long as they do not overlap; the update will preserve them.
+When it is not obvious how to reconcile changes, for following happens:
+1. The `HEAD` pointer stays the same.
+2. The `MERGE_HEAD` ref is set to point to the other branch head.
+3. Paths that merged cleanly are updated both in the index file and in your working tree.
+4. For conflicting paths, the index file records up to three versions: stage 1 stores the version from the common ancestor, stage 2 from `HEAD`, and stage 3 from `MERGE_HEAD` (you can inspect the stages with `git ls-files -u`). The working tree files contain the result of the "merge" program; i.e. 3-way merge results with familiar conflict markers `<<<===>>>`.
+5. No other changes are made. In particular, In particular, the local modifications you had before you started merge will stay the same and the index entries for them stay as they were, i.e. matching `HEAD`.
+If you tried a merge which resulted in complex conflicts and want to start over, you can recover with `git merge --abort`.
+
+### 11.6 `man git rebase`
 ## 12 Discussions
 ### 12.1 Visualize Merge History with `git log --graph`, `--first-parent`, and `--no-merges`
 Git merges can be complicated, but these arcane parameters can help.
@@ -2684,7 +2850,7 @@ By the time I'm done, I hope not only to teach you about a few useful parameters
 In troubled times like these, Git wizards can use advanced `git log` parameters to cast Magic Missile at the darkness.
 
 #### Yes, I know what a rebase is:a defensive disclaimer
-Before I continue, I should point out that Git makes it possible to eliminate merge commits with `git rebase`, and somebody's going to read this post and run to Hack News to say how stupid I am, because you should only use `git rebase` and you should never have merge commits.
+Before I continue, I should point out that Git makes it possible to **eliminate merge commits with `git rebase`**, and somebody's going to read this post and run to Hack News to say how stupid I am, because you should only use `git rebase` and you should never have merge commits.
 Not you, dear reader, but I think we all know who it is I'm talking about.
 OK, it might be you. If it is you, please try to hold your breath until the end of this section.
 This post is long enough as it is, so I don't want to use space in this blog post to discuss when to rebase and when to merge. There are a million blog posts about that already. There are some smart people who say you should never have merge commits, and some other smart people who do lots of merge commits. For example, the Linux git repo has lots of interesting merges in its history.
@@ -2716,8 +2882,8 @@ Here's what we see when we run `git log --pretty="format:%h %ar %s` (that "prett
 
 ![gitlogresult](gitlogresult.png)
 
-As you can see, `git log` prefers to show the commits in chronological order (`--date-order`). Those are the dates that the commits were created.
-But, even though we're running `git log` on the `master` branch, this is not the chronological history of `master`. If these timestamps were days ago instead of seconds ago, you might mistakenly believe that the `branch1` commit `974b6d7` was in `master` five days ago, when in fact it only merged in yesterday. You might also think that the `branch1` commit `974b6d7` landed on `master` before the `branch2` commit `accf1ce`, but the reverse is true; `accf1c` merged to `master` before the `branch1` commit `974b6d7`.
+As you can see, **`git log` prefers to show the commits in chronological order (`--date-order`). Those are the dates that the commits were created.**
+**But, even though we're running `git log` on the `master` branch, this is not the chronological history of `master`. If these timestamps were days ago instead of seconds ago, you might mistakenly believe that the `branch1` commit `974b6d7` was in `master` five days ago, when in fact it only merged in yesterday. You might also think that the `branch1` commit `974b6d7` landed on `master` before the `branch2` commit `accf1ce`, but the reverse is true; `accf1c` merged to `master` before the `branch1` commit `974b6d7`.**
 
 #### Merge commits: when one parent commit loves another parent commit very, very much
 `git log` has a tool you can use to visualize all of this merging, `--graph`. The output looks like this:
@@ -2736,24 +2902,24 @@ But, even though we're running `git log` on the `master` branch, this is not the
         * | a26aed9 6 seconds ago commit directly on master
         |/
         * 2d56476 7 seconds ago initial
-_Note: Look through the graph above from top down to bottom._
-This graph shows not only the commits (as asterisks `*`) but also their "parent" commits. Most commits-"ordinary" commits-have only one parent: the last commit of the branch you were on when the commit was created. In the above example, the initial commit `2d56476` is the only parent of the commit `a26aed9`.
-The initial commit in a repository, the "root commit", has no parents. It's possible for git repositories to have multiple root commits,typically due to errors rewriting Git history. The moral of this story is to avoid time travel whenever possible.
-When you merge two branches, you're creating a "merge" commit with two parents: the last commit of the branch you're on, and the last commit of the branch you're merging in. In the graph above, `8aec370` is a merge commit with two parents: `b7b4b7c` (the last commit on `master` at the time) and `f88c7ba` (the last commit on `branch3`). See how the merge commit `8aec370` has two liens sticking out of the bottom, whereas `f88c7ba` has only one? No? Well, scroll up and look at the graph again. This is important!
-It's also possible to perform "octopus" merge in git, which have two more parents. There's a commit in the Linux repo with 66 parents.
-Note that `git log --graph` does *not* show the commits in chronological order. The `git help` man pages cal it `--topo-order`, topological ordering. "Show no parents before all of its children are shown, and avoid showing commits on multiple lines of history intermixed."
+**_Note: Look through the graph above from top down to bottom._**
+This graph shows not only the commits (as asterisks `*`) but also their "parent" commits. **Most commits-"ordinary" commits-have only one parent: the last commit of the branch you were on when the commit was created.** In the above example, the initial commit `2d56476` is the only parent of the commit `a26aed9`.
+The initial commit in a repository, the **"root commit"**, has no parents. It's possible for git repositories to have multiple root commits,typically due to errors rewriting Git history. The moral of this story is to avoid time travel whenever possible.
+**When you merge two branches, you're creating a "merge" commit with two parents**: **the last commit of the branch you're on, and the last commit of the branch you're merging in.** In the graph above, `8aec370` is a merge commit with two parents: `b7b4b7c` (the last commit on `master` at the time) and `f88c7ba` (the last commit on `branch3`). See how **the merge commit `8aec370` has two lines sticking out of the bottom**, whereas `f88c7ba` has only one? No? Well, scroll up and look at the graph again. This is important!
+It's also possible to perform **"octopus"** **merge** in git, which have two more parents. There's a commit in the Linux repo with 66 parents.
+Note that **`git log --graph` does *not* show the commits in chronological order. The `git help` man pages cal it `--topo-order`, topological ordering. "Show no parents before all of its children are shown, and avoid showing commits on multiple lines of history intermixed."**
 Did you know that "topological sorting" has essentially nothing to do with the modern mathematical definition of "topology"? I bet you do know that the definition of "topological sorting" has nothing to do with any Git problem you're trying to resolve. Git's help pages are full of technical jargon like this, terms that are technically correct but obscure the meaning of text rather than enlightening the reader.
 
 #### Use `--graph` as little as possible
-Using `git log --graph` can help, if you know about parent commits and you know how to read it, but it's still not very easy to understand the visualization as a whole; it would be a completely illegible mess with just a few more merges in it.
+**Using `git log --graph` can help, if you know about parent commits and you know how to read it, but it's still not very easy to understand the visualization as a whole; it would be a completely illegible mess with just a few more merges in it.**
 Don't even try to visualize the entire messy history of `master` when there are a bunch of merges on it. Visualization is powerful mental technique, but visual aids can only really represent a few dozen things before they become as complicated as the thing you were trying to understand in the first place.
 And when analyzing messy merges, it's not just the commits we're trying to visualize, but the lines connecting the commits (the "edges" connecting the "nodes", in graph-theory terms). We can only visualize a few dozen of those, and that typically means we can visualize only a handful of merge commits at a time.
 If you have a bunch of merges into the `master` branch, you'll find that the history of `master` isn't a straight line of history; it's more like one of those slashy fanfics in which the Amazing Spider-Man and Dr.Octopus have cybernetic octo-spider babies.
-Instead of trying to understand the entire graph, its' better to look at the history of `master` itself, in isolation. That's what we'll do in the next section.
+**Instead of trying to understand the entire graph, its' better to look at the history of `master` itself, in isolation.** That's what we'll do in the next section.
 
 #### The "first parent" is the true lineage of master (usually)
-In an ideal world, you'd be able to say to Git, "Show me just the commits that were created on the `master` branch." But for legacy reasons, Git commits don't record the name of the branch on which commits are created. (In my example, I embedded that information in the commit message to make it easier to understand.)
-From Git's perspective, by the time all of those merges are done, *all* of those commits are "on" the `master` branch. That's why it has to show you all of them when you ask for the history of `master`.
+In an ideal world, you'd be able to say to Git, **"Show me just the commits that were created on the `master` branch."** But for legacy reasons, **Git commits don't record the name of the branch on which commits are created. (In my example, I embedded that information in the commit message to make it easier to understand.)**
+**From Git's perspective, by the time all of those merges are done, *all* of those commits are "on" the `master` branch.** That's why it has to show you all of them when you ask for the history of `master`.
 But look at the graph again.
 
 ***   8aec370 0 seconds ago Merge branch 'branch3'**
@@ -2772,7 +2938,7 @@ But look at the graph again.
 *** 2d56476 7 seconds ago initial**
 
 See the commit asterisks that appear on the left-hand rail? (I've bolded those lines.) Those commits are the ones that were "really" on the `master` branch, aren't they? How did Git know to put those commits all in a straight line like that, if all of the commits are equal in the eyes of the `master` branch?
-It turns out that, just like real children, Git doesn't treat a merge commit's two parents equally; merge commits have a "first parent" and a "second parent." The "first parent" is the branch you were already on when you typed `git merge` (or `git pull` or whatever caused the merge). The "second parent" is the branch that you were pulling in.
+It turns out that, just like real children, Git doesn't treat a merge commit's two parents equally; merge commits have a "first parent" and a "second parent." **The "first parent" is the branch you were already on when you typed `git merge` (or `git pull` or whatever caused the merge). The "second parent" is the branch that you were pulling in.**
 Here's what is says when you `git show 8aec370` in our example repository.
 
         commit 8aec37089204c7ec5d280779cdcfe5e378026c65
@@ -2790,6 +2956,118 @@ Here's what we see when we `git log --first-parent`.
         7b79ec5 3 seconds ago Merge branch 'branch2'
         a26aed9 6 seconds ago commit directly on master
         2d56476 7 seconds ago initial
-`--first-parent` instructs `git log` to log only the first parent of each commit, ignoring all other parents and their parents (their "ancestors"). Since the first parent is the parent that was already on `master` at the time the merge was performed, looking at the first parent can reveal the "true history" of the `master` branch. The first-parent lineage shows you what you would have gotten if you'd peeked at the `master` branch at a particular point in time.
+**`--first-parent` instructs `git log` to log only the first parent of each commit, ignoring all other parents and their parents (their "ancestors"). Since the first parent is the parent that was already on `master` at the time the merge was performed, looking at the first parent can reveal the "true history" of the `master` branch.** The first-parent lineage shows you what you would have gotten if you'd peeked at the `master` branch at a particular point in time.
 That's about as close as you can get to viewing the history of the `master` branch in isolation. (But, as we'll see in a moment, there are problems with using `--first-parent` this way.)
 
+#### Beware: fast-forward merges can mix up parent order
+Consider this sample script.
+
+        git init --bare origin
+        git clone origin clone1
+        cd clone1
+
+        echo 0 > file.txt
+        git add file.txt
+        git commit -am "initial commit"
+        git push origin master
+        git checkout -b branch1
+        git push origin branch1
+
+        cd ..
+        git clone origin clone2
+
+        cd clone1
+        git checkout branch1
+        echo 1 > file.txt
+        git commit -am "1 (in clone1)"
+        git push origin branch1
+
+        cd ../clone2
+        git checkout branch1
+        echo 2 > file2.txt
+        git add file2.txt
+        git commit -m "2 (in clone2)"
+        git pull --no-edit origin branch1
+        git push origin branch1
+In this sample, we create an `origin` repository and create two clones `clone1` and `clone2`. (**Imagine that these repositories each belonged to a different engineer.**)
+In `clone1`, we create the initial commit and then an additional commit on `branch1` and push it to the `origin` repository. `clone2` only contains the initial commit, at first.
+When we create a commit on `branch1` in `clone2`, we `pull` from the `origin` repository, creating a merge commit, and then immediately `push` our repository. (This is a very common approach for teams of engineers working directly on the same feature branch, aka topic branch.)
+The `pull` creates a merge commit with a confusing message:
+
+        Merge branch 'branch1` of /tmp/origin into branch1
+Yes, we're merging `branch1` into `branch1`! Specially, we're merging `origin`'s `branch1` into `clone2`'s `branch1`.
+The push from the local `maser` to the remote is a **"fast-forward" merge. In this type of merge, Git skips creating a merge commit, and instead moves `origin`'s `master` branch pointer to point directly to the latest commit from `clone2`.**
+Now what happens when we `git log --first-parent`?
+
+        $ git log --first-parent --oneline
+        83ac7af Merge branch 'branch1` of /tmp/origin into branch1
+        493e104 2 (in clone 2)
+        8a5e558 initial commit
+Uh oh! That's not the true history of `origin`'s `branch1`. Why not? Let's look at the `--graph` output:
+
+        $ git log --graph --oneline
+        *   83ac7af Merge branch 'branch1' of /tmp/origin into branch1
+        |\
+        | * 572edba 1 (in clone1)
+        * | 493e104 2 (in clone2)
+        |/
+        * 8a5e558 initial commit
+The first parent of the merge commit was `clone2`'s commit;`origin`'s `branch1`'s last commit is the *second* parent. That's not what we wanted.
+Typically when this happens, `--graph` makes it pretty clear what's happening, if you can recognize it. (Any time I see a commit message about merging a branch into itself, e.g. `Merging branch X into X`, I remember "oh,yeah, that.")
+When fast-forward merges result in mixed-up parents, `git log --graph` may be the simplest accurate view of the history. If the team is working on a small branch, the graph output should be pretty manageable.
+Alternately, if the team working on your branch doesn't care about merges t o the branch, and especially if you don't care about the *order* of the commits, you might prefer to ignore merges completely with `git log --no-merges`.
+
+        $ git log --no-merges --oneline
+        493e104 2 (in clone2)
+        572edba 1 (in clone1)
+        8a5e558 initial commit
+**It's in chronological order**, which obscures the "true" history of the branch, but if your team doesn't care about that, then neither do I!
+In my experience, `--no-merges` works well only in small, shared branches. But what if your team shares `master` in this way, with lots of engineers regularly pulling and pushing directly to `master`?
+As I understand it, the general consensus is that in that case, your history will be inherently hard to read, and so you should not use Git in that way. There are two better approaches, depending on whether you prefer to `merge` or `rebase`:
+**1. In one approach, every change going into the `master` branch should use a pull requet, which creates a well-formed merge commit.**
+**2. In anothe approach, engineers should pull with `git pull --rebase`.**
+
+### 12.2 Check the difference between two branches
+There are a couple of tricks that one can use for this particular case though. If you check the (extensive, albeit confusing) documentation for `git rev-list` you will find the options `--left-right`, `--left-only`, `--right-only`, `--cherry-mark`, `--cherry-pick`, and `--cherry`.
+The `--left-right` option works with any symmetric difference, i.e., commits selected by `A...B`, which means "all commits that are on branch `A` or branch `B`, excluding any commits that are on *both* branches." This is how `git cherry` does the first part of its thing: it finds commits that are on the symmetric difference. However, `git cherry` goes on to *throw out*(meaning to remove, to get rid of) all the commits that are *"the same"* on both branches, then marks those on one side with `-` and those on the other with `+`. The `--left-right` option marks all commits as either `<` (left side) or `>` (right side).
+Since `rev-list` is the Swiss Army Chainsaw command, it also has the ability to throw out commits that are the same. It has even more abilities too: it can throw out commits on one side entirely, same-or-different. This is what we want in this case: throw out "commits that are the same" (so that we keep only *different* ones); then throw out all "left side" commits (so that we keep only those that are in the right side but not the left side). We get the former with `--cherry-pick`: it keeps only commits that are considered *different*. Then we add `--right-only` to keep only those on the right side, i.e., when we say `firstbranch...secondbranch`, keep only those that are both different *and* in `secondbranch`, which is exactly what `git cherry` does.
+Hence:
+`git rev-list --right-only --cherry-pick firstbranch...secondbranch`
+produces the same commit ID list as:
+`git cherry firstbranch secondbranch`
+(with the single difference being that instead of `+ face0ff...`, it prints `+face0ff`, i.e., no space after the `+` mark).
+This seems pretty silly: instead of just the four words `git cherry` and two branch names, we need `git rev-list` and a bunch of options and two branch names and three periods. We've typed in lots more letters to get pretty much the same thing. So we could just use the shorter command and pipe it to `git log`, but now we get to the tricky bit.
+Log options `--cherry-mark`, `--left-only`, `--right-only`, `--cherry` and `--cherry-pick` that show various selections of similar or dissimilar commits of a `...` (two-branch aka "symmetric difference") log. Also, `--left-right` shows for each commit whether its changes appear only on the left branch, right branch, or both.
+`--cherry`: which is a synonym for `--right-only --cherry-mark --no-merges`. You can also use `--right-only --cherry-pick --no-merges`. The difference is that `--cherry-mark` *marks* the commits (as equivalent or not), while `--cherry-pick` *skips* the equivalent commits. The `git cherry` command is like similar, although I prefer the direct symmetric difference for instruction purposes: `git cherry` is what you use *after* you know all the above.
+<hr>
+The little-used command `git cherry` shows you the commits which haven't yet been cherry-picked. In short, you should just be able to do:
+`git cherry next devel`
+and see output a bit like this:
+
+        + 492508acab7b454eee8b805f8ba906056eede0ff
+        - 5ceb5a9077ddb9e78b1e8f24bfc70e674c627949
+        + b4459544c000f4d51d1ec23f279d9cdb19c1d32b
+        + b6ce3b78e938644a293b2dd2a15b2fecb1b54cd9
+The commits that begin with `+` will be the ones that you *haven't yet* cherry-picked into `next`. In this case, I'd only cherry-picked one commit so far. You might want to add the `-v` parameter to the `git cherry` command, so that it also outputs the subject line of each commit.
+And you wouldn't know of a way to get `cherry` to mark or exclude equivalent commits, would you? `cherry` seems like a plumbing command, but doesn't (appear to) offer many options. For what I'm currently in the middle of, `git cherry` gives me false positives, but `git log --chery-pick` correctly excludes the previously-picked/rebased commits.
+<hr>
+
+#### `git log` and `git rev-list` are very nearly the same command
+In fact, they are built from the same source code, they just set some internal options differently (and `git log` will pretend you said `HEAD` if you don't name any other starting points). Since we're about to pipe the output of `git rev-list` to `git log --pretty='%h %ce'`, maybe we can just do the whole thing in `git log` directly.
+Sure enough, we can. We need all those same options as with `git rev-list`, but now we can just run:
+`git log --cherry-pick --right-only --pretty='%h %ce' firstbranch...secondbranch`
+(you may want `--no-merges` here as well-I'm not sure offhand what `git cherry` does about merges!).
+
+
+
+### 12.3 Why does git status show branch is up-to-date when changes exist upstream
+#### Q
+Changes exist upstream in a tracked branch, but when I type `git status`, it indicates that my local branch is up-to-date. Is this new behavior, did I change a config setting, or is something wrong?
+
+#### A
+What the status is telling you is that you're behind the ref called `origin/master`, which is a *local* ref in your *local* repo. In this case that ref happens to track a branch in some remote, called `origin`, but the status is not telling you anything about the branch on the remote. It's telling you about the ref, which is a commit ID stored on your local filesystem (in this case, it's typically in a file called `.git/refs/remotes/origin/master` in your local repo).
+`git pull` does two operations: first it does a `git fetch` to get up to date with the commits in the remote repo (which updates the `origin/master` ref in your local repo), then it does a `git merge` to merge those commits into the current branch.
+Until you do the `fetch` step (either on its own or via `git pull`) your local repo has no way to know that there are additional commits upstream, and `git status` only looks at your local `origin/master` ref.
+When `git status` say up-to-date, it means "up-to-date with the branch that the current branch tracks", which in this case means "up-to-date with the local ref called `origin/master`". That only equates to "up-to-date with the upstream status that was retrieved last time we did a `fetch` which is not the same as "up-to-date with the latest live status of the upstream".
+Why does it work this way? Well the `fetch` operation is a potentially slow and expensive network operation. The design of Git (and other distributed version control systems) is to avoid network operations when unnecessary, and is completely different model to the typical client-server system many people are used to. It's entirely to use Git offline, with no connection to centralized server, and the output of `git status` reflect this.
+Creating and switching branches ( and checking their status) in Git is supposed to be lightweight, not something that performs a slow network operation to a centralized system.

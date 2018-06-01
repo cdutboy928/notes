@@ -12,7 +12,7 @@ There is no need to trans when in code format
 * Actually there must be blank line both before and after the normal text.
 * To conceal: `au FileType markdown setl conceallevel=2`
 
-##  Text format  
+##  Text format
 * Italics and Bold  
  * \_Italics\_: _Italics_
  * \*\*Bold\*\*: **Bold**
