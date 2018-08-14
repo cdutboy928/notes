@@ -1,0 +1,6 @@
+
+BSSID, First time seen, Last time seen, channel, Speed, Privacy, Cipher, Authentication, Power, # beacons, # IV, LAN IP, ID-length, ESSID, Key
+50:FA:84:57:2C:90, 2018-07-10 00:56:29, 2018-07-10 00:56:55,  1,  54, WPA2, CCMP,PSK, -53,       19,        5,   0.  0.  0.  0,  12, TP-LINK_2C90, 
+
+Station MAC, First time seen, Last time seen, Power, # packets, BSSID, Probed ESSIDs
+

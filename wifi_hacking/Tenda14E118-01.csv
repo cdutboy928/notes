@@ -1,0 +1,6 @@
+
+BSSID, First time seen, Last time seen, channel, Speed, Privacy, Cipher, Authentication, Power, # beacons, # IV, LAN IP, ID-length, ESSID, Key
+08:40:F3:C4:39:68, 2018-07-01 15:17:04, 2018-07-01 21:26:11,  2,  54, WPA2, CCMP,PSK, -53,    59780,        0,   0.  0.  0.  0,  12, Tenda_C43968, 
+
+Station MAC, First time seen, Last time seen, Power, # packets, BSSID, Probed ESSIDs
+

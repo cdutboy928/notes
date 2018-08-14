@@ -1,0 +1,8 @@
+
+BSSID, First time seen, Last time seen, channel, Speed, Privacy, Cipher, Authentication, Power, # beacons, # IV, LAN IP, ID-length, ESSID, Key
+84:39:BE:3A:D2:3E, 2018-06-23 23:43:55, 2018-06-24 00:04:25,  1,  54, WPA , CCMP,PSK,  -9,     7120,      556,   0.  0.  0.  0,  13, Router_3AD23E, 
+
+Station MAC, First time seen, Last time seen, Power, # packets, BSSID, Probed ESSIDs
+08:ED:B9:E7:A8:CB, 2018-06-23 23:45:50, 2018-06-24 00:03:55,  -1,       22, 84:39:BE:3A:D2:3E,
+50:04:B8:46:49:B4, 2018-06-23 23:43:55, 2018-06-24 00:04:24,   0,     3364, 84:39:BE:3A:D2:3E,
+

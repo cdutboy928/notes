@@ -419,7 +419,7 @@ If you want to see more information about a particular remote, you can use the `
         Local ref configured for 'git push':
             master pushes to master (up to date)
 It lists the URL for the remote repository as well as the tracking branch information. The command helpfully tells you that if you're on the master branch and you run `git pull`, it will automatically merge in the master branch on the remote after it fetches all the remote references. It also lists all the remote references it has pulled down.
-That is a simple example you're likely to encounter. When you're using Git more heavily, however, you may see more information from `git remtoe show`:
+That is a simple example you're likely to encounter. When you're using Git more heavily, however, you may see more information from `git remote show`:
         
         $ git remote show origin
         * remote origin
@@ -1217,10 +1217,10 @@ git push uses:
         `HEAD:refs/heads/<head>`
 
 ##### CONFIGURED REMOTE-TRACKING BRANCHES
-You often interact with the same remote repository by regularly and repeatedly fetching from it. In order to keep track of the progress of such a remote repository, `git fetch` allows you to configure `remtoe.<repository>.fetch` configuration variables.
+You often interact with the same remote repository by regularly and repeatedly fetching from it. In order to keep track of the progress of such a remote repository, `git fetch` allows you to configure `remote.<repository>.fetch` configuration variables.
 Typically such a variable may look like this:
 
-        [remtoe "origin"]
+        [remote "origin"]
                 fetch = +refs/heads/*:refs/remotes/origin/*
 ![configuration_variables](configuration_variables.png)
 This configuration is used in two ways:
@@ -2098,7 +2098,7 @@ A revision parameter `<rev>` typically, but not necessarily, names a commit obje
 * `@`
     `@` alone is a shortcut for `HEAD`.
 * `<refname>@{<date>}`, e.g. `master@{yesterday}`, `HEAD@{5 minutes ago}`
-    A ref followed by the suffix `@` with a date specification enclosed in a brace pair (e.g. `{yesterday}`, `{1 month 2 weeks 3 days 1 hour 1 second ago}` or `{1979-02-26 18:30:00}`) specifies the value of the ref at a pior point in time. This suffix may only be used immediately following a ref name and the ref must have an existing log (`$GIT_DIR/logs/<ref>`). Note that this looks up the state of your **local** ref at a given time; e.g., what was in your local `master` branch last week. If you want to look at commits made during certain times, see `--since` and `--until`.
+    A ref followed by the suffix `@` with a date specification enclosed in a brace pair (e.g. `{yesterday}`, `{1 month 2 weeks 3 days 1 hour 1 second ago}` or `{1979-02-26 18:30:00}`) specifies the value of the ref at a prior point in time. This suffix may only be used immediately following a ref name and the ref must have an existing log (`$GIT_DIR/logs/<ref>`). Note that this looks up the state of your **local** ref at a given time; e.g., what was in your local `master` branch last week. If you want to look at commits made during certain times, see `--since` and `--until`.
 * `<refname>@{<n>}`, e.g. `master@{1}`
     A ref followed by the suffix `@` with an ordinal specification enclosed in a brace pair (e.g. `{1}`, `{15}`) specifies the n-th prior value of that ref. For example `master@{1}` is the immediate prior value of `master` while `master@{15}` is the 15th prior value of `master`. This suffix may only be used immediately following a ref name and the ref must have an existing log (`$GIT_DIR/logs/<refname>`).
 * `@{<n>}`, e.g. `@{1}`
@@ -2238,6 +2238,76 @@ Here are a handful of examples using the Loeliger illustration above, with each 
     = B ^B^1 ^B^2 ^B^3
     = B ^D ^E ^F          B
     F^! D  = F ^I ^J D           G H D F
+
+
+#### `man git show-ref`
+##### NAME
+`git show-ref`: List references in a local repository.
+
+##### Synopsis
+
+        git show-ref [-q|--quiet] [--verify] [--head] [-d|--dereference] [-s|--hash[=<n>]] [--abbrev[=<n>]] [--tags] [--heads] [--] [<pattern>...]
+        git show-ref --exclude-existing[=<pattern>]
+
+##### Description
+Displays references available in a local repository along with the associated commit IDs. Results can be filtered using a pattern and tags can be dereferenced into object IDs. Additionally, it can be used to test whether a particular ref exists.
+By default, shows the tags, heads, and remote refs.
+The `--exclude-existing` from is a filter that does the inverse. It reads refs from stdin, one ref per line, and shows those that don't exist in the local repository.
+Use of this utility is encouraged in favor of directly accessing files under the `.git` directory.
+
+##### Options
+* `--head`
+    Show the `HEAD` reference, even if it would normally be filtered out.
+* `--tags`, `--heads`
+    Limit to `refs/heads` and `refs/tags`, respectively. These options are not mutually exclusive; when given both, references stored in `refs/heads` and `refs/tags` are displayed.
+* `-d`, `--dereference`
+    Dereference tags into object IDs as well. They will be shown with `^{}` appended.
+* `-s`, `--hash[=<n>]`
+    Only show the SHA-1 hash, not the reference name. When combined with `--dereference` the dereferenced tag will still be shown after the SHA-1.
+* `--abbrev[=<n>]`
+    Abbreviate the object name. When using `--hash`, you do not have to say `--hash --abbrev`; `--hash=n` would do.
+* `-q`, `--quiet`
+    Do not print any results to stdout. When combined with `--verigy` this can be used to silently check if a reference exists.
+* `<pattern>...`
+    Show references matching one or more patterns. Patterns are matched from the end of the full name, and only complete parts are matched, e.g. `master` matches `refs/heads/master`, `refs/remotes/origin/master`, `refs/tags/jedi/master` but not `refs/heads/mymaster` or `refs/remotes/master/jedi`.
+
+##### OUTPUT
+The output is in the format:`<SHA-1 ID> <space> <reference name>`.
+
+        $ git show-ref --head --dereference
+        832e76a9899f560a90ffd62ae2ce83bbeff58f54 HEAD
+        832e76a9899f560a90ffd62ae2ce83bbeff58f54 refs/heads/master
+        832e76a9899f560a90ffd62ae2ce83bbeff58f54 refs/heads/origin
+        3521017556c5de4159da4615a39fa4d5d2c279b5 refs/tags/v0.99.9c
+        6ddc0964034342519a87fe013781abf31c6db6ad refs/tags/v0.99.9c^{}
+        055e4ae3ae6eb344cbabf2a5256a49ea66040131 refs/tags/v1.0rc4
+        423325a2d24638ddcc82ce47be5e40be550f4507 refs/tags/v1.0rc4^{}
+
+When using `--hash` (and not `--dereference`) the output format is: `<SHA-1 ID>`
+
+        $ git show-ref --heads --hash
+        2e3ba0114a1f52b47df29743d6915d056be13278
+        185008ae97960c8d551adcd9e23565194651b5d1
+        03adf42c988195b50e1a1935ba5fcbc39b2b029b
+        ...
+##### Example
+To show all references called `master`, whether tags or heads or anything else, and regardless of how deep in the reference naming hierarchy they are, use:
+        `git show-ref master`
+This will show `refs/heads/master` but also `refs/remote/other-repo/master`, if such references exist.
+When using the `--verify` flag, the command requires an exact path:
+        `git show-ref --verify refs/heads/master`
+will only match the exact branch called `master`.
+If nothing matches, `git show-ref` will return an error code of `1`, and in the case of verification, it will show an error message.
+For scripting, you can ask it to be quiet with the `--quiet` flag, which allows you to do things like
+        `git show-ref --quiet --verigy -- "refs/heads/$headname" || echo "$headname is not a valid branch"`
+to check whether a particular branch exists or not (notice how we don't actually want to show any results, and we want to use the full refname for it in order to not trigger the problem with ambiguous partial matches).???
+To show only tags, or only proper branch heads, use `--tags` and/or `--heads` respectively (using both means that it shows tags and heads, but not other random references under the `refs/` subdirectory).
+To do automatic tag object dereferencing, use the `-d` or `--dereference` flag, so you can do
+        `git show-ref --tags --dereference`
+to get a listing of all tags together with what they dereference.
+
+##### Files
+`.git/refs/*`, `.git/packed-refs`
 
 ### [10.4 Git Internals-Packfiles](https://git-scm.com/book/en/v2/Git-Internals-Packfiles)
 **Packfiles**
@@ -2388,6 +2458,21 @@ However, you can use namespaces (or directories) to accomplish something like th
                 fetch = +refs/heads/master:refs/remotes/origin/master
                 fetch = +refs/heads/qa/*:refs/remotes/origin/qa/*
 If you have a complex workflow process tha has a QA team pushing branches, developers pushing branches, and integration teams pushing and collaborating on remote branches, you can namespace them easily this way.
+
+##### Example
+When you clone a repository sets up the default refspec, you can see it in `.git/config` in the repository:
+
+        [core]
+            repositoryformatversion = 0
+            filemode = true
+            bare = false
+            logallrefupdates = true
+        [remote "origin"]
+            url = https://git.example.com/example.git
+            fetch = +refs/heads/*:refs/remotes/origin/*
+        [branch "master]
+            remote = origin
+            merge = refs/heads/master
 #### Pushing Refspecs
 It's nice that you can fetch namespaced references that way, but how does the QA team get their branches into a `qa/` namespace in the first place? You accomplish that by using refspecs to push.
 If the QA team wants to push their `master` branch to `qa/master` on the remote server, they can run:
@@ -2554,8 +2639,8 @@ git-rev-list: Lists commit objects in reverse chronological order.
 #### Synopsis
 
 #### Description
-List commit that are reachable by following the `parent` links from the given commit(s), but exclude commits that are reachable from the one(s) given with a `^` in front of them. The output is given in reverse chronological order by default.
-You can think of this as a set operation. Commits given on the command lien form a set of commits that are reachable from any of them, and then commits reachable from any of the ones given with `^` in front are subtracted from that set. The remaining commits are what comes out in the command's output. Various other options and paths parameters can be used to further limit the result.
+List commits that are reachable by following the `parent` links from the given commit(s), but exclude commits that are reachable from the one(s) given with a `^` in front of them. The output is given in reverse chronological order by default.
+You can think of this as a set operation. Commits given on the command line form a set of commits that are reachable from any of them, and then commits reachable from any of the ones given with `^` in front are subtracted from that set. The remaining commits are what comes out in the command's output. Various other options and paths parameters can be used to further limit the result.
 Thus, the following command:
 
         $ git rev-list foo bar ^baz
@@ -2685,7 +2770,6 @@ The `delete` subcommand deletes single entries from the reflog. Its argument mus
 The `exist` subcommand checks whether a ref has a reflog. It exits with zero status if the reflog exists, and non-zero status if it does not.
 
 #### Options
-
 ##### Options for `show`
 `git reflog show` accepts any of the options accepted by `git log`.
 ![git reflog](reflog.png)
@@ -2695,7 +2779,7 @@ The `exist` subcommand checks whether a ref has a reflog. It exits with zero sta
 * `--all`
     Process the reflogs of all references.
 * `--expire=<time>`
-    Prune entries older than the specified time. It this option is not specified, the expiration time is taken from the configuration setting `gc.reflogExpire`, which in turn defaults to 90 days. `--expire=all` prunes entries regardless of their age; `--expire=never` turns off pruning of reachable entries (but see `--expire-unreachable`).
+    Prune entries older than the specified time. If this option is not specified, the expiration time is taken from the configuration setting `gc.reflogExpire`, which in turn defaults to 90 days. `--expire=all` prunes entries regardless of their age; `--expire=never` turns off pruning of reachable entries (but see `--expire-unreachable`).
 * `--expire-unreachable=<time>`
     Prune entries older than `<time>` that are not reachable from the current tip of the branch. If this option is not specified, the expiration time is taken from the configuration setting `gc.reflogExpireUnreachable`, which in turn defaults to 30 days. `--expire-unreachable=all` prunes unreachable entries regardless of their age; `--expire-unreachable=never` turns off early pruning of unreachable entries (but see `--expire`).
 * `--updateref`
@@ -2712,7 +2796,203 @@ The `exist` subcommand checks whether a ref has a reflog. It exits with zero sta
 
 ##### Options for `delete`
 `git reflog delete` accepts options `--updateref`, `--rewrite`, `-n`, `--dry-run`, and `--verbose`, with the same meaning as when they are used with `expire`.
+### 11.4 `man git branch`
+#### NAME
+`git branch`: List, create, or delete branches.
+
+#### Synopsis
+
+        git branch [--color[=<when>] | --no-color] [-r | -a] [--list] [-v [--abbrev=<length> | --no-abbrev]] [--column[=<options>] | --no-column] [(--merged | --no-merged | --contains) [<commit>]] [--sort=<key>] [--points-at <object>] [<pattern>...]
+        git branch [--set-upstream | --track | --no-track] [-l] [-f] <branchname> [<start-point>]
+        git branch (--set-upstream-to=<upstream> | -u <upstream>) [<branchname>]
+        git branch --unset-upstream [<branchname>]
+        git branch (-m | -M) [<oldbranch>] <newbranch>
+        git branch (-d | -D) [-r] <branchname>...
+        git branch --edit-description [<branchname>]
+
+#### Description
+If `--list` is given, or if there are no non-option arguments, existing branches are listed; the current branch will be highlighted with an asterisk. Option `-r` causes the remote-tracking branches to be listed,and option `-a` shows both local and remote branches.
+![git branch --list](git_branch_list.png)
+If a `<pattern>` is given, it is used as a shell wildcard to restrict the output to matching branches. If multiple patterns are given, a branch is shown if it matches any of the patterns. Note that when providing a `<pattern>`, you must use `--list`; otherwise the command is interpreted as branch creation.
+With `--contains`, shows only the branches that contain the named commit (in other words, the branches whose tip commits are descendants of the named commit). With `--merged`, only branches merged into the named commit (i.e. the branches whose tip commits are reachable from the named commit) will be listed. With `--no-merged` only branches not merged into the named commit will be listed. If the `<commit>` argument is missing it defaults to `HEAD` (i.e. the tip of the current branch).
+The command's second form creates a new branch head named `<branchname>` which points to the current `HEAD`, or `<start-point>` if given.
+Note that this will create the new branch, but it will not switch the working tree to it; use `git checkout <newbranch>` to switch to the new branch.
+When a local branch is started off a remote-tracking branch, Git sets up the branch (specifically the `branch.<name>.remote` and `branch.<name>.merge` configuration entries) so that `git pull` will appropriately merge from the remote-tracking branch. [See branch refspecs](#branch_refspecs) This behavior may be changed via the global `branch.autoSetupMerge` configuration flag. That setting can be overridden by using the `--track` and `--no-track` options, and changed later using `git branch --set-upstream-to`.
+With a `-m` or `-M` option, `<oldbranch>` will be renamed to `<newbranch>`. If `<oldbranch>` had a corresponding reflog, it is renamed to match `<newbranch>`, and a reflog entry is created to remember the branch renaming. If `<newbranch>` exists, `-M` must be used to force the rename to happen.
+With `-d` or `-D` option, `<branchname>` will be deleted. You may specify more than one branch for deletion. If the branch currently has a reflog then the reflog will also be deleted.
+Use `-r` together with `-d` to delete remote-tracking branches. Note, that it only makes sense to delete remote-tracking branches if they no longer exist in the remote repository or if `git fetch` was configured not to fetch them again. See also the `prune` subcommand of `git remote` for a way to clean up all obsolete remote-tracking branches.
+
+
+
+#### Options
+* `-d`, `--delete`
+    Delete a branch. The branch must be fully merged in its upstream branch, or in `HEAD` if no upstream was set with `--track` or `--set-upstream`.
+* `-D`
+    Shortcut for `--delete --force`.
+* `-l`, `--create-reflog`
+    Create the branch's reflog. This activates recording of all changes made to the branch ref, enabling use of date based sha1 expressions such as `<branchname>@{yesterday}`. Note that in non-bare repositories, reflogs are usually enabled by default by the `core.logallrefupdates` comfig option.
+* `-f`, `--force`
+    Reset `<branchname>` to `<startpoint>` if `<branchname>` exists already. Without `-f` git branch refuses to change an existing branch. In combination with `-d` (or `--delete`), allow deleting the branch irrespective of its merged status. In combination with `-m` (or `--move`), allow renaming the branch even if the new branch name already exists.
+* `-m`, `--move`
+    Move/rename a branch and the corresponding reflog.
+* `-M`
+    Shortcut for `--move --force`.
+* `--color[=<when>]`
+    Color branches to highlight current, local, and remote-tracking branches. The value must be always (the default), never, or auto.
+* `--no-color`
+    Turn off branch colors, even when the configuration file gives the default to color output. Same as `--color=never`.
+* `--column[=<options>]`, `--no-column`
+    Display branch listing in columns. See configuration variable `column.branch` for option syntax. `--column` and `--no-column` without options are equivalent to `always` and `never` respectively.
+    This option is only applicable in non-verbose mode.
+* `-r`, `--remotes`
+    List or delete (if used with `-d`) the remote-tracking branches.
+* `-a`, `--all`
+    List both remote-tracking branches and local branches.
+* `--list`
+    Active the list mode.`git branch <pattern>` would try to create a branch, use `git branch --list <pattern>` to list matching branches.
+* `-v`, `-vv`, `--verbose`
+    When in list mode, show sha1 and commit subject line for each head, along with relationship to upstream branch (if any). If given twice, print the name of the upstream branch, as well (see also `git remote show <remote>`).
+* `-q`, `--quiet`
+    Be more quiet when creating or deleting a branch, suppressing non-error messages.
+* `--abbrev=<length>`
+    Alter the sha1's minimum display length in the output listing. The default value is 7 and be overridden by the `core.abbrev` config option.
+* `--no-abbrev`
+    Display the full sha1s in the output listing rather than abbreviation them.
+* `-t`, `--track`
+    When creating a new branch, set up `branch.<name>.remote` and `branch.<name>.merge` configuration entries to mark the start-point branch as "upstream" from the new branch. This configuration will tell git to show the relationship between the two branches in `git status` and `git branch -v`. Furthermore, it directs `git pull` without arguments to pull from the upstream when the new branch is checked out.
+    This behavior is the default when the start point is a remote-tracking branch. Set the `branch.autoSetupMerge` configuration variable to `false` if you want `git checkout` and `git branch` to always behave as if `--no-track` were given. Set it to `always` if you want this behavior when the start-point is either a local or remote-tracking branch.
+* `--no-track`
+    Do not set up "upstream" configuration, even if the `branch.autoSetupMerge` configuration variable is true.
+* `--set-upstream`
+    If specified branch does not exist yet or if `--force` has been given, acts exactly like `--track`. Otherwise  sets up configuration like `--track` would when creating the branch, except that where branch points to is not changed.
+* `-u <upstream>`, `--set-upstream-to=<upstream>`
+    Set up `<branchname>`'s tracking information, so `<upstream>` is considered `<branchname>`'s upstream branch. If no `<branchname>` is specified, then it defaults to the current branch.
+* `--unset-upstream`
+    Remove the upstream information for `<branchname>`. If no branch is specified it defaults to the current branch.
+* `--edit-description`
+    Open an editor and edit the text to explain what the branch is for, to be used by various other commands (e.g. `format-patch`, `request-pull`, and `merge` (if enabled)). Multi-line explanations may be used.
+* `--contains [<commit>]`
+    Only list branches which contain the specified commit (`HEAD` if not specified). Implies `--list`.
+* `--merged [<commit>]`
+    Only list branches whose tips are reachable from the specified commit (`HEAD` if not specified). Implies `--list`.
+* `--no-merged [<commit>]`
+    Only list branches whose tips are not reachable from the specified commit (`HEAD` if not specified). Implies `--list`.
+* `<branchname>`
+    The name of the branch to create or delete. The new branch name must pass all checks defined by `git-check-ref-format`. Some of these checks may restrict the characters allowed in a branch name.
+* The new branch head will point to this head. It may be given as a branch name, a commit-id, or a tag. If this option is omitted, the current `HEAD` will be used instead.
+* `<oldbranch>`
+    The name of an existing branch to rename.
+* `<newbranch>`
+    The new name for an existing branch. The same restrictions as for `<branchname>` apply.
+* `-sort=<key>`
+    Sort based on the key given. Prefix `-` to sort in descending order of the value. You may use the `--sort=<key>` option multiple times, in which case the last key becomes the primary key. The keys supported are the same as those in `git for-each-ref`. Sort order defaults to sorting based on the full refname (including `ref/...` prefix). This lists detached `HEAD` (if present) first, then local branches and finally remote-tracking branches.
+* `--points-at <object>`
+    Only list branches of the given object.???
+
+#### Examples
+Start development from a known tag
+
+        $ git clone git://git.kernel.org/pub/scm/.../linux-2.6 my2.6
+        $ cd my2.6
+        $ git branch my2.6.14 v2.6.14 (1)
+        $ git checkout my2.6.14
+1. This step and the next one could be combined into a single step with `checkout -b my2.6.14 v.2.6.14`.
+
+Delete an unneeded branch
+
+        $ git clone git://git.kernel.org/.../git.git my.git
+        $ cd my.git
+        $ git branch -d -r origin/todo origin/html origin/man   (1)
+        $ git branch -D test
+1. Delete the remote-tracking branches `todo`, `html` and `man`. The next `fetch` or `pull` will create them again unless you configure them not to. See `git fetch`.
+2. Delete the `test` branch even if the `master` branch (or whichever branch is currently checked out) does not have all commits from the `test` branch.
+
+#### Notes
+If you are creating a branch that you want to checkout immediately, it is easier to use the `git checkout` command with its `-b` option to create a branch and check it out with a single command.
+The options `--contains`, `--merged` and `--no-merged` serve three related but different purposes:
+* `--contains <commit>` is used to find all branches which will need special attention if `<commit>` were to be rebased or amended, since those branches contain the specified `<commit>`.
+* `--merged` is used to find all branches which can be safely deleted, since those branches are fully contained by `HEAD`.
+* `--no-merged` is used to find branches which are candidates for merging into HEAD, since those branches are not fully contained by `HEAD`.
+
 ### 11.4 `man git log`
+#### Name
+`git log`: Show commit logs
+
+#### Synopsis
+`git log [<options>] [<resvision range>] [[--] <path>...]`
+
+#### Description
+Shows the commit logs.
+The command takes options applicable to the `git rev-list` command to control what is shown and how, and options applicable to the `git diff-*` commands to control how the changes each commit introduces are shown.
+
+#### Options
+* `--follow`
+    Continue listing the history of a file beyond renames (works only for a single file).
+* `--no-decorate`, `--decorate[=short|full|auto|no]`
+    Print out the ref names of any commits that are shown. If `short` is specified, the ref name prefixes `refs/heads/`, `refs/tags/` and `refs/remotes` will not be printed. If `full` is specified, the full ref name (including prefix) will be printed. If `auto` is specified, then if the output is going to terminal, the ref names are shown as if `short` were given, otherwise no ref names are shown. The default option is `short`.
+* `--source`
+    Print out the ref name given on the command line by which each commit was reached.
+* `--use-mailmap`
+    Use mailmap file to map author and committer names and email addresses to canonical real names and email addresses.
+    The `.mailmap` feature is used to coalesce together commits by the same person in the shortlog, where their name and/or email address was spelled differently.
+    If the file `.mailmap` exists at the toplevel of the repository, or at the location pointed to by the `mailmap.file` or `mailmap.blob` configuration options, it is used to map author and committer names and email addresses to canonical real names and email addresses.
+    In the simple form, each line in the file consists of the canonical real name of an author, whitespace, and an email address used in the commit (enclosed by `<` and `>`) to map to the name. For example:
+    `Proper Nmae <commit@email.xx>`
+    The more complex forms are:
+    `<proper@email.xx> <commit@email.xx>`
+    which allows mailmap to replace only the email part of a commit, and:
+    `Proper Name <propter@email.xx> <commit@email.xx>`
+    which allows mailmap to replace both the name and the email of a commit matching the specified commit email address, and:
+    `Proper Name <proper@email.xx> Commit Name <commit@email.xx>`
+    which allows mailmap to replace both the name and the email of a commit matching both the specified commit name and email address.
+    Example 1: Your history contains commits by two authors, Jane and Joe, whose names appear in the repository under several forms:
+    `Joe Developer <joe@example.com>`
+    `Joe R. Developer <joe@example.com>`
+    `Jane Doe <jane@example.com>`
+    `Jane Doe <jane@laptop.(none)>`
+    `Jane D. <jane@desktop.(none)>`
+    Now suppose that Joe wants his middle name initial used, and Jane prefers her family name fully spelled out. A proper `.mailmap` file would look like:
+    `Jane Doe <jane@destop.(none)>`
+    `Joe R. Developer <joe@example.com>`
+    Note how there is no need or an entry for `<jane@laptop.(none)>`, because the real name of that author is already correct.
+    Example 2: Your repository contains commits from the following authors:
+    `nick1 <bug@company.xx>`
+    `nick2 <bug@company.xx>`
+    `nick2 <nick2@company.xx>`
+    `santa <me@company.xx>`
+    `claus <me@company.xx>`
+    `CTO <cto@coompany.xx>`
+    Then you might want a `.mailmap` file that looks like:
+    `<cto@company.xx>       <cto@coompany.xx>`
+    `Some Dude <some@dude.xx>       nick1 <bugs@company.xx>`
+    `Other Author <other@author.xx>    nick2 <bugs@company.xx>`
+    `Other Authorr <other@author.xx>    <nick2@company.xx>`
+    `Santa Claus <santa.claus@northpole.xx> <me@company.xx>`
+    Use hash `#` for comments that are either on their own line, or after the email address.
+* `--full-diff`
+    Without this flag, `git log -p <path>...` shows commits that touch the specified paths, and diff about the same specified paths. With this, the full diff is shown for commits that touch the specified paths; this means that `<path>...` limits only commits, and doesn't limit diff for those commits.
+* `-L <start>,<end>:<file>`, `-L :<funcname>:<file>`
+    Trace the evolution of the line range given by `<start>,<end>` (or the function name regex `<funcname>`) within the `<file>`. You may not give any pathspec limiters. This is currently limited to a walk starting from a single revision, i.e., you may only give zero or one positive revision arguments. You can specify this option more than once.
+    * `<start>` or `<end>` is number, it specifies an absolute line number (lines count from 1).
+    * `/regex/`
+        This form will use the first line matching the given POSIX regex. If `<start>` is a regex, it will search from the end of the previous `-L` range, if any, otherwise from the start of file. If `<start>` is `^/regex/`, it will search from the start of file. If `<end>` is a regex, it will search starting at the lien given by `<start>`.
+    * `+offset`, or `-offset`
+        This is only valid for `<end>` and will specify a number of lines before or after the lien given by `<start>`.
+    If `:<funcname>` is given in place of `<start>` and `<end>`, it is a regular expression that denotes the range form the first funcname line that matches `<funcname>`, up to the next funcname line.
+    `:<funcname>` searches from the end of the previous `-L` range, if any, otherwise from the start of file. `^:<funcname>` searches from the start of file.
+* `<revision range>`
+    Show only commits in the specified revision range. When no `<revision range>` is specified, it defaults to `HEAD` (i.e. the whole history leading to the current commit). `origin..HEAD` specifies all the commits reachable from the current commit (i.e. `HEAD`), but not from `origin`. For a complete list of ways to spell `<revision range>`, see the *Specifying Ranges* section of `gitrevisions`.
+* `[--] <path>...`
+    Show only commits that are enough to explain how the files that match the specified paths came to be. See *History Simplification* below for details and other simplification modes.
+    Paths may need to be prefixed with `--` to separate them from options or the revision range, when confusion arises.
+
+#### Commit Limiting
+Besides specifying a range of commits that should be listed using the special notations explained in the description, additional commit limiting may be applied.
+Using more options generally further limits the output (e.g. `--since=<date1>` limits to commits newer than `<date1>`, and using it with `--grep=<pattern>` further limits to commits whose log message has a line that matches `<pattern>`), unless otherwise noted.
+Note that these are applied before commit ordering and formatting options, such as `--reverse`.
+
+
+
 
 ### 11.5 `man git cherry-pick`
 #### NAME
@@ -2747,51 +3027,52 @@ See git-merge for some hints on resolving such conflicts.
         git merge --continue
 
 #### Description
-Incorporates changes from the named commits (since the time their histories diverged from the current branch) into the current branch. This command is used by `git pull` to incorporate changes from another repository and can be used by hand to merge changes from one branch into another.
+**Incorporates changes from the named commits (since the time their histories diverged from the current branch)** **into the current branch**. This command is used by `git pull` to incorporate changes from another repository and can be used by hand to merge changes from one branch into another.
 Assume the following history exists and the current branch is `master`:
 
 
                      A---B---C topic
                     /
                D---E---F---G master
-Then `git merge topic` will replay the changes made on the `topic` branch since it diverged from `master` (i.e., `E`) until its current commit (`C`) on top of `master`, and record the result in a new commit along with the names of the two parent commits and a log message from the user describing the changes.
+Then `git merge topic` will replay the changes made on the `topic` branch since it diverged from `master` (i.e., `E`) until its current commit (`C`) on top of `master`, **and record the result in a new commit along with the names of the two parent commits and a log message from the user describing the changes.**
 
 
                      A---B---C topic
                     /         \
                D---E---F---G---H master
 The second syntax (`<msg> HEAD <commit>...`) is supported for historical reasons. Do not use it from the command line or in new scripts. It is the same as `git merge -m <msg> <commit>...`.
-The third syntax (`git merge --abort`) can only be run after the merge has resulted in conflicts. `git merge --abort` will abort the merge process and try to reconstruct the pre-merge state. However, if there were uncommitted changes when the merge started (and especially if those changes were further modified after the merge was started), `git merge --abort` will in some cases be unable to reconstruct the original (pre-merge) changes. Therefore:
+The third syntax (`git merge --abort`) **can only be run after the merge has resulted in conflicts.** `git merge --abort` **will abort the merge process and try to reconstruct the pre-merge state.** However, **if there were uncommitted changes when the merge started (and especially if those changes were further modified after the merge was started), `git merge --abort` will in some cases be unable to reconstruct the original (pre-merge) changes.** Therefore:
 **Warning**: Running `git merge` with non-trivial uncommitted changes is discouraged: while possible, it may leave you in a state that is hard to back out of in the case of a conflict.
 
 #### Options
 * `--commit`, `--no-commit`
     Perform the merge and commit the result. This option can be used to override `--no-commit`.
-    With `--no-commit` perform the merge but pretend the merge failed and do not autocommit, to give the user a chance to inspect and further tweak the merge result before committing.
+    **With `--no-commit` perform the merge but pretend the merge failed and do not autocommit, to give the user a chance to inspect and further tweak the merge result before committing.**
 * `--edit`, `-e`, `--no-edit`
-    Invoke an editor before committing successful mechanical merge to further edit the auto-generated merge message, so that the user can explain and justify the merge. The `--no-edit` option can be used to accept the auto-generated message (this is generally discouraged). The `--edit` (or `-e`) option is still useful if you are giving a draft message with the `-m` option from the command line and want to edit it in the editor.
+    **Invoke an editor before committing successful mechanical merge to further edit the auto-generated merge message**, so that the user can explain and justify the merge. **The `--no-edit` option can be used to accept the auto-generated message** (this is generally discouraged). The `--edit` (or `-e`) option is still useful if you are giving a draft message with the `-m` option from the command line and want to edit it in the editor.
     Older scripts may depend on the historical behavior of not allowing the user to edit the merge log message. They will see an editor opened when they run `git merge`. To make it easier to adjust such scripts to the updated behavior, the environment variable `GIT_MERGE_AUTOEDIT` can be set to `no` at the beginning of them.
 * `-ff`
-    When the merge resolves as a fast-forward, only update the branch pointer, without creating a merge commit. This is the default behavior.
+    **When the merge resolves as a fast-forward**, only update the branch pointer, without creating a merge commit. This is the default behavior.
 * `--no-ff`
     Create a merge commit even when the merge resolves as a fast-forward. This is the default behavior when merging an annotated (and possibly signed) tag.
 * `--ff-only`
-    Refuse to merge and exit with a non-zero status unless the current `HEAD` is already up-to-date or the merge can be resolved as a fast-forward.
+    **Refuse to merge and exit with a non-zero status unless the current `HEAD` is already up-to-date or the merge can be resolved as a fast-forward.**
 * `--log[=<n>]`, `--no-log`
-    In addition to branch names, populate the log message with one-line descriptions from at most <n> actual commits that are being merged. See also `git-fmt-merge-msg`.
-    With `--no-log` do not list one-line descriptions from the actual commits being merged.
+    **In addition to branch names, populate the log message with one-line descriptions from at most <n> actual commits that are being merged.** See also `git-fmt-merge-msg`.
+    **With `--no-log` do not list one-line descriptions from the actual commits being merged**.
 * `--stat`, `-n`, `--no-stat` ???
-    Show a diffstat at the end of the merge. The diffstat is also controlled by the configuration option merge.stat.
+    **Show a diffstat at the end of the merge.** The diffstat is also controlled by the configuration option merge.stat.
     With `-n` or `--no-stat` do not show a diffstat at the end of the merge.
 * `--squash`, `--no-squash`
-    Produce the working tree and index state as if a real merge happened (except for the merge information), but do not actually make a commit, move the `HEAD`, or record `$GIT_DIR/MERGE_HEAD` (to cause the next `git commit` command to create a merge commit). This allows you to create a single single commit on top of the current branch whose effect is the same as merging another branch (or more in case of an octopus).
-    With `--no-squash` perform the merge and commit the result. This option can be used to override `--squash`.
+    **Produce the working tree and index state as if a real merge happened (except for the merge information), but do not actually make a commit, move the `HEAD`, or record `$GIT_DIR/MERGE_HEAD` (to cause the next `git commit` command to create a merge commit).** This allows you to create a single single commit on top of the current branch whose effect is the same as merging another branch (or more in case of an octopus).
+    **With `--no-squash` perform the merge and commit the result.** This option can be used to override `--squash`.
     This is a way to merge all changes from one branch into another, but squash to a single commit at the same time.
     A word of caution: this works, but the default commit message includes the log from the branch being merged. The problem is it looks similar to the format you normally see where the entire text shown does not actually become part of the commit message, but in this case it does. So if you don't want all that, you need manually remove all of it from your commit message. I should have tested this before using it.
 * `-s <strategy>`, `--strategy=<strategy>`
-    Use the given merge strategy; can be supplied more than once to specify them in the order they should be tried. If there is no `-s` option, a built-in list of strategies is used instead (`git merge-recursive` when merging a single head, `git merge-octopus` otherwise).
+    Use the given merge strategy; can be supplied more than once to specify them in the order they should be tried. **If there is no `-s` option, a built-in list of strategies is used instead (`git merge-recursive` when merging a single head, `git merge-octopus` otherwise)**.
 * `-X <option>`, `--strategy-option=<option>`
     Pass merge strategy specific option through to the merge strategy.
+    `git merge -s recursive -X ours` and `git merge -X ours` both are OK.
 * `--summary`, `--no-summary`
     Synonyms to `--stat` and `--no-stat`; these are deprecated and will be remove in the future.
 * `-q`, `--quiet`
@@ -2801,45 +3082,157 @@ The third syntax (`git merge --abort`) can only be run after the merge has resul
 * `--progress`, `--no-progress`
     Turn progress on/off explicitly. If neither is specified, progress is shown if standard error is connected to a terminal. Note that not all merge strategies may support progress reporting.
 * `--allow-unrelated-histories`
-    By default, `git merge` command refuses to merge histories that do not share a common ancestor. This option can be used to override this safety when merging histories of two projects that started their lives independently. As that is a very rare occasion, no configuration variable to enable this be default exists and will not be added.
+    By default, `git merge` command refuses to merge histories that do not share a common ancestor. This option can be used **to override this safety when merging histories of two projects that started their lives independently.** As that is a very rare occasion, no configuration variable to enable this be default exists and will not be added.
 * `-S[<keyid>]`, `--gpg-sign[=<keyid>]`
     GPG-sign the resulting merge commit. The `<keyid>` argument is optional and defaults to the committer identity; if specified, it must be stuck to the option without a space.
 * `-m <msg>`
     Set the commit message to be used for the merge commit (in case one is created).
-    If `--log` is specified, a shortlog of the commits being merged will be appended to the specified message.
+    **If `--log` is specified, a shortlog of the commits being merged will be appended to the specified message.**
     The `git fmt-merge-msg` command can be used to give a good default for automated `git merge` invocations. The automated message can include the branch description.
 * `--[no-]rerere-autoupdate`
     Allow the rerere mechanism to update the index with the result of auto-conflict resolution if possible.
     `git rerere`: Reuse recorded resolution of conflicted merges.
 * `--abort`
     Abort the current conflict resolution process, and try to reconstruct the pre-merge state.
-    If there were uncommitted worktree changes present when the merge started, `git merge --abort` will in some cases be unable to reconstruct these changes. It is therefore recommended to always commit or stash your changes before running `git merge`.
-    `git merge --abort` is equivalent to `git reset --merge` when `MERGE_HEAD`is present.
+    If there were uncommitted worktree changes present when the merge started, `git merge --abort` will in some cases be unable to reconstruct these changes. **It is therefore recommended to always commit or stash your changes before running `git merge`.**
+    **`git merge --abort` is equivalent to `git reset --merge` when `MERGE_HEAD`is present.**
 * `<commit>...`
     Commits, usually other branch heads, to merge into our branch. Specifying more than one commit will create a merge with ore than two parents (affectionately called an Octopus merge).
-    If no commit is given from the command line, merge the remote-tracking branches that the current branch is configured to use as its upstream. See also the configuration section of this manual page.
-    When `FETCH_HEAD` (and no other commit) is specified, the branches recorded in the `.git/FETCH_HEAD` file by the previous invocation of `git fetch` for merging are merged to the current branch.
+    **If no commit is given from the command line, merge the remote-tracking branches that the current branch is configured to use as its upstream.** See also the configuration section of this manual page.
+    **When `FETCH_HEAD` (and no other commit) is specified, the branches recorded in the `.git/FETCH_HEAD` file by the previous invocation of `git fetch` for merging are merged to the current branch.**
 
 #### PRE-MERGE CHECKS
-Before applying outside changes, you should get your own work in good shape and committed locally, so it will not be clobbered if there are conflicts. See also `git-stash`. `git pull` and `git merge` will stop without doing anything when local uncommitted changes overlap with files that `git pull`/`git merge` may need to update.
+Before applying outside changes, you should **get your own work in good shape and committed locally**, so it will not be clobbered if there are conflicts. See also `git-stash`. `git pull` and `git merge` will stop without doing anything when local uncommitted changes overlap with files that `git pull`/`git merge` may need to update.
 To avoid recording unrelated changes in the merge commit, `git pull` and `git merge` will also abort if there are any changes registered in the index relative to the `HEAD` commit. (One exception is when the changed index entries are in the state that would result from the merge already.)
-If all named commits are already ancestors of `HEAD`, `git merge` will exit early with the message "Already up-to-date."
+**If all named commits are already ancestors of `HEAD`, `git merge` will exit early with the message "Already up-to-date."**
 
 #### FAST-FORWARD MERGE
-Often the current branch head is an ancestor of the named commit. This is the most common case especially when invoked from `git pull`: you are tracking an upstream repository, you have committed no local changes, and now you want to update to a newer upstream revision. In this case, a new commit is not needed to store the combined history; instead, the `HEAD` (along with the index) is updated to point at the named commit, without creating an extra merge commit.
-This behavior can be suppressed with the `--no-ff` option.
+Often the current branch head is an ancestor of the named commit. This is the most common case especially when invoked from `git pull`: you are tracking an upstream repository, you have committed no local changes, and now you want to update to a newer upstream revision. In this case, a new commit is not needed to store the combined history; instead, **the `HEAD` (along with the index) is updated to point at the named commit, without creating an extra merge commit.**
+This behavior **can be suppressed with the `--no-ff` option.**
 
 #### TRUE MERGE
 Except in a fast-forward merge (see above), the branches to be merged must be tied together by a merge commit that has both of them as its parents.
-A merged version reconciling the changes from all branches to be merged is committed, and your `HEAD`, index, and working tree are updated to it. It is possible to have modifications in the working tree as long as they do not overlap; the update will preserve them.
+**A merged version reconciling the changes from all branches to be merged is committed, and your `HEAD`, index, and working tree are updated to it. It is possible to have modifications in the working tree as long as they do not overlap; the update will preserve them.**
 When it is not obvious how to reconcile changes, for following happens:
-1. The `HEAD` pointer stays the same.
-2. The `MERGE_HEAD` ref is set to point to the other branch head.
-3. Paths that merged cleanly are updated both in the index file and in your working tree.
-4. For conflicting paths, the index file records up to three versions: stage 1 stores the version from the common ancestor, stage 2 from `HEAD`, and stage 3 from `MERGE_HEAD` (you can inspect the stages with `git ls-files -u`). The working tree files contain the result of the "merge" program; i.e. 3-way merge results with familiar conflict markers `<<<===>>>`.
-5. No other changes are made. In particular, In particular, the local modifications you had before you started merge will stay the same and the index entries for them stay as they were, i.e. matching `HEAD`.
+**1. The `HEAD` pointer stays the same.**
+**2. The `MERGE_HEAD` ref is set to point to the other branch head.**
+**3. Paths that merged cleanly are updated both in the index file and in your working tree.**
+**4. For conflicting paths, the index file records up to three versions: stage 1 stores the version from the common ancestor, stage 2 from `HEAD`, and stage 3 from `MERGE_HEAD` (you can inspect the stages with `git ls-files -u`). The working tree files contain the result of the "merge" program; i.e. 3-way merge results with familiar conflict markers `<<<===>>>`.**
+**5. No other changes are made.** In particular, the local modifications you had before you started merge will stay the same and the index entries for them stay as they were, i.e. matching `HEAD`.
 If you tried a merge which resulted in complex conflicts and want to start over, you can recover with `git merge --abort`.
 
+#### MERGING TAG
+**When merging an annotated (and possibly signed) tag, Git always creates a merge commit even if a fast-forward merge is possible, and the commit message template is prepared with the tag message.** Additionally, if the tag is signed, the signature check is reported as a comment in the message template. See also `git-tag`.
+When you want to just integrate with the work leading to the commit that happens to be tagged, e.g. synchronizing with an upstream release point, you may not want to make an unnecessary merge commit.
+In such a case, you can "unwrap" the tag yourself before feeding it to `git merge`, or pass `--ff-only` when you do not have any work on your own.
+e.g.
+
+        git fetch origin
+        git merge v1.2.3^0
+        git merge --ff-only v1.2.3
+
+#### How conflicts are presented
+**During a merge, the working tree files are updated to reflect the result of the merge.** Among the changes made to the common ancestor's version, non-overlapping ones (that is, you changed and area of the file while the other side left that area intact, or vice versa) are incorporated in the final result verbatim. When both sides made changes to the same area, however, Git cannot randomly pick one side over the other, and asks you to resolve it by leaving what both sides did to that area.
+By default, Git uses the same style as the one used by the "merge" program from the RCS suit to present such conflicted hunk, like this:
+
+        Here are lines that are either unchanged from the common ancestor, or cleanly resolved because only one side changed.
+        <<<<<<< yours:sample.txt
+        Conflict resolution is hard;
+        let's go shopping.
+        =======
+        Git makes conflict resolution easy.
+        >>>>>>> theirs:sample.txt
+        And here is another line that is cleanly resolved or unmodified.
+The area where a pair of conflicting changes happened is marked with markers `<<<<<<<`, `=======`, and `>>>>>>>`. The part before the `=======` is typically your side, and the part afterwards is typically their side.
+The default format does not show what the original said in the conflicting area. You cannot tell how many lines are deleted and replaced with Barbie's remark on your side. The only thing that you can tell is that your side wants to say it is hard and you'd prefer to go shopping, while the other side wants to claim it is easy.
+An alternative style can be used by setting the `merge.conflictStyle` configuration variable to `diff3`. In `diff3` style, the above conflict may look like this:
+
+        Here are lines that are either unchanged from the common ancestor, or cleanly resolved because only one side changed.
+        <<<<<<<< yours:sample.txt
+        Conflict resolution is hard;
+        let's go shopping.
+        |||||||
+        Conflict  resolution is hard.
+        =========
+        Git makes conflict resolution eay.
+        >>>>>>> theirs: sample.txt
+        And here is another line tht is cleanly resolved or unmodified.
+In addition to the `<<<<<<<`, `========`, and `>>>>>>>` markers, **it uses another `|||||||` marker that is followed by the original text.** You can tell that the original just stated a fact, and your side simply gave in to that statement and gave up, while the other side tried to have a more positive attitude. You can sometimes come up with a better resolution by viewing the original.
+
+#### How to resolve conflicts
+After seeing a conflict, you can do two things: 
+* Decide not to merge. The only clean-ups you need are to reset the index file to the `HEAD` commit to reverse 2. and to clean up working tree changes made by 2. and 3.; `git merge --abort` can be used for this.
+* Resolve the conflicts. Git will mark the conflicts in the working tree. **Edit the files into the shape and `git add` them to the index. Use `git commit` to seal the deal.**
+You can work through the conflict with a number of tools:
+* **Use a mergetool. `git mergetool` to launch a graphical mergetool which will work you through the merge.**
+* **Look at the diffs. `git diff` will show a three-way diff, highlighting changes from both the `HEAD` and `MERGE_HEAD` versions.**
+* **Look at the diffs from each branch. `git log --merge -p <path>` will show diffs first for the `HEAD` version and then the `MERGE_HEAD` version.**
+* **Look at the originals. `git show :1:filename` shows the common ancestor, `git show :2:filename` shows the `HEAD` version, and `git show :3:filename` shows the `MERGE_HEAD` version.**
+
+#### Examples
+* Merge branches `fixes` and `enhancements` on top of the current branch, making an octopus merge.
+    `$ git merge fixes enhancements`
+* Merge branch `obsolete` into the current branch, using `ours` merge strategy:
+    `$ git merge -s ours obsolete`
+* Merge branch `maint` into the current branch, but do not make a new commit automatically:
+    `$ git merge --no-commit maint`
+    This can be used when you want to include further changes to the merge, or want to write your own merge commit message.
+    You should refrain from abusing this options to sneak substantial changes into a merge commit. Small fixups like bumping release/version name would be acceptable.
+
+#### MERGE STRATEGIES
+The merge mechanism (`git merge` and `git pull` commands) allows the backend *merge strategies* to be chosen with `-s` option. Some strategies can also take their own options, which can be passed by giving `-X <option>` arguments to `git merge` and/or `git pull`.
+* `resolve`
+    This can only resolve two heads (i.e. the current branch and another branch you pulled from) using a 3-way merge algorithm. **It tries to carefully detect criss-cross merge ambiguities and is considered generally safe and fast.**
+* `recursive`
+    This can only resolve two heads using a 3-way merge algorithm. When there is more than one common ancestor that can be used for 3-way merge, it creates a merged tree of the common ancestors and uses that as the reference tree for the 3-way merge. **This is has been reported to result in fewer merge conflicts without causing mismerges by tests done on actual merge commits taken from Linux 2.6 kernel development history. Additionally this can detect and handle merges involving renames. This is the default merge strategy when pulling or merging one branch.**
+    The recursive strategy can take the following options:
+    * `ours`
+        **This option forces conflicting hunks to be auto-resolved cleanly by favoring *our* version.** **Changes from the other tree that do not conflict with our side are reflected to the merge result. For a binary file, the entire contents are taken from our side.**
+        **This should not be confused with the `ours` merge strategy, which does not even look at what the other tree contains at all. It discards everything the other tree did, declaring *our* history contains all that happened in it.**
+    * `theirs`
+        This is the opposite of `ours`.
+    * `patience`
+        **With this option, `merge-recursive` spends a little extra time to avoid mismerges that sometimes occur due to unimportant matching lines (e.g., braces from distinct functions). Use this when the branches to be merged have diverged wildly**. See also `git-diff --patience`.
+    * `diff-algorithm=[patience|minimal|histogram|myers]`
+        Tells `merge-recursive` to use a different diff algorithm, which can help avoid mismerges that occur due to unimportant matching liens (such as braces from distinct functions). See also `git-diff --diff-algorithm`.
+    * `ignore-space-change`, `ignore-all-space`, `ignore-space-at-eol`
+        **Treats lines with indicated type of whitespace change as unchanged for the sake of a three-way merge. Whitespace changes mixed with other changes to a line are not ignored.** See also `git-diff -b -w` and `--ignore-space-at-eol`.
+        * If *their* version only introduces whitespace changes to a line, *our* version is used.
+        * If *our* version introduces whitespace changes but *their* version includes a substantial change, *their* version is used;
+        * Otherwise, the merge proceeds in the usual way.
+    * `no-renames`
+        **Turn off rename detection.** See also `git-diff --no-renames`.
+    * `find-renames[=<n>]`
+        **Turn on rename detection**, optionally setting the similarity threshold. This is the default. See also `git-diff --find-renames`.
+* `octopus`
+    **This resolves cases with more than two heads, but refuses to do a complex merge that needs manual resolution. It is primarily meant to be used for bundling topic branch heads together. This is the default merge strategy when pulling or merging more than one branch.**
+* `ours`
+    This resolves any number of heads, but the resulting tree of the merge is always that of the current branch head, It is meant to be used to supersede old development history of side branches. Note that this is different from the `-Xours` option to the `recursive` merge strategy.
+* `subtree`???
+    This is a modified recursive strategy. When merging trees A and B, if B corresponds to a subtree of A, B is first adjusted to match the tree structure of A, instead of reading the trees at the same level. This adjustment is also done to the common ancestor tree.
+With the strategies that use 3-way merge (including the default, *recursive*), if a changes is made on both branches, but later reverted on one of the branches, that change will be present in the merged result; some people find this behavior confusing. It occurs because only the heads and the merge base are considered when performing a merge, not the individual commits. The merge algorithm therefore considers the reverted change as no change at all , and substitutes the changed version instead.???
+
+#### CONFIGURATION
+* `merge.conflictStyle`
+    Specify the style in which conflicted hunks are written out to working tree files upon merge. The default is `merge`, which shows a `<<<<<<<` conflict marker, changes made by one side, a `=======` marker, changes made by the other side, and then a `>>>>>>>` marker. An alternate style, `diff3`, adds a `||||||||` marker and the original text before the `=======` marker.
+* `merge.defaultToUpstream`
+    **If merge is called without any commit argument, merge the upstream branches configured for the current branch by using their last observed values stored in their remote-tracking branches.** **The values of the `branch.<current branch>.merge` that name the branches at the remote named by `branch.<current branch>.remote` are consulted, and then they are mapped via `remote.<remote>.fetch` to their corresponding remote-tracking branches, and the tips of these tracking branches are merged.** <a name=branch_refspecs></a>
+* `merge.ff`
+    **By default, Git does not create an extra merge commit when merging a commit that is a descendant of the current commit. Instead, the tip of the current branch is fast-forwarded. When set to `false`, this variable tells Git to create an extra merge commit in such a case (equivalent to giving the `--no-ff` option from the command line). When set to `only`, only such fast-forward merges are allowed (equivalent to giving the `--ff-only` option from the command line).**
+* `merge.branchdesc`
+    **In addition to branch names, populate the log message with the description text associated with them. Defaults to false.**
+* `merge.log`
+    **In addition to branch names, populate the log message with at most the specified number of one-line descriptions from the actual commits that are being merged. Defaults to false, and true is a synonym for 20.**
+* `merge.renameLimit`
+    **The number of files to consider when performing rename detection during a merge;** if not specified, defaults to the value of `diff.renameLimit`.
+* `merge.stat`
+    **Whether to print the diffstat between `ORIG_HEAD` and the merge result at the end of the merge. True by default.**
+* `merge.tool`
+    Controls which merge tool is used by `git mergetool`. The list below shows the valid built-in values. Any other value is treated as a custom merge tool and requires that a corresponding `mergetool.<tool>.cmd` variable is defined.
+* `merge.verbosity`
+    Controls the amount of output shown by the recursive merge strategy. **Level 0 outputs nothing except a final error message if conflicts were detected. Level 1 outputs only conflicts, 2 outputs conflicts and file changes. Level 5 and above outputs debugging information. The default is level 2.** Can be overridden by the `GIT_MERGE_VERBOSITY` environment variable.
+* `branch.<name>.mergeOptions`
+    **Sets default options for merging into branch `<name>`. The syntax and supported options are the same as those of `git merge`**, but option values containing whitespace characters are currently not supported.
 ### 11.6 `man git rebase`
 ## 12 Discussions
 ### 12.1 Visualize Merge History with `git log --graph`, `--first-parent`, and `--no-merges`

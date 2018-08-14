@@ -722,7 +722,8 @@ top 交互命令：
 ## [BaiduPCS-Go](https://github.com/iikira/BaiduPCS-Go)
 ### Install and run
 * Install Go language
-        sudo apt install golang-go
+
+           sudo apt install golang-go
 * [Download the zip](https://github.com/iikira/BaiduPCS-Go/releases)
 * unzip to ~
 * type `./BaiduPCS-Go` to run
@@ -744,7 +745,7 @@ top 交互命令：
 #### download
 * `download <网盘文件或目录的路径1> <文件或目录2> <文件或目录3> ...`
 * `d <网盘文件或目录的路径1> <文件或目录2> <文件或目录3> ...`
-##### 可选参数
+##### 可选参数 (貌似只有`--test`可用）
 * `--test`: 测试下载, 此操作不会保存文件到本地
 * `--status`: 输出所有线程的工作状态
 * `--save`: 将下载的文件直接保存到当前工作目录
@@ -759,7 +760,7 @@ _下载的文件默认保存到 程序所在目录 的 download/ 目录, 支持�
 #### config
 * `config` or `config set` 显示和修改程序配置项
 * `config -h` or `config set -h`: 显示所有可以设置的值
-* `config set --savedir /home/cdutboy/Downloads`:设置下载文件的储存目录
+* `config set --savedir /home/cdutboy/Downloads`:设置下载文件的储存目录(have to use absolute path)
 * `config set --max_parallel 150`: 设置下载最大并发量为 150
 
 ## unzip
@@ -770,3 +771,9 @@ _下载的文件默认保存到 程序所在目录 的 download/ 目录, 支持�
 
 ## how to type faster
 **type the whole word** uninterruptedly
+## autokey
+### install
+
+        sudo add-apt-repository ppa:troxor/autokey
+        sudo apt update
+        sudo apt install autokey-gtk

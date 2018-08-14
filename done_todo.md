@@ -97,3 +97,4 @@
   * google assistant
   * guitar english songs
   * 微信添加信用卡
+  * man git merge
