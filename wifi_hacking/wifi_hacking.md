@@ -1052,7 +1052,7 @@ aws-shell is a command-lien shell program that provides convenience and producti
     * Execute regular shell commands by piping or prefixing shell commands with `!`.
 * Export executed commands to a text editor
     Running the `.edit` command after executing some commands gives you all the commands in your default text editor.
-##### Usage
+##### Installing
 The AWS Command Line Interface User Guide walks you through installing and configuring the tool. After that, you can begin making calls to your AWS services from the command line.
 ###### What is the AWS Command Line Interface?
 The AWS CLI is an open source tool built on top of the AWS SDK for Python (Boto) that provides commands for interacting with AWS services. With minimal configuration, you can start using all of the functionality provided by the AWS Management Console from your favorite terminal program.
@@ -1103,6 +1103,608 @@ The primary distribution method for the AWS CLI on Linux, Windows, and macOS is 
     * Python 2 version 2.6.5+ or Python 3 version 3.3+
     * Windows, Linux, macOS, or Unix
 If you already have pip and a supported version of Python, you can install the AWS CLI with the following command:
+`$ pip install awscli --upgrade --user`
+The `--upgrade` option tells pip to upgrade any requirements that are already installed. The `--user` option tells pip to install the program to a subdirectory of your user directory to avoid modifying libraries used by your operating system.
+If you encounter issues when you attempt to install the AWS CLI with pip, you can [install the AWS ClI in a virtual environment](https://docs.aws.amazon.com/cli/latest/userguide/awscli-install-virtualenv.html) to isolate the tool and its dependencies, or use a different version of Python than you normally do.
+####### Standalone Installers
+For offline or automated installations on Linux, macOS, or Unix, try the [bundled installer](https://docs.aws.amazon.com/cli/latest/userguide/awscli-install-bundle.html). The bundled installer includes the AWS CLI, its dependencies, and a shell script that performs the installation for you.
+On windows, you can also use the [MSI installer](https://docs.aws.amazon.com/cli/latest/userguide/awscli-install-windows.html#install-msi-on-windows). Both of these methods simplify the initial installation, with the tradeoff of being more difficult to upgrade when a new version of the AWS CLI is released.
+After you install the AWS CLI, you may need to add the path to the executable file to your PATH variable. For platform specific instructions, see the following topics:
+* Linux-[Adding the AWS CLI Executable to your Command Line Path](https://docs.aws.amazon.com/cli/latest/userguide/awscli-install-linux.html#awscli-install-linux-path)
+* Windows-[Adding the AWS CLI Executable to your Command Line Path](https://docs.aws.amazon.com/cli/latest/userguide/awscli-install-windows.html#awscli-install-windows-path)
+* macOS-[Adding the AWS CLI Executable to your Command Line Path](https://docs.aws.amazon.com/cli/latest/userguide/awscli-install-windows.html#awscli-install-windows-path)
+Verify that the AWS CLI installed correctly by running `aws --version`.
+`$ aws --version`
+`aws-cli/1.11.84 Python/3.6.2 Linux/4.4.0-59-generic botocore/1.5.47`
+The AWS CLI is updated regularly to add support for new services and commands. To update to the latest version of the AWS CLI, run the installation command again.
+`$ pip isntall swscli --update --user`
+If you need to uninstall the AWS CLI, use pip uninstall.
+`pip uninstall awscli`
+##### Configuring the AWS CLI
+This section explains how to configure settings that the AWS Command Line Interface uses when interacting with AWS, such as your security credentials and the default region.
+**Note**: The AWS CLI signs requests on your behalf, and includes a date in the signature. Ensure that your computer's date and time are set correctly; if not, the date in the signature may not match the date of the request, and AWS rejects the request.
+###### Quick Configuration
+For general use, the `aws configure` command is the fastest way to set up your AWS CLI installation.
+
+        $ aws configure
+        AWS Access Key ID [None]: AKIAIOSFODNN7EXAMPLE
+        AWS Secret Access Key [None]: wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
+        Default region name [None]: us-west-2
+        Default output format [None]:json
+The AWS CLI will prompt you for four pieces of information. AWS Access Key ID and AWS Secret Access Key are your account credentials.
+**To get the access key ID and secret access key for an IAM user**
+Access keys consist of an access key ID and secret access key, which are used to sign programmatic requests that you make to AWS. If you don't have access keys, you can create them from the AWS Management Console. We recommend that you use IAM access keys instead of AWS account root user access keys. IAM lets you securely control access to AWS services and resources in your AWS account.
+The only time that you can view or download the secret access keys is when you create the keys. You cannot recover them later. However, you can create new access keys at any time. You must also have permissions to perform the required IAM actions. For more information, see Permissions Required to Access IAM Resources in the IAM User Guide.
+1. Open the IAM console.
+2. In the navigation pane of the condole, choose **Users**.
+3. Choose your IAM user name (not the check box).
+4. Choose the Security credentials tab and then choose **Create access key**.
+5. To see the new access key, choose **Show**. Your credentials will look something like this:
+  * Access key ID: AKIAIOSFODNN7EXAMPLE
+  * Secret access key: wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
+6. To download the key pair, choose **Download .csv file**. Store the keys in a secure location.
+Keep the keys confidential in order to protect your AWS account, and never email them. Do not share them outside your organization, even if an inquiry appears to come from AWS or Amazon.com. No one who legitimately represents Amazon will ever ask you for your secret key.
+Default region is the name of the region you want to make calls against by default. This is usually the region closest to you, but it can be any region. For example, type `us-west-2` to use US West (Oregon).
+**Note**: You must specify an AWS region when using the AWS CLI. For a list of services and available regions, see Regions and Endpoints. The region designators used by the AWS CLI are the same names that you see AWS Management Console URLs and service endpoints.
+Default output format can be either json, text, or table. If you don't specify an output format, json is used.
+If you have multiple profiles, you can configure additional, named profiles by using the `--profile` option.
+
+        $ aws configure --profile user2
+        AWS Access Key ID [None]: AKIAI44QH8DHBEXAMPLE
+        AWS Secret Access Key [None]: je7MtGbClwBF/2Zp9Utk/h3yCo8nvbEXAMPLEKEY
+        Default regioon name [None]: us-east-1
+        Default output format [None]: text
+To update any of your settings, simply run `aws configur` again and enter new values as appropriate. The next sections contain more information on the files that `aws configure` creates, additional settings, and named profiles.
+###### Configuration and Credential Files
+####### Configuration Settings and Precedence
+The AWS CLI uses a *provider chain* to look for AWS credentials in a number of different places, including system or user environment variables and local AWS configuration files.
+The AWS CLI looks for credentials and configuration settings in the following order:
+1. Command line options-region, output format and profile can be specified as command options to override default settings.
+2. Environment variables-AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, and AWS_SESSION_TOKEN.
+3. The AWS credential file-located at `~/.aws/credentials` on Linux, macOS, or Unix, or at `C:\Users\Username\.aws\credentials` on Windows. This file can contain multiple named profiles in addition to a default profile.
+4. The CLI configuration file-typically located at `~/.aws/config` on Linux, macOS, or Unix, or at `C:\Users\USERNAME\.aws\config` on Windows. This file can contain a default profile, named profiles, and CLI specific configuration parameters for each.
+5. Container credentials-provided by Amazon Elastic Container Service on container instances when you assign a role to your task.
+6. Instance profile credentials-these credentials can be used on EC2 instances with an assigned instance role, and are delivered through the Amazon EC2 metadata service.
+####### Configuration and Credential Files
+The CLI stores credentials specified with `aws configure` in a local file named `credentials` in a folder named `.aws` in your home directory. Home directory location varies but can be referred to using the environment variables `%UserProfile%` in Windows and `$HOME` or `~`(tilde) in Unix-like systems.
+For example, the following commands list the contents of the `.aws` folder:
+* Linux, macOS, or Unix
+    `$ ls ~/.aws`
+* Windows
+    `> dir "%UserProfile%\.aws"`
+In order to separate credentials from less sensitive options, region and output format are stored in a separate file named `config` in the same folder.
+The default file location for the config file can be overridden by setting the AWS_CONFIG_FILE environment variable to another local path.
+**Storing Credentials in Config**
+The AWS CLI will also read credentials from the config file. If you want to keep all of your profile settings in a single file, you can. If there are ever credentials in both locations for a profile (say you used `aws configure` to update the profile's keys), the keys in the credentials file will take precedence.
+If you use one of the SDKs in addition to the AWS CLI, you may notice additional warnings if credentials are not stored in their own file.
+The files generated by the CLI for the profile configured in the previous section look like this:
+
+        cat ~/.aws/credentials
+        [default]
+        aws_access_key_id=AKIAIOSFODNN7EXAMPLE
+        aws_secret_access_key=wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
+
+        cat ~/.aws/config
+        [default]
+        region=us-west-2
+        output=json
+The following settings are supported.
+**aws_access_key_id**-AWS access key.
+**aws_secret_access_key**-AWS secret key.
+**aws_session_token**-AWS session token. A session token is only required if you are using temporary security credentials.
+**region**-AWS region.
+**output**-output format (json, text, or table).
+###### Named Profiles
+The AWS CLI supports *named profiles* stored in the config and credentials files. You can configure additional profiles by using `aws config` with the `--profile` option or by adding entries to the config and credentials files.
+The following example shows a credentials files with two profiles:
+
+        cat ~/.aws/credentials
+        [default]
+        aws_access_key_id=AKIAIOSFODNN7EXAMPLE
+        aws_secret_access_key=wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
+
+        [user2]
+        aws_access_key_id=AKIAI44QH8DHBEXAMPLE
+        aws_secret_access_key=je7MtGbClwBF/2Zp9Utk/h3yCo8nvbEXAMPLEKEY
+Each profile uses different credentials-perhaps from two different IAM users-and can also use different regions and output formats.
+
+        cat ~/.aws/config
+        [default]
+        region=us-west-2
+        output=json
+
+        [profile user2]
+        region=us-east-1
+        output=text
+**Important**: The AWS credentials file uses a different naming format than the CLI config file for named profiles. Do not include the 'profile' prefix when configuring a named profile in the AWS credentials file.
+####### Using Profiles with the AWS CLI
+To use a named profile, add the `--profile` option to your command. The following example lists running instances using the user2 profile from the previous section.
+`$ aws ec2 describe-instances --profile user2`
+If you are going to use a named profile for multiple commands, you can avoid specifying the profile in every command by setting the AWS_PROFILE environment variable at the command line.
+* Linux, macOS, or Unix
+    `$ export AWS_PROFILE=user2`
+* Windows
+    `>set AWS_PROFILE=user2`
+Setting the environment variable changes the default profile until the end of your shell session, or until you set the variable to a different value. More on variables in the next section.
+###### Environment Variables
+Environment variables override configuration and credential files and can be useful for scripting or temporarily setting a named profile as the default.
+The AWS CLI supports the following environment variables.
+* AWS_ACCESS_KEY_ID-AWS access key.
+* AWS_SECRET_ACCESS_KEY-AWS secret key. Access and secret key variables override credentials stored in credential and config files.
+* AWS_SESSION_TOKEN-Specify a session token if you are using temporary security credentials.
+* AWS_DEFAULT_REGION-AWS region. This variable overrides the default region of the in-use profile, if set.
+* AWS_DEFAULT_OUTPUT-Change the AWS CLI's output formatting to json, text, or table.
+* AWS_PROFILE-name of the CLI profile to use. This can be the name of a profile stored in a credential or config file, or default to use the default profile.
+* AWS_CA_BUNDLE-Specify the path to a certificate bundle to use for HTTPS certificate validation.
+* AWS_SHARED_CREDENTIALS_FILE-Change the location of the file that the AWS CLI uses to store access keys.
+* AWS_CONFIG_FILE-Change the location of the file that the AWS CLI uses to store configuration profiles.
+The following example shows how you would configure environment variables for the default user from earlier in this guide.
+* Linux, macOS, or Unix
+    `$ export AWS_ACCESS_KEY_ID=AKIAIOSFODNN7EXAMPLE`
+    `$ export AWS_SECRET_ACCESS_KEY=wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY`
+    `$ export AWS_DEFAULT_REGION=us-west-2`
+* Windows
+    `> set AWS_ACCESS_KEY_ID=AKIAIOSFODNN7EXAMPLE`
+    `> set AWS_SECRET_ACCESS_KEY=wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY`
+    `> set AWS_DEFAULT_REGION=us-west-2`
+###### Command Line Options
+You can use the following command line options to override the default configuration settings for a single command. You cannot use command lien options to specify credentials.
+* `--profile`: The name of a named profile to use.
+* `--region`: The AWS Region to call.
+* `--outptu`: The output format.
+* `--endpoint-url`: The URL to make the call against. For most commands, the AWS CLI automatically determines the URL based on the service and AWS Region. However, some commands require that you specify an account-specific URL.
+When you provide one of these options at the command line, it overrides the default configuration and corresponding profile setting for a single command. Each option takes a string argument with a space or equals sign (=) separating the argument from the option name. When the argument string contains a space, use quotation marks around the argument.
+**Tip**: To set up additional profiles, you can use the `--profile` options with `aws config`.
+`$ aws configure --profile <profilename>`
+Common uses for command line options include checking your resources in multiple AWS Regions, and changing the output format for legibility or ease of use when scripting. For example, if you're not sure which region your instance is running, you can run the `describe-instances` command against each region until you find it, as follows.
+
+        $ aws ec2 describe-instances --output table --region us-east-1
+        ---------------
+        |DescribeInstances|
+        +-------------+
+        $ aws ec2 describe-instances --output table --region us-west-1
+        ---------------
+        |DescribeInstances|
+        +-------------+
+        $ aws ec2 describe-instances --output table --region us-west-2
+        --------------------------------------
+        |           DescribeInstances       |
+        +----------------------------------+
+        ||          Reservations        ||
+        |+--------------------------------+|
+        || OwnerId      |01234567890        ||
+        || ReservationI  | r-abcdefgh       ||
+        |+------------+--------------------+|
+        |||         Instances           |||
+        ||+-------------+------------------+||
+        ||| AmiLaunchIndex      |0          |||
+        ||| Architecture | x86_64           |||
+###### Instance Metadata
+To use the CLI from an EC2 instance, create a role that has access to the resources needed and assign that role to the instance when it is launched. Launch the instance and check to see if the AWS CLI is already installed (it comes pre-installed on Amazon Linux).
+Install the AWS CLI if necessary and config a default region to avoid having to specify it in every command. You can set the region using `aws configure` without entering credentials by pressing enter twice to skip the first two prompts:
+
+        $ aws configure
+        AWS Access Key ID [None]:ENTER
+        AWS Secret Access Key [None]:ENTER
+        Default region name [None]: us-west-2
+        Default output format [None]: json
+The AWS CLI will read credentials from the instance metadata.
+###### Using an HTTP Proxy
+If you need to access AWS through proxy servers, you should configure the HTTP_PROXY and HTTPS_PROXY environment variables with the IP addresses for your proxy servers.
+* Linux, macOS, or Unix
+    `$ export HTTP_PROXY=http://a.b.c.d:n`
+    `$ export HTTPS_PROXY=http://w.x.y.z:m`
+* Windows
+    `> set HTTP_PROXY=http://a.b.c.d:n`
+    `> set HTTPS_PROXY=http://w.x.y.z:m`
+In these examples, `http://a.b.c.d:n` and `http://w.x.y.z:m` are the IP addresses and ports for the HTTP and HTTPS proxies.
+####### Autenticating a Proxy
+* Linux, macOS, or Unix
+    `$ export HTTP_PROXY=http://username:password@a.b.c.d:n`
+    `$ export HTTPS_PROXY=http://username:password@w.x.y.z:m`
+* Windows
+    `> set HTTP_PROXY=http://username:password@a.b.c.d:n`
+    `> set HTTPS_PROXY=http://username:password@w.x.y.z:m`
+**Note**: The AWS CLI does not support NTLM proxies. If you use an NTLM or Kerberos proxy, you may be able to connect through an authentication proxy like Cntlm.
+####### Using a proxy on EC2 Instances
+If you configure a proxy on an ec2 instance launched with an IAM role, you should also set the NO_PROXY environment variable with the IP address 169.254.169.254, so that the AWS CLI can access Instance Metadata.
+* Linux, macOS, or Unix
+    `$ export NO_PROXY=169.254.169.254`
+* Windows
+    `> set NO_PROXY=169.254.169.254`
+###### Assuming a Role
+An IAM role is a authorization tool that lets a user gain additional permissions, or get permission to peform actions in a different account.
+You can configure the AWS Command Line Interface to use a role by creating a profile for the role in the `~/.aws/config` file. The following example shows a role profile named *marketingadmin* that is assumed by the default profile.
+
+        [profile marketadmin]
+        role_arn=arn:aws:iam::123456789012:role/marketingadmin
+        source_profile=default
+In this case, the default profile is an IAM user with credentials and permission to assume a role named marketingadmin. To access the role, you created a named profile. Instead of configuring this profile with credentials, you specify the ARN of the role and the name of the profile that has access to it.
+####### Configuring and Using a Role
+When you run commands using the role profile, the AWS CLI uses the source profile's credentials to call AWS Security Token Service and assume the specified role. The source profile must have permission to call `sts:assume-role` against the role, and the role must have a trust relationship with the source profile to allow itself to be assumed.
+Create a new role in IAM with the permissions that you want users to assume by following the procedure under Creating a Role to Delegate Permissions to an IAM User in the AWS Identity and Access Management User Guide. If the role and the target IAM user are in the same account, you can enter your own account ID when configuring the role's trust relationship.
+After creating the role, modify the trust relationship to allow the IAM user to assume it. The following example shows a trust relationship that allows a trust relationship that allows a role to be assumed by an IAM user named *jonsmith*:
+
+        {
+        "Version":"2012-10-17",
+        "Statement":[
+         {
+          "Sid":"",
+          "Effect":"Allow",
+          "Principal":{
+           "AWS":"arn:aws:iam::123456789012:user/jonsmith"
+         },
+         "Action":"sts:AssumeRole"
+         }
+         ]
+         }
+Next, grant your IAM user permission to assume the role. The following example shows an AWS Identity and Access Management policy that allows an IAM user to assume the marketingadmin role:
+
+        {
+         "Version":"2012-10-17",
+         "Statement":[
+          {
+           "Effect":"Allow",
+           "Action":"sts:AssumeRole",
+           "Resource":"arn:aws:iam::123456789012:role/marketingadmin"
+           }
+          ]
+          } 
+The user doesn't need to have any additional permissions to run commands using the rule profile. If you want your users to be able to access AWS resources without using the role, apply additional inline or managed policies for those resources.
+With the role profile, role permissions, trust relationship and user permissions applied, you can assume the role at the command line by using the `profile` option. For example:
+`$ aws s3 ls --profile marketingadmin`
+To use the role for multiple calls, you can set the AWS_PROFILE environment variable for the current session from the command line:
+* Linux. macOS, or Unix
+    `$ export AWS_PROFILE=marketingadmin`
+* Windows
+    `> set AWS_PROFILE=marketingadmin`
+For more information on configuring IAM users and roles, see Users and Groups and Roles in the *AWS Identity and Access Management User Guide*.
+####### Using Multifactor Authentication
+For additional security, you can require users to provide a one time key generated from a authentication device or mobile app when they attempt to make a call using the role profile.
+First, modify the trust relationship on the role to require multifactor authentication:
+
+        {
+         "Version":"2012-10-17",
+         "Statement":[
+          { 
+           "Sid":"",
+           "Effect":"Allow",
+           "principal":{"AWS":"arn:aws:iam::123456789012:user/jonsmith"},
+           "Action":"sts:AssumeRole",
+           "Condition": { "Bool":{ "aws:MutiFactorAuthPresent":true}}
+           }
+          ]
+          } 
+Next, add a line to the role profile that specifies the ARN of the user's MFA device:
+
+        [profile marketingadmin]
+        roel_arn=arn:aws:iam::123456789012:role/marketingadmin
+        source_profile=default
+        mfa_serial=arn:aws:iam::123456789012:mfa/jonsmith
+The mfa_serial setting can take an ARN, as show, or the serial number of a hardware MFA token.
+
+####### Cross Account Roles
+You can enable IAM users to assume roels that belong to different accounts by configuring the role as a cross account role. During role creating, set the role type to oen of the options under Role for Cross-Account Access and optionally select **Require MFA**. The **Require MFA** option configures the appropriate condition in the trust relationship as described in Using Multifactor Authentication.
+If you use an external ID to provide addtional control over who can assume a role across accounts, add an external_id parameter to the role profile:
+
+        [profile crossaccountrole]
+        role_arn=:aws:iam::234567890123:role/xaccount
+        source_profile=default
+        mfa_serial=arn:aws:iam::123456789012:mfa/jonsmith
+        external_id=123456
+####### Clearing Cached Credentials
+When you assume a role, the AWS CLI caches the temporary credentials locally until they expire. If your role's temporary credentials are revoked, you can delete the cache to force the AWS CLI to retrieve new credentials.
+* Linux, macOS, or Unix
+    `$ rm -r ~/.aws/cache`
+* Windows
+    `> del /s /q %UserProfile%\.aws\cache`
+###### Command Completion
+On Unix-like systems, the AWS CLI includes a command-completion feature that enables you to use the **TAB** key to complete a partially typed command. This feature is not automatically installed so you need to configure it manually.
+Configuring command completion requires two pieces of information: the name of the shell you are using and the location of the aws_completer script.
+**Completion on Amazon Linux**
+Command completion is configured by default on instances running Amazon Linux.
+####### Identify Your Shell
+If you are not sure which shell you are using, identify it with one of the following commands:
+* `echo $SHELL`-show the shell's installation directory. This will usually match the in-use shell, unless you launched a different shell after logging in.
+        
+        $ echo $SHELL
+        /bin/bash
+* `ps`-show the processes running for the current user. The shell will be one of them.
+
+        $ ps
+          PID TTY       TIME CMD
+        2148 pts/1      00:00:00 bash
+        8756 pts/1      00:00:00 ps
+####### Locate the AWS Completer
+The location can vary depending on the installation method used.
+* **Package Manager**-programs such as pip, yum, brew and apt-get typically install the AWS completer (or a symlink to it) to a standard path location. In this case, `which` will locate the completer for you.
+
+        $ which aws_completer
+        /usr/local/bin/aws_completer
+* **Bundled Installer**-if you used the bundled installer per the instructions in the previous section, the AWS completer will be located in the `bin` subfolder of the installation directory.
+
+        $ ls /usr/local/aws/bin
+        activate
+        activate.csh
+        activate.fish
+        activate_this.py
+        aws
+        aws.cmd
+        aws_completer
+        ...
+If all else fails, you can use `find` to search your entire file system for the AWS completer.
+`$ find / -name aws_completer`
+`/usr/local/aws/bin/aws_completer`
+####### Enable Command Completion
+Run a command to enable command completion. The command that you use to enable completion depends on the shell that you are using. You can add the command to your shell's RC file to run it each time you open a new shell.
+* **bash**-use the built-in command complete
+    `$ complete -C '/usr/local/bin/aws_complete' aws`
+    Add the command to `~/.bahsrc` to run it each time you open a new shell. Your `~/.bash_profile` should source `~/.bashrc` to ensure that the command is run in login shells as well.
+####### Test Command Completion
+After enabling command completion, type in a partial command and press TAB to see the available commands.
+
+        $ aws sTAB
+        s3  ses sqs sts swf
+        s3api   sns storagegateway support
+
+##### Deploying a Development Environment in Amazon EC2 Using the AWS Command Line Interface
+This tutorial details how to set up a development environment in Amazon EC2 using the AWS CLI. It includes a short version of the installation and configuration instructions, and it can be run start to finish on Windows, Linux, macOS, or Unix.
+###### Install the AWS CLI
+You can install the AWS CLI with an installer (Windows) or by using pi, a package manager for Python.
+* Windows
+    Download the MSI installer.
+    * [Download the AWS CLI MSI installer for Windows (64-bit)](https://s3.amazonaws.com/aws-cli/AWSCLI64.msi)
+    * Download the AWS CLI MSI installer for Windows (32-bit)
+* Linux, macOS, or Unix
+    These steps require that you have a working installation of Python 2 version 2.6.5+ or Python 3 version 3.3+. If you encounter any issues using the following steps, see the full installation instructions in the AWS Command Line Interface User Guide.
+    1. Download and run the installation script from the pip website:
+        
+        $ curl "https://bootstrap.pypa.io/get-pip.py" -o "get-pip.py"
+        $ python get-pip.py --user
+    2. Install the AWS CLI Using pip:
+
+        $ pip install awscli --user
+###### Configure the AWS CLI
+Run `aws configure` at the command line to set up your credentials and settings.
+
+        $ aws configure
+        AWS Access Key ID [None]: AKIAIOSFODNN7EXAMPLE
+        AWS Secret Access Key [None]: wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
+        Default region name [None]: us-east-2
+        Default output format [None]: json
+The AWS CLI will prompt you for the following information:
+* **AWS Access Key ID and AWS Secret Access Key**-These are your account credentials. If you don't have keys, see How Do I Get Security Credentials? in the Amazon Web Services General Reference.
+* **Default region name**-This is the name of region you want to make calls against by default.
+* **Default output format**-This format can be either json, text, or table. If you don't specify an output format, json will be used.
+Run a command to verify that your credentials are configured correctly and that you can connect to AWS.
+
+        $ aws ec2 describe-regions --output table
+        ----------------------------------------------------------
+        |                     DescribeRegions                    |
+        +--------------------------------------------------------+
+        ||                        Regions                       ||
+        |+-----------------------------------+------------------+|
+        ||             Endpoint              |   RegionName     ||
+        |+-----------------------------------+------------------+|
+        ||  ec2.ap-south-1.amazonaws.com     |  ap-south-1      ||
+        ||  ec2.eu-west-3.amazonaws.com      |  eu-west-3       ||
+        ||  ec2.eu-west-2.amazonaws.com      |  eu-west-2       ||
+        ||  ec2.eu-west-1.amazonaws.com      |  eu-west-1       ||
+        ||  ec2.ap-northeast-3.amazonaws.com |  ap-northeast-3  ||
+        ||  ec2.ap-northeast-2.amazonaws.com |  ap-northeast-2  ||
+        ||  ec2.ap-northeast-1.amazonaws.com |  ap-northeast-1  ||
+        ||  ec2.sa-east-1.amazonaws.com      |  sa-east-1       ||
+        ||  ec2.ca-central-1.amazonaws.com   |  ca-central-1    ||
+        ||  ec2.ap-southeast-1.amazonaws.com |  ap-southeast-1  ||
+        ||  ec2.ap-southeast-2.amazonaws.com |  ap-southeast-2  ||
+        ||  ec2.eu-central-1.amazonaws.com   |  eu-central-1    ||
+        ||  ec2.us-east-1.amazonaws.com      |  us-east-1       ||
+        ||  ec2.us-east-2.amazonaws.com      |  us-east-2       ||
+        ||  ec2.us-west-1.amazonaws.com      |  us-west-1       ||
+        ||  ec2.us-west-2.amazonaws.com      |  us-west-2       ||
+        |+-----------------------------------+------------------+|
+###### Create a Security Group and Key Pair for the EC2 Instance
+Your next step is to set up prerequisities for launching an EC2 instance that can be accessed using SSH. For more information about Amazon EC2 features, go to the [Amazon EC2 User Guide for Linux Instances](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/concepts.html)
+**To create a security group, key pair, and role**
+1. First, create a new security group and add a rule that allows incoming traffic over  port 22 for SSH. If you are using the default VPC for the region, you can omit the `--vpc-id` parameter; otherwise, specify the ID of the VPC in which you'll launch your instance. For better security, replace the 0.0.0.0/0 CIDR range with the range of the network from which you'll connect to your instance.
+
+        $ aws ec2 create-security-group --group-name devenv-sg --vpc-id vpc-xxxxxxxx --description "security group for development environment"
+        {
+          "GroupId":"sg-b018ced5"
+        }
+        $ aws ec2 authorize-security-group-ingress --group-name devenv-sg --protocol tcp --port 22 --cidr 0.0.0.0/0
+Note the security group ID for later use when you launch the instance.
+2. Next, create the key pair, which allows you to connect to the instance. This command saves the contents of the key to a file named *devenv-key.pem*.
+`$ aws ec2 create-key-pair --key-name devenv-key --query 'KeyMaterial' --output text > devenv-key.pem`
+**Windows**: In a Windows Command prompt, use double quotes instead of single quotes.
+3. On Linux, you will also need to change the file mode so that only you have access to the key file.
+`$ chmod 400 devenv-key.pem`
+###### Launch and connect to the Instance
+Finally, you are ready to launch instance and connect to it.
+**To launch and connect to the instance**
+1. Run the following command, using the ID of the security group that you created in the previous step. The `--image-id` parameter specifies the Amazon Machine Image (AMI) that Amazon EC2 uses to bootstrap the instance. You can find an image ID for your region and operating system using the Amazon EC2 console. If you are using the default subnet for a default VPC, you can omit the `--subnet-id` parameter; otherwise, specify the ID of the subnet in which you'll launch your instance.
+`$ aws ec2 run-instance --image-id ami-xxxxxxxx --subnet-id subnet-xxxxxxxx --security-group-ids sg-b018ced5 --count 1 --instance-type t2.micro --key-name devenv-key --query 'Instances[0].InstanceId'`
+`"i-0787e4282810ef9cf"`
+2. The instance will take a few moments to launch. After the instance is up and running, you'll need the public IP address of the instance to connect to it. Use the following command to get the public IP address:
+`$ aws ec2 describe-instances --instance-ids i-0787e4282810ef9cf --query 'Reservation[0].Instances[0].PublicIpAddress'`
+`"54.183.22.255"`
+3. To connect to the instance, use the public IP address and private key with your preferred terminal program. On Linux, macOS, or Unix, you can do this from the command line using the following command:
+`$ ssh -i devenv-key.pem <user>@<54.183.22.255>`
+If you get an error like *Permission denied (publickey)* when attempting to connect to your instance, check that the following are correct:
+* **Key**-The key specified must be at the path indicated and must be the private key, not the public one. Permissions on the key must be restricted to the owner.
+* **User**-The user name must match the default user name associated wit the AMI you used to launch the instance. For an Ubuntu AMI, this is *ubuntu*.
+* **Instance**-The public IP address or DNS name of the instance. Verify that the address is public and that port 22 is open to your local machine on the instance's security group.
+You can also use the `-v` option to view additional information related to the error.
+**SSH on Windows**
+On Windows, you can use the PuTTY terminal application available [here](https://www.chiark.greenend.org.uk/~sgtatham/putty/). Get putty.exe and puttygen.exe from the download page.
+Use puttygen.exe to convert your private key to a .ppk file required by PuTTY. Launhc putty.exe, enter the public IP address of the instance in the **Host Name** field, and set the connection type to SSH.
+In the **Category** panel, navigate to **Connection**>**SSH**>**Auth**, and click **Browse** to select your .ppk file, and then click **Open** to connect.
+4. The terminal will prompt you to accept the server's public key. Type *yes* and click **Enter** to complete the connection.
+You've now configured a security group, created a key pair, launched an EC2 instance, and connected to it without ever leaving the command line.
+##### Using the AWS Command Line Interface
+This section introduces the common features and calling patterns used throughout the AWS Command Line Interface.
+**Note**: The AWS CLI makes API calls to services over HTTPS. Outbound connections on TCP port 443 must be enabled in order to perform calls.
+###### Getting Help with the AWS Command Line Interface
+To get help when using the AWS CLI, you can simply add `help` to the end of a command. For example, the following command lists help for the general AWS CLI options and the available top-level commands.
+`$ aws help`
+The following command lists the available subcommands for Amazon EC2.
+`$ aws ec2 help`
+The next example lists the detailed help for the EC2 DescribeInstances operation, including descriptions of it input parameters, filters, and output. Check the examples section of the help if you are not sure how to phrase a command.
+`$ aws ec2 describe-instances help`
+The help for each command is divided into six sections:
+* **Name**-the name of the command.
+    
+        NAME
+            describe-instances -
+* **Description**-a description of the API operation that the command invokes, pulled from the API documentation for the command's service.
+
+        DESCRIPTION
+            Describe one or more of your instances.
+
+            If you specify one or more instance IDs, Amazon EC2 returns information for those instances. If you do not specify instance IDs, Amazon EC2 returns information for all relevant instances. If you specify an instance ID that is not valid, an error is returned. If you spescify an instance that you do not own, it is not included in the returened results.
+        ...
+* **Synosis**-list of the command and its options. If an option is shown in square brackets, it is either optional, has a default value, or has an alternative option that can be used instead.
+
+        SYNOPSIS
+            describe-instances
+           [--dry-run | --no-dry-run]
+           [--instance-ids <value>]
+           [--filters <value>]
+           [--cli-input-json <value>]
+           [--starting-token <value>]
+           [--page-size <value>]
+           [--max-items <value>]
+           [--generate-cli-skeleton]
+     `describe-instances` has a default behavior that describes all instances in the current account and region. You can optionally specify a list of `instance-ids` to describe one or more instances. `dry-run` is an optional boolean flag that doesn't take a value. To use a boolean flag, specify either shown value, in this case `--dry-run` or `--no-dry-run`. Likewise, `--generate-cli-skeleton` does not take a value. If there are conditions on an option's use, they should be described in the OPTIONS section, or shown in the examples.
+* **Options**- description of each of the options shown in the synopsis.
+
+        OPTIONS
+            --dry-run | --no-dry-run (boolean)
+              Checks whether you have the requred permissions for the action, without actually making the request, and provides an error response.
+              If you have the required permissions, the error response is DryRun-Operation. Otherwise, it is UnauthorizedOperation.
+            --instance-ids (list)
+              One or more instance IDs.
+
+              Default: Describes all your instances.
+* **Examples**-examples showing the usage of the command and its options. If no example is available for a command or use case that you need, please request one using feedback link on this page, or in the AWS CLI command reference on the help page for the command.
+
+        EXAMPLES
+        To describe an Amazon EC2 instance
+        Command:
+        aws ec2 describe-instances --instance-ids i-5203422c
+
+        To describe all instances with the instance type m1.small
+        command:
+        aws ec2 describe-instances --filters "Name=instance-type, Values=m1.small"
+
+        To describe all instances with a Owner tag
+        Command:
+        aws ec2 describe-instances --filters "Name=tag-key,values=Owner"
+        ...
+* **Output**-descriptions of each of the fields and datatypes returned in the response from AWS.
+    For describe-instances, the output is a list of reservation objects, each of which contains several fields and objects that contain information about the instance(s) associated with it. This information comes from the API documentation for the reservation datatype used by Amazon EC2.
+
+        OUTPUT
+            Reservations -> (list)
+             One or more reservations.
+
+             (structure)
+                Describes a reservation.
+
+                ReservationId -> (string)
+                  The ID of the reservation.
+
+                OwnerId -> (string)
+                  The ID of the AWS account that owns the reservation.
+
+                RequestId -> (string)
+                  The ID of the requester that launched the instances on your behalf ( for example, AWS Management Console or Auto Scaling).
+
+                Groups -> (list)
+                  One or more security groups.
+
+                  (structure)
+                    Describe a security group.
+
+                    GroupName -> (string)
+                      The name of the security group.
+
+                    GroupId -> (string)
+                      The ID of the security group.
+
+                Instances -> (list)
+                   One or more instances.
+
+                   (structure)
+                     Describes an instance.
+
+                     InstanceId -> (string)
+                       The ID of the instance.
+
+                     ImageId -> (string)
+                       The ID of the AMI used to launch the instance.
+
+                    State -> (structure)
+                      The current state of the instance.
+
+                      Code -> (integer)
+                        The low byte represents the state. The high byte is an opaque internal value and should be ignored.
+    When the output is rendered into JSON by the AWS CLI, it becomes an array of reservation objects, like this:
+
+        {
+          "Reservations":[
+            {
+              "OwnerId":"012345678901",
+              "ReservationId":"r-4c58f8a0",
+              "Groups":[]
+              "RequesterId":"012345678901",
+              "Instances":[
+                {
+                  "Monitoring":{
+                    "State":"disabled"
+                  },
+                  "PublicDnsName":"ec2-52-74-16-12.us-west-2.compute.amazonaws.com",
+                  "State":{
+                    "Code":16,
+                    "Name":"running"
+                  },
+            ...
+    Each reservation object contains fields describing the reservation and an array of instance objects, each with its own fields (e.g. PublicDnsName) and objects (e.g. State) that describe it.
+**Windows Users**
+Pipe the output of the help command to more to view the help file one page at a time. Press the space bar or PageDown to view more of the document, and q to quit.
+`> aws ec2 describe-instances help | more`
+###### Command Structure
+The AWS CLI uses a multipart structure on the command line. It starts with the base call to `aws`. The next part specifies a top-level command, which often represents an AWS service supported in the AWS CLI. Each AWS service has additional subcommands that specify the operation to perform. The general CLI options, or the specific parameters for an operation, can be specified on the command line in any order. If an exclusive parameter is specified multiple times, then only the *last value* applies.
+`$ aws <command> <subcommand> [options and parameters]`
+Parameters can take various types of input values, such as numbers, strings, lists, maps, and JSON structures.
+###### Specifying Parameter Values
+Many parameters are simple string or numeric values, such as the key pair name my-key-pair in the following example:
+`$ aws ec2 create-key-pair --key-name my-key-pair`
+Strings without any space characters may be quoted or unquoted. However, strings that include one or more space characters must be quoted. Use a single quote (') in Linux, macOS, or Unix and Windows PowerShell, or use a double quote (") in the Windows command prompt, as shown in the following examples.
+**Windows PowerShell, Linux, macOS, or Unix**
+`$ aws ec2 create-key-pair --key-name 'my key pair'`
+**Windows Command Processor**
+`> aws ec2 create-key-pair --key-name "my key pair"`
+You can also use an equals sign instead of a space. This is typically only necessary if the value of the parameter starts with a hyphen:
+`aws ec2 delete-key-pair --key-name=-mykey`
+####### Common Parameter Types
+The section describes some of the common parameter types and the format that the services expect them to conform to. If you are having trouble with the formatting of a parameter for a specific command, check the manual by typing `help` after the command name, for example:
+`$ aws ec2 describe-spot-price-history help`
+The help for each subcommand describes its function, options, output, and examples. The options section includes the name and description of each option with the option's parameter type in parentheses.
+* **String**-String parameters can contain alphanumeric characters, symbols, and whitespace from the ASCII character set. Strings that contain whitespace must be surrounded by quotes. Use of symbols and whitespace other than the standard space character is not recommended and may cause issues when using the AWS CLI.
+    Some string parameters can accept binary data from a file. See Binary Files for an example.
+* **Timestamp**-Timestamps are formatted per the ISO 8601 standard. These are sometimes referred to as "Date Time" or "Date" type parameters.
+    `$ aws ec2 describe-spot-price-history --start-time 2014-10-13T19:00:00Z`
+    Acceptable formats include:
+    * YYYY-MM-DDThh:mm:ss.sssTZD (UTC), e.g., 2014-10-01T20:30:00.000Z
+    * YYYY-MM-DDThh:mm:ss.sssTZD (with offset), e.g., 2014-10-01T12:30:00.000-08:00
+    * YYYY-MM-DD, e.g., 2014-10-01
+    * Unix time in seconds, e.g. 1412195400
+* **List**-One or more strings separated by spaces
+    `$ aws ec2 describe-spot-price-history --isntance-types m1.xlarge m1.medium`
+* **Boolean**-Binary flag that turns an option on or off. For example, `ec2 describe-spot-price-history` has a boolean `dry-run` parameter that, when specified, validates the command against the service without actually running a query.
+    `$ aws ec2 describe-spot-price-history --dry-run`
+    The output indicates where the command was well formed or not. This command also includes a `no-dry-run` version of the parameter that can be used to explicitly indicate that the command should be run normally, although including it is not necessary as this is the default behavior.
 #### How to get prepare for hashcat
 ##### Setting up p3.16xlarge for hashcat
 First of, you may need to request a limit increase so that you are allowed to launch the new p3.16xlarge instances. AWS was pretty responsive, it only took them 20 minutes or so.

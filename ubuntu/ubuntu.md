@@ -777,3 +777,64 @@ _下载的文件默认保存到 程序所在目录 的 download/ 目录, 支持�
         sudo add-apt-repository ppa:troxor/autokey
         sudo apt update
         sudo apt install autokey-gtk
+## Pip
+### To install pip on Ubuntu 18.04
+Pip is a package management system that simplifies installation and management of software packages written in Python such as those found in the Python Packages Index (PyPI). Pip is not installed by default on Ubuntu 18.04, but the installation is pretty straightforward.
+#### Install pip
+There are several different ways to install pip on Ubuntu 18.04, depending on your preferences and needs. In this guide, we will install pip for both Python 2 `pip` and Python 3 `pip3` using the `apt` package manager.
+Before installing any package with `apt` it is recommended to update the package list with:
+`$ sudo apt update`
+##### Install pip for Python 2
+The following command will install pip for Python 2 and all of it's dependencies:
+`$ sudo apt install python-pip`
+Once this installation is complete, we can verify the installation with the following command which will print the pip version:
+`$ pip --version`
+The version number may vary, but it will look something like this:
+`pip 9.0.1 from /usr/lib/python2.7/dist-packages (python 2.7)`
+##### Install pi for Python 3
+To install pip3 for Python 3.x run:
+`$ sudo apt install python3-pip`
+Same as before we will verify the pip3 installation with:
+`$ pip3 --version`
+`pip 9.0.1 from /usr/lib/python3/dist-packages (python 3.6)`
+#### Install development tools
+We will also install development tools which are required for building Python modules, for Python 2 run:
+`$ sudo apt install build-essential python-dev python-setuptools`
+For Python 3:
+`$ sudo apt install build-essential python3-dev python3-setuptools`
+#### Pip Usage
+In this section we will go through a few useful basic pip commands. With pip we ca install packages from PyPI, version control, local projects, and from distribution files but in most cases you will install packages from PyPI.
+Let's say we want to install a package named `scrapy`, we can do that by issuing the following command:
+`$ pip install scrapy`
+To uninstall a package run:
+`$ pip uninstall scrapy`
+To search packages from PyPI:
+`$ pip search "search_query"`
+To list installed packages:
+`$ pip list`
+To list outdated packages:
+`$ pip list --outdated`
+### To install pip another way
+If you don't have pip, install pip with the script provided by the Python Packaging Authority.
+1. Download the installation script from pypa.io:
+`$ curl -O https://bootstrap.pypa.io/get-pip.py`
+The script downloads and installs the latest version of pip and another required package named setuptools.
+2. Run the script with Python:
+`$ python get-pip.py --user`
+3. Add the executable path to your PATH variable: `~/.local/bin`
+  To modify your PATH variable (Linux, macOS, or Unix)
+  * Find your shell's profile script in your user folder. If you are not sure which shell you have, run `echo $SHELL`.
+      `$ ls -a ~`
+      `. .. .bash_logout .bash_profile .bashrc Desktip Documents Downloads`
+      * Bash- .bash_profile, .profile, or .bash_login.
+      * Zsh- .zshrc
+      * Tcsh- .tcshrc, .cshrc or .login.
+  * Add an export command to your profile script.
+      `export PATH=~/.local/bin:$PATH`
+      This command adds a path, `~/.local/bin` in this example, to the current PATH variable.
+  * Load the profile into your current session
+      `$ source ~/.bahs_profile`
+4. Verify that pip is installed correctly.
+`$ pip --version`
+`pip 8.1.2 from ~/.local/lib/python3.4/site-packaes (python 3.4)`
+
