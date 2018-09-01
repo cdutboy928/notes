@@ -1705,6 +1705,1079 @@ The help for each subcommand describes its function, options, output, and exampl
 * **Boolean**-Binary flag that turns an option on or off. For example, `ec2 describe-spot-price-history` has a boolean `dry-run` parameter that, when specified, validates the command against the service without actually running a query.
     `$ aws ec2 describe-spot-price-history --dry-run`
     The output indicates where the command was well formed or not. This command also includes a `no-dry-run` version of the parameter that can be used to explicitly indicate that the command should be run normally, although including it is not necessary as this is the default behavior.
+* **Integer**-An unsigned whole number.
+    `$ aws ec2 describe-spot-price-history --max-items 5`
+* **Blob**-Binary object. Blob parameters take a path to a local file that contains binary data. The path should not contain any protocol identifier such as `http://` or `file://`.
+    The `--body` parameter for `aws s3api put-object` is a blob:
+    `$ aws s3api put-object --bucket my-bucket --key testimage.png --body /tmp/image.png`
+* **Map**-A sequence of key value pairs specified in JSON or shorthand syntax. The following example reads an item from a DynamoDB table named *my-table* with a map parameter, `--key`. The parameter specifies the primary key named *id* with a number value of *1* in a nested JSON structure.
+
+        $ aws dynamodb get-item --table-name my-table --key '{"id":{"N":"1"}}'
+         {
+           "Item":{
+              "name":{
+                "S":"John"
+              },
+              "id":{
+                "N":"1"
+              }
+            }
+          }
+The next section covers JSON arguments in more detail.
+####### Using JSON for Parameters
+JSON is useful for specifying complex command line parameters. For example, the following command will list all EC2 instances that have an instance type of m1.small or m1.medium that are also in the us-west-2c Availability Zone.
+`$ aws ec2 describe-instances --filters "Name=instance-type,Values=t2.micro,m1.medium" "Name=availability-zone,Values=us-west-2c"`
+The following example specifies the equivalent list of filters in a JSON array. Square brackets are used to create an array of JSON objects separated by commas. Each object is a comma separated list of key-value pairs ("Name" and "Values" are both keys in this instance).
+Note that value to the right of the "Values" key is itself an array. This is required, even if the array contains only one value string.
+
+        [
+         {
+          "Name":"instance-type",
+          "Values":["t2.micro","m1.medium"]
+          },
+          {
+           "Name":"availability-zone",
+           "Values":["us-west-2c"]
+          }
+         ]
+The outermost brackets, on the other hand, are only required if more than one filter is specified. A single filter version of the above command, formatted in JSON, looks like this:
+`$ aws ec2 describe-instances --filters '{"Name":"instance-type","Values":["t2.micro","m1.medium"]}'`
+Some operations require data to be formatted as JSON. For example, to pass parameters to the `--block-device-mappings` parameter in the `ec2 run-instances` command, you need to format the block device information as JSON.
+This example shows the JSON to specify a single 20GiB Elastic Block Store device to be mapped at `/dev/sdb` on the launching instance.
+
+        {
+         "DeviceName":"/dev/sdb",
+         "Ebs":{
+          "VolumeSize":20,
+          "DeleteOnTermination":false,
+          "VolumeType":"standard"
+          }
+         }
+To attack multiple devices, list the objects in an array like in the next example.
+
+        [
+         {
+          "DeviceName":"/dev/sdb",
+          "Ebs":{
+           "VolumeSize":20,
+           "DeleteOnTermination":false,
+           "VolumeType":"standard"
+           }
+          },
+          {
+           "DeviceName":"/dev/sdc",
+           "Ebs":{
+            "VolumeSize":10,
+            "DeleteOnTermination":true,
+            "VolumeType":"standard"
+            }
+           }
+          ]
+You can either enter the JSON directly on the command line (see Quoting Strings), or save it to a file that is referenced from the command line (see Loading Parameters from a File).
+When passing in large blocks of data, you might find it easier to save the JSON to a file and reference it from the command line. JSON data in a file is easier to read, edit, and share with others. This technique is described in the next section.
+####### Quoting Strings
+The way you enter JSON-formatted parameters on the command line differs depending upon your operating system. Linux, macOS, or Unix and Windows PowerShell use the single quote(') to enclose the JSON data structure, as in the following example:
+`$ aws ec2 run-instances --image-id ami-05355a6c --block-device-mappings '[{"DeviceName":"/dev/sdb","Ebs":{"VolumeSize":20,"DeleteOnTermination":false,"VolumeType":"standard"}}]'`
+The Windows command prompt, on the other hand, uses the double quote (") to enclose the JSON data structure. In addition, a backslash (\) escape character is required for each double quote (") within the JSON data structure it self, as in the following example:
+`> aws ec2 run-instances --image-id ami-05355a6c --block-device-mappings "[{\"DeviceName\":\"/dev/sdb\",\"Ebs\":{\"VolumeSize\":20,\"DeleteOnTermination\":false,\"VolumeType\":\"standard\"}}]"`
+Windows PowerShell requires a single quote (') to enclose the JSON data structure, as well as a backslash (\) to escape double quote (") within the JSON structure, as in the following example:
+`> aws ec2 run-instances --image-id ami-05355a6c --block-device-mappings '[{\"DeviceName\":\"/dev/sdb\",\"Ebs\":{\"VolumeSize\":20,\"DeleteOnTermination\":false,\"VolumeType\":\"standard\"}}]'`
+####### Loading Parameters from a File
+To avoid the need to escape JSON strings at the command line, load the JSON from a file. Load parameters from a file by providing the path to the file using the `file://` prefix, as in the following examples.
+* **Linux, macOS, or Unix**
+
+        //Read from a file in the current directory
+        $ aws ec2 describe-instances --filters file://filter.json
+
+        //Read from a file in /tmp
+        $ aws ec2 describe-instances --filters file:///tmp/filter.json
+* **Windows**
+
+        //Read from a file in C:\temp
+        > aws ec2 describe-instances --filters file://C:\temp\filter.json
+The `file://` prefix option supports Unix-style expansions including `~/`, `./`, and `../`. On Windows, the `~/` expression expands to your user directory, stored in the `%USERPROFILE%` environment variable. For example, on Windows 7 you would typically have a user directory under `C:\Users\User Name\``.
+JSON documents that are provided as the value of a parameter key must still be escaped:
+`$ aws sqs create-queue --queue-name my-queue --attributes file://attributes.json`
+
+**attributes.json**
+
+        {
+         "RedrivePolicy":"{\"deadLetterTargetArn\":\"arn:aws:sqs:us-west-2:0123456789012:deadletter\",\"maxReceiveCount\":\"5\"}"
+        }
+* **Binary Files**
+    For commands that take binary data as a parameter, specify that the data is binary content by using the `fileb://` prefix. Commands that accept binary data include:
+    * `aws ec2 run-instances`- `--user-data` parameter
+    * `aws s3api put-object`- `--sse-customer-key` parameter
+    * `aws kms decrypt`- `--ciphertext-blob` parameter
+    The following example generates a binary 256 bit AES key using a Linux command line tool and then provides it to Amazon S3 to encrypt an uploaded file server-side:
+
+        $ dd if=/dev/urandom bs=1 count=32 > sse.key
+        32+0 records in
+        32+0 records out
+        32 bytes (32 B) coppied, 0.000164441 s, 195 kB/s
+        $ aws s3api put-object --bucket my-bucket --key test.txt --body test.txt --sse-customer-key fileb://sse.key --sse-customer-algorithm AES256
+        {
+         "SSECustomerKeyMD5": "iVg8oWa8sy714+FjtesrJg==",
+         "SSECustomerAlgorithm": "AES256",
+         "ETag": "\"a6118e84b76cf98bf04bbe14b6045c6c\""
+        }
+
+* **Remote Files**
+    The AWS CLI also supports loading parameters from a file hosted on the Internet with an `http://` URL. The following example references a file in an Amazon S3 bucket. This allows you to access parameter files from any computer, but requires the file to be stored in a publically accessible location.
+    `$ aws ec2 run-instances --image-id ami-a13d6891 --block-device-mamppings http://my-bucket.s3.amazonaws.com/filename.json`
+    In the preceding examples, the `filename.json` file contains the following JSON data.
+
+        [
+         {
+          "DeviceName":"/dev/sdb",
+          "Ebs":{
+           "VolumeSize":20,
+           "DeleteOnTermination":false,
+           "VolumeType":"standard"
+           }
+          }
+         ]
+
+###### Generate CLI Skeleton and CLI Input JSON Parameters
+Most AWS CLI commands support `--generate-cli-skeleton` and `--cli-input-json` parameters that you can use to store parameters in JSON and read them from a file instead of typing them at the command line.
+Generate CLI Skeleton outputs JSON that outlines all of the parameters that can be specified or the operation.
+**To use `--generate-cli-skeleton` with aws ec2 run-instances**
+1. Execute the `run-instances` command with the `--generate-cli-skeleton` option to view the JSON skeleton.
+
+        $ aws ec2 run-instances --generate-cli-skeleton
+        {
+            "DryRun": true,
+            "ImageId": "",
+            "MinCount": 0,
+            "MaxCount": 0,
+            "KeyName": "",
+            "SecurityGroups": [
+                ""
+            ],
+            "SecurityGroupIds": [
+                ""
+            ],
+            "UserData": "",
+            "InstanceType": "",
+            "Placement": {
+                "AvailabilityZone": "",
+                "GroupName": "",
+                "Tenancy": ""
+            },
+            "KernelId": "",
+            "RamdiskId": "",
+            "BlockDeviceMappings": [
+                {
+                    "VirtualName": "",
+                    "DeviceName": "",
+                    "Ebs": {
+                        "SnapshotId": "",
+                        "VolumeSize": 0,
+                        "DeleteOnTermination": true,
+                        "VolumeType": "",
+                        "Iops": 0,
+                        "Encrypted": true
+                    },
+                    "NoDevice": ""
+                }
+            ],
+            "Monitoring": {
+                "Enabled": true
+            },
+            "SubnetId": "",
+            "DisableApiTermination": true,
+            "InstanceInitiatedShutdownBehavior": "",
+            "PrivateIpAddress": "",
+            "ClientToken": "",
+            "AdditionalInfo": "",
+            "NetworkInterfaces": [
+                {
+                    "NetworkInterfaceId": "",
+                    "DeviceIndex": 0,
+                    "SubnetId": "",
+                    "Description": "",
+                    "PrivateIpAddress": "",
+                    "Groups": [
+                        ""
+                    ],
+                    "DeleteOnTermination": true,
+                    "PrivateIpAddresses": [
+                        {
+                            "PrivateIpAddress": "",
+                            "Primary": true
+                        }
+                    ],
+                    "SecondaryPrivateIpAddressCount": 0,
+                    "AssociatePublicIpAddress": true
+                }
+            ],
+            "IamInstanceProfile": {
+                "Arn": "",
+                "Name": ""
+            },
+            "EbsOptimized": true
+        }
+
+2. Direct the output to a file to save the skeleton locally:
+`$ aws ec2 run-instances --generate-cli-skeleton > ec2runinst.json`
+3. Open the skeleton in text editor and remove any parameters that you will not use:
+
+        {
+          "DryRun":true,
+          "ImageId":"",
+          "KeyName":"",
+          "SecurityGroups":[
+            ""
+          ],
+          "InstanceType":"",
+          "Monitoring":{
+            "Enabled":true
+          }
+         }
+    Leave the DryRun parameter set to true to use EC2's dry run feature, which lets you test your configuration without creating resources.
+4. Fill in the values for the instance type, key name, security group and AMI in you default region. In this example, `ami-dfc39aef` is a 64-bit Amazon Linux image in the `us-west-2` region.
+
+        {
+          "DryRun":true,
+          "ImageId":"ami-dfc39aef",
+          "KeyName":"mykey",
+          "SecurityGroups":[
+            "my-sg"
+          ],
+          "InstanceType":"t2.micro",
+          "Monitoring":{
+            "Enabled":true
+          }
+         }
+
+5. Pass the JSON configuration to the `--cli-input-json` parameter using the `file://` prefix:
+
+        $ aws ec2 run-instances --cli-input-json file://ec2runinst.json
+        A client error (DryRunOperation) occurred when calling the RunInstances operation: Request would have succeeded, but DryRun flag is set.
+    The dry run error indicates that the JSON is formed correctly and the parameter values are valid. If any other issues are reported in the output, fix them and repeat the above step until the dry run error is shown.
+6. Set the DryRun parameter to false to disable the dry run feature.
+
+        {
+          "DryRun":false,
+          "ImageId":"ami-dfc39aef",
+          "KeyName":"mykey",
+          "SecurityGroups":[
+            "my-sg"
+          ],
+          "InstanceType":"t2.micro",
+          "Monitoring":{
+            "Enabled":true
+          }
+         }
+
+7. Run the `run-instances` command again to launch an instance:
+
+        $ aws ec2 run-instances --cli-input-json file://ec2runinst.json
+        {
+          "OwnerId":"123456789012",
+          "ReservationId":"r-d94a2b1",
+          "Groups":[],
+          "Instances":[
+        ...
+###### Controlling Command Output from the AWS Command Line Interface
+This section describes the different ways that you can control the output from the AWS CLI.
+####### How to Select the Output Format
+The AWS CLI supports three different output formats:
+* JSON (json)
+* Tab-delimited text (text)
+* ASCII-formatted table (table)
+As explained in the configuration topic, the output format can be specified in three different ways:
+* Using the `output` option in the configuration file. The following example sets the output to text:
+
+        [default]
+        output=text
+* Using the AWS_DEFAULT_OUTPUT environment variable. For example:
+    `$ export AWS_DEFAULT_OUTPUT="table"`
+* Using the `--output` option on the command line. For example:
+    `$ aws swf list-domains --registration-status REGISTERED --output text`
+**Note**:If the output format is specified in multiple ways, the usual AWS CLI precedence rules apply. For example, using the AWS_DEFAULT_OUTPUT environment variable overrides any value set in the config file with `output`, and a value passed to an AWS CLI command with `--output` overrides any value set in the environment or in the config file.
+JSON is best for handling the output programmatically via various languages. The table format is easy for humans to read, and text format works well with traditional Unix text processing tools, such as `sed`, `grep`, and `awk`, as well as Windows PowerShell scripts.
+####### How to Filter the Output with the `query` Option
+The AWS CLI provides built-in output filtering capabilities with the `--query` option. To demonstrates how it works, we'll first start with the default JSON output below, which describes two EBS (Elastic Block Storage) volumes attached to separate EC2 instances.
+
+        {
+            "Volumes": [
+                {
+                    "AvailabilityZone": "us-west-2a",
+                    "Attachments": [
+                        {
+                            "AttachTime": "2013-09-17T00:55:03.000Z",
+                            "InstanceId": "i-a071c394",
+                            "VolumeId": "vol-e11a5288",
+                            "State": "attached",
+                            "DeleteOnTermination": true,
+                            "Device": "/dev/sda1"
+                        }
+                    ],
+                    "VolumeType": "standard",
+                    "VolumeId": "vol-e11a5288",
+                    "State": "in-use",
+                    "SnapshotId": "snap-f23ec1c8",
+                    "CreateTime": "2013-09-17T00:55:03.000Z",
+                    "Size": 30
+                },
+                {
+                    "AvailabilityZone": "us-west-2a",
+                    "Attachments": [
+                        {
+                            "AttachTime": "2013-09-18T20:26:16.000Z",
+                            "InstanceId": "i-4b41a37c",
+                            "VolumeId": "vol-2e410a47",
+                            "State": "attached",
+                            "DeleteOnTermination": true,
+                            "Device": "/dev/sda1"
+                        }
+                    ],
+                    "VolumeType": "standard",
+                    "VolumeId": "vol-2e410a47",
+                    "State": "in-use",
+                    "SnapshotId": "snap-708e8348",
+                    "CreateTime": "2013-09-18T20:26:15.000Z",
+                    "Size": 8
+                }
+            ]
+        }
+First, we can display only the first volume from the Volumes list with the following command.
+
+        $ aws ec2 describe-volumes --query 'Volumes[0]'
+        {
+            "AvailabilityZone": "us-west-2a",
+            "Attachments": [
+                {
+                    "AttachTime": "2013-09-17T00:55:03.000Z",
+                    "InstanceId": "i-a071c394",
+                    "VolumeId": "vol-e11a5288",
+                    "State": "attached",
+                    "DeleteOnTermination": true,
+                    "Device": "/dev/sda1"
+                }
+            ],
+            "VolumeType": "standard",
+            "VolumeId": "vol-e11a5288",
+            "State": "in-use",
+            "SnapshotId": "snap-f23ec1c8",
+            "CreateTime": "2013-09-17T00:55:03.000Z",
+            "Size": 30
+        }
+Now, we use the wildcard `[*]` to iterate the entire list and also filter out three elements: VolumeId, AvailabilityZone, and Size. Note that the dictionary notation requires that you provide an alias for each key, like this: `Alias1:Key1,Alias2:Key2}`. A dictionary is inherently *unordered*, so the ordering of the key-aliases within a structure may not be consistent in some cases.
+
+        $ aws ec2 describe-volumes --query 'Volumes[*].{ID:VolumeId,AZ:AvailabilityZone,Size:Size}'
+        [
+          {
+            "AZ":"us-west-2a",
+            "ID":"vol-e11a5288",
+            "Size":30
+          },
+          {
+            "AZ":"us-west-2a",
+            "ID":"vol-2e410a47",
+            "Size":8
+          }
+         ]
+In the dictionary notation, you can also use chained keys such as key1.key2[0].key3 to filter elements deeply nested within the structure. The example below demonstrates this with the Attachments[0].InstanceId key, aliased to simply InstanceId.
+
+        $ aws ec2 describe-volumes --query 'Volumes[*].{ID:VolumeId,InstanceId:Attachements[0].InstanceId,AZ:AvailableZone,Size:Size}'
+        [
+          {
+            "InstanceId":"i-a071c394",
+            "AZ":"us-west-2a",
+            "ID":"vol-e11a5288",
+            "Size":30
+          },
+          {
+            "InstanceId":"i-4b41a37c",
+            "AZ":"us-west-2a",
+            "ID":"vol-2e410a47",
+            "Size":8
+          }
+        ]
+You can also filter multiple elements with the list notation: [key1,key2]. This will format all filtered attributes into a single *ordered* list per object, regardless of type.
+
+        $ aws ec2 describe-volumes --query 'Volumes[*].[VolumeId, Attachments[0],InstanceId,AvailableZone,Size]'
+        [
+          [
+            "vol-e11a5288",
+            "i-a071c394",
+            "us-west-2a",
+            30
+          ],
+          [
+            "vol-2e410a47",
+            "i-4b41a37c",
+            "us-west-2a",
+            8
+          ]
+         ]
+To filter results by the value of a specific field, use the JMESPath `?` operator. The following example query outputs only volumes ion the us-west-2a availability zone:
+
+        $ aws ec2 describe-volums --query 'Volumes[?AvailabilityZone==`us-west-2a`]'
+**Note**: When specifying a literal value such as "us-west-2" above in a JMESPath query expression, you must surround the value in backticks (\`) in order for it to be read properly.
+Combined with the three output formats that will be explained in more detail in the following sections, the `--query` option is a powerful tool you can use to customize the content and style of outputs.
+####### JSON Output Format
+JSON is the default output format of the AWS CLI. Most languages can easily decode JSON strings using built-in functions or with publicly available libraries. As shown in the previous topic along with the output examples, the `--query` option provides powerful ways to filter and format the AWS CLI's JSON formatted output. If you need more advanced features that may not be possible with `--query`, you can check out jq, a command line JSON processor.
+####### Test Output Format
+The *text* format organizes the AWS CLI's output into tab-delimited lines. It works well with traditional Unix text tools such as grep, sed, and awk, as well as Windows PowerShell.
+The text output format follows the basic structure shown below. The columns are sorted alphabetically by the corresponding key names of the underlying JSON object.
+
+        IDENTIFIER sorted-column1 sorted-column2
+        IDENTIFIER2 sorted-column1 sorted-column2
+The following is an example of a text output.
+
+        $ aws describe-volumes --output text
+        VOLUMES us-west-2a 2013-09-17T00:55:03.000Z 30  snap-f23ec1c8 in-use vol-e11a5288 standard
+        ATTACHMENTS     2013-09-17T00:55:03.000Z        True    /dev/sda1       i-a071c394      attached        vol-e11a5288
+        VOLUMES us-west-2a      2013-09-18T20:26:15.000Z        8       snap-708e8348   in-use  vol-2e410a47    standard
+        ATTACHMENTS     2013-09-18T20:26:16.000Z        True    /dev/sda1       i-4b41a37c      attached        vol-2e410a47
+We strongly recommend that the text output be used along with the `--query` option to ensure consistent behavior. This is because the text format alphabetically orders output columns, and similar resources may not always have the same collection of keys. For example, a JSON representation of a Linux EC2 instance may have elements that are not present in the JSON representation of a Windows instance, or vice versa. Also, resources may have key-value elements added or removed in future updates, altering the column ordering. This is where the `--query` arguments the functionality of the text output to enable complete control over the output format. In the example below, the command pre-selects which elements to display and defines the ordering of the columns with the list notation [key1,key2,...]. This gives users full confidence that the correct key values will always be displayed in the expected column. Finally, notice how the AWS CLI outputs 'None' as values for keys that don't exist.
+
+        $ aws ec2 descirbe-volumes --query 'Volumes[*].[VolumeId,Attachments[0].InstanceId,AvailableZone,Size,FakeKey]' --output text
+        vol-e11a5288 i-a071c394 us-west-2a 30 None
+        vol-2e410a47 i-4b41a37c us-west-2a 8  None
+Below is an example of how `grep` and `awk` can be used along with a text output from `aws ec2 describe-instances` command. The first command displays the AvailabilityZone, state, and instance ID of each instance in text output. The second command outputs only the instance IDs of all running instances in the `us-west-2a` Availability Zone.
+
+        $ aws ec2 describe-instances --query 'Reservations[*].Instances[*].[Placement.AvailableZone,State.Name,InstanceId]' --output text
+        us-west-2a running i-4b41a37c
+        us-west-2a      stopped i-a071c394
+        us-west-2b      stopped i-97a217a0
+        us-west-2a      running i-3045b007
+        us-west-2a      running i-6fc67758
+
+        $ aws ec2 describe-instances --query 'Reservations[*].Instances[*].[Placement.AvailabilityZone,State.Name,InstanceId]' --output text | grep us-west-2a|grep running|awk '{print $3}'
+        i-4b41a37c
+        i-3045b007
+        i-6fc67758
+The next command shows a similar example for all stopped instances and takes it one step further to automate changing instance types for each stopped instance.
+
+        $ aws ec2 describe-instances --query 'Reservations[*].Instances[*]].[State.Name,InstanceId]' --output text|
+        > grep stopped|
+        > awk '{print $2}'|
+        > while read line;
+        > do aws ec2 modify-instance-attribute --instance-id $line --instance-type '{"Value":"m1.medium"}';
+        > done
+####### Table Output Format
+The table format produces human-readable representations of AWS CLI output. Here is an example:
+
+        $ aws ec2 describe-volumes --output table
+        ---------------------------------------------------------------------------------------------------------------------
+        |                                                  DescribeVolumes                                                  |
+        +-------------------------------------------------------------------------------------------------------------------+
+        ||                                                     Volumes                                                     ||
+        |+------------------+---------------------------+-------+----------------+---------+----------------+--------------+|
+        || AvailabilityZone |        CreateTime         | Size  |  SnapshotId    |  State  |   VolumeId     | VolumeType   ||
+        |+------------------+---------------------------+-------+----------------+---------+----------------+--------------+|
+        ||  us-west-2a      |  2013-09-17T00:55:03.000Z |  30   |  snap-f23ec1c8 |  in-use |  vol-e11a5288  |  standard    ||
+        |+------------------+---------------------------+-------+----------------+---------+----------------+--------------+|
+        |||                                                  Attachments                                                  |||
+        ||+---------------------------+------------------------+-------------+--------------+------------+----------------+||
+        |||        AttachTime         |  DeleteOnTermination   |   Device    | InstanceId   |   State    |   VolumeId     |||
+        ||+---------------------------+------------------------+-------------+--------------+------------+----------------+||
+        |||  2013-09-17T00:55:03.000Z |  True                  |  /dev/sda1  |  i-a071c394  |  attached  |  vol-e11a5288  |||
+        ||+---------------------------+------------------------+-------------+--------------+------------+----------------+||
+        ||                                                     Volumes                                                     ||
+        |+------------------+---------------------------+-------+----------------+---------+----------------+--------------+|
+        || AvailabilityZone |        CreateTime         | Size  |  SnapshotId    |  State  |   VolumeId     | VolumeType   ||
+        |+------------------+---------------------------+-------+----------------+---------+----------------+--------------+|
+        ||  us-west-2a      |  2013-09-18T20:26:15.000Z |  8    |  snap-708e8348 |  in-use |  vol-2e410a47  |  standard    ||
+        |+------------------+---------------------------+-------+----------------+---------+----------------+--------------+|
+        |||                                                  Attachments                                                  |||
+        ||+---------------------------+------------------------+-------------+--------------+------------+----------------+||
+        |||        AttachTime         |  DeleteOnTermination   |   Device    | InstanceId   |   State    |   VolumeId     |||
+        ||+---------------------------+------------------------+-------------+--------------+------------+----------------+||
+        |||  2013-09-18T20:26:16.000Z |  True                  |  /dev/sda1  |  i-4b41a37c  |  attached  |  vol-2e410a47  |||
+        ||+---------------------------+------------------------+-------------+--------------+------------+----------------+||
+The `--query` option can be used with the table format to display a set of elements pre-selected from the raw output. Note the output differences in dictionary and list notations: column names are alphabetically ordered in the first example, and unnamed columns are ordered as defined by the user in the second example.
+
+        $ aws ec2 describe-volumns --query 'Volumes[*].{ID:VolumeId,InstanceId:Attachements[0].InstanceId,AZ:AvailabilityZone,Size:Size}' --output table
+        ------------------------------------------------------
+        |                   DescribeVolumes                  | 
+        +------------+----------------+--------------+-------+
+        |     AZ     |      ID        | InstanceId   | Size  |
+        +------------+----------------+--------------+-------+
+        |  us-west-2a|  vol-e11a5288  |  i-a071c394  |  30   |
+        |  us-west-2a|  vol-2e410a47  |  i-4b41a37c  |  8    |
+        +------------+----------------+--------------+-------+
+
+        $ aws ec2 describe-volumes --query 'Volumns[*].[VolumeId,Attachments[0].InstanceId,AvailabilityZone,Size]' --output table
+        ----------------------------------------------------
+        |                  DescribeVolumes                 |
+        +--------------+--------------+--------------+-----+
+        |  vol-e11a5288|  i-a071c394  |  us-west-2a  |  30 |
+        |  vol-2e410a47|  i-4b41a37c  |  us-west-2a  |  8  |
+        +--------------+--------------+--------------+-----+
+###### Using Shorthand Syntax with the AWS Command Line Interface
+While the AWS Command Line Interface can take nonscalar option parameters in JSON format, it can be tedious to type large JSON lists or structures on the command line. To address this issue, the AWS CLI supports a shorthand syntax that allows simpler representation of your option parameters than using the full JSON format.
+####### Structure Parameters
+The shorthand syntax in the AWS CLI makes it easier for users to input parameters that are flat (non-nested structures). The format is a comma separate list of key value pairs:
+* Linux, macOS, or Unix
+    `--option key1=value1, key2=value2,key3=value3`
+* Windows PowerShell
+    `--option "key1=value1,key2=value2,key3=value3"`
+This is equivalent to the following example formatted in JSON:
+`--option '{"Key1":"Value1","Key2":"Value2","Key3":"Value3"`
+There must be no whitespace between each comma-separated key/value pair. Here is an example of the DynamoDB `update-table` command with the `--provisioned-throughput` option specified in shorthand.
+`$ aws dynamodb udpate-table --provisioned-throughput ReadCapacityUnits=15,WriteCapacityUnits=10 --table-name MyDDBTable`
+####### List Parameters
+Input parameters in a list form can be specified in two ways: JSON and shorthand. The AWS CLI's shorthand syntax is designed to make it easier to pass lists with number, string, or non-nested structures. The basic format is shown here, where values in the list are separated by single space.
+`--option value1 value2 value3`
+This is equivalent to the following example formatted in JSON.
+`--option '[value1,value2,value3]'`
+As previously mentioned, you can specify a list of numbers, a list of strings, or a list of non-nested structures in shorthand. The following is an example of the `stop-instances` command for Amazon EC2, where the input parameters (list of strings) or the `--instance-ids` option is specified in shorthand.
+`$ aws ec2 stop-instances --instance-ids i-1486157a i-1286157c i-ec3a7e87`
+This is equivalent to the following example formatted in JSON.
+`$ aws ec2 stop-instances --instance-ids '["i-1486157a","i-1286157c","i-ec3a7e87"]'`
+Next is an example of the Amazon EC2 `create-tags` command, which takes a list of non-nested structures for the `--tags` option. The `--resoursces` option specifies the ID of the instance to be tagged.
+`$ aws ec2 create-tags --resoursces i-1286157c --tags Key=My1stTag,Value=Value1 Key=My2ndTag,Value2 Key=My3rdTag,Value=Value3`
+This is equivalent to the following example formatted in JSON. The JSON parameter is written in multiple lines of readability.
+
+        $ aws ec2 create-tags --resources i-1286157c --tags '[
+          {"Key":"My1stTag","Value":"Value1"},
+          {"Key":"My2ndTag","Value":"Value2"},
+          {"Key":"My3rdTag","Value":"Value3"}
+        ]'
+##### Using Amazon EC2 through the AWS Command Line Interface
+You can access the features of Amazon EC2 using the AWS CLI. To list the AWS CLI commands for Amazon EC2, use the following command.
+`$ aws ec2 help`
+Before you run any commands, set your default credentials.
+For examples for common tasks for Amazon EC2, see the following topics.
+###### Using Key Pairs
+You can use the AWS CLI to create, display, and delete your key pairs. You must specify a key pair when you launch and connect to an Amazon EC2 instance.
+**Note**: Before you try the example commands, set your default credentials.
+####### Creating a Key Pair
+To create a key pair named "MyKeyPair", use the `create-key-pair` command, and use the `--query` option and the `--output text` option to pipe your private key directly into a file.
+`$ aws ec2 create-key-pair --key-name MyKeyPair --query 'KeyMaterial' --output text > MyKeyPair.pem`
+Note that for Windows PowerShell, the `>` file redirection defaults to UTF-8 encoding, which cannot be used with some SSH clients. So, you must explicitly specify ASCII encoding in the `out-file` command.
+`aws ec2 create-key-pair --key-name MyKeyPair --query 'KeyMaterial' --output text | out-file -encoding ascii -filepath MyKeyPair.pem`
+The resulting MyKeyPair.pem file looks like this:
+
+        -----BEGIN RSA PRIVATE KEY-----
+        EXAMPLEKEYKCAQEAy7WZhaDsrA1W3mRlQtvhwyORRX8gnxgDAfRt/gx42kWXsT4rXE/b5CpSgie/
+        vBoU7jLxx92pNHoFnByP+Dc21eyyz6CvjTmWA0JwfWiW5/akH7iO5dSrvC7dQkW2duV5QuUdE0QW
+        Z/aNxMniGQE6XAgfwlnXVBwrerrQo+ZWQeqiUwwMkuEbLeJFLhMCvYURpUMSC1oehm449ilx9X1F
+        G50TCFeOzfl8dqqCP6GzbPaIjiU19xX/azOR9V+tpUOzEL+wmXnZt3/nHPQ5xvD2OJH67km6SuPW
+        oPzev/D8V+x4+bHthfSjR9Y7DvQFjfBVwHXigBdtZcU2/wei8D/HYwIDAQABAoIBAGZ1kaEvnrqu
+        /uler7vgIn5m7lN5LKw4hJLAIW6tUT/fzvtcHK0SkbQCQXuriHmQ2MQyJX/0kn2NfjLV/ufGxbL1
+        mb5qwMGUnEpJaZD6QSSs3kICLwWUYUiGfc0uiSbmJoap/GTLU0W5Mfcv36PaBUNy5p53V6G7hXb2
+        bahyWyJNfjLe4M86yd2YK3V2CmK+X/BOsShnJ36+hjrXPPWmV3N9zEmCdJjA+K15DYmhm/tJWSD9
+        81oGk9TopEp7CkIfatEATyyZiVqoRq6k64iuM9JkA3OzdXzMQexXVJ1TLZVEH0E7bhlY9d8O1ozR
+        oQs/FiZNAx2iijCWyv0lpjE73+kCgYEA9mZtyhkHkFDpwrSM1APaL8oNAbbjwEy7Z5Mqfql+lIp1
+        YkriL0DbLXlvRAH+yHPRit2hHOjtUNZh4Axv+cpg09qbUI3+43eEy24B7G/Uh+GTfbjsXsOxQx/x
+        p9otyVwc7hsQ5TA5PZb+mvkJ5OBEKzet9XcKwONBYELGhnEPe7cCgYEA06Vgov6YHleHui9kHuws
+        ayav0elc5zkxjF9nfHFJRry21R1trw2Vdpn+9g481URrpzWVOEihvm+xTtmaZlSp//lkq75XDwnU
+        WA8gkn6O3QE3fq2yN98BURsAKdJfJ5RL1HvGQvTe10HLYYXpJnEkHv+Unl2ajLivWUt5pbBrKbUC
+        gYBjbO+OZk0sCcpZ29sbzjYjpIddErySIyRX5gV2uNQwAjLdp9PfN295yQ+BxMBXiIycWVQiw0bH
+        oMo7yykABY7Ozd5wQewBQ4AdSlWSX4nGDtsiFxWiI5sKuAAeOCbTosy1s8w8fxoJ5Tz1sdoxNeGs
+        Arq6Wv/G16zQuAE9zK9vvwKBgF+09VI/1wJBirsDGz9whVWfFPrTkJNvJZzYt69qezxlsjgFKshy
+        WBhd4xHZtmCqpBPlAymEjr/TOlbxyARmXMnIOWIAnNXMGB4KGSyl1mzSVAoQ+fqR+cJ3d0dyPl1j
+        jjb0Ed/NY8frlNDxAVHE8BSkdsx2f6ELEyBKJSRr9snRAoGAMrTwYneXzvTskF/S5Fyu0iOegLDa
+        NWUH38v/nDCgEpIXD5Hn3qAEcju1IjmbwlvtW+nY2jVhv7UGd8MjwUTNGItdb6nsYqM2asrnF3qS
+        VRkAKKKYeGjkpUfVTrW0YFjXkfcrR/V+QFL5OndHAKJXjW7a4ejJLncTzmZSpYzwApc=
+        -----END RSA PRIVATE KEY-----
+Your private key is not stored in AWS and can only be retrieved when it is created.
+If you're sing an SSH client on a Linux computer to connect to your instance, use the following command to set the permissions of your private key file so that only you can read it.
+`$ chmod 400 MyKeyPair.pem`
+####### Displaying Your Key Pair
+A fingerprint is generated from your key pair, and you can use to verify that the private key that you have on your local machine matches the public key that's stored in AWS. The fingerprint is an SHA1 hahs take from a DER encoded copy of the private key. This value is stored in AWS and can be viewed in the EC2 management console or by calling `aws ec2 describe-key-pairs`. For example, you can view the fingerprint for MyKeyPair using the following command:
+
+        $ aws ec2 describe-key-pairs --key-name MyKeyPair
+        {
+          "KeyPairs":[
+            {
+              "KeyName":"MyKeyPair",
+              "KeyFingerprint":"1f:51:ae:28:bf:89:e9:d8:1f:25:5d:37:2d:7d:b8:ca:9f:f5:f1:6f"
+            }
+          ]
+        }
+####### Deleting Your Key Pair
+To delete MyKeyPair, use the `delete-key-pair` command as follows:
+`$ aws ec2 delete-key-pair --key-name MyKeyPair`
+###### Using Security Groups
+You create a security group for use in either EC2-Classic or EC2-VPC. For more information about EC2-Classic and EC2-VPC, see Supported Platforms in the Amazon EC2 User Guide for Linux Instances.
+You can use the AWS CLI to create, add rules to, and delete your security groups.
+**Note**: Before you try the example commands, set your default credentials.
+####### Creating a Security Group
+To create a security group named my-sg, use the `create-security-group` command.
+######## EC2-VPC
+The following command creates a security group named my-sg for the specified VPC:
+
+        aws ec2 create-security-group --group-name my-sg --description "My security group" --vpc-id vpc-1a2b3c4d
+        {
+          "GroupId":"sg-903004f8"
+        }
+To view the initial information for my-sg, use the `describe-security-groups` command as follows. Note that you can't reference a security group for EC2-VPC by name.
+
+        aws ec2 describe-security-groups --group-ids sg-903004f8
+        {
+          "SecurityGroups":[
+            {
+               "IpPermissionsEgress":[
+                 {
+                   "IpProtocol":"-1",
+                   "IpRanges":[
+                     {
+                       "CidrIp":"0.0.0.0/0"
+                     }
+                   ],
+                   "UserIdGroupPairs":[]
+                  }
+                ],
+                "Description":"My security group"
+                "IpPermissions":[],
+                "GroupName":"my-sg",
+                "VpcId":"vpc-1a2b3c4d",
+                "OwnerId":"123456789012",
+                "GroupId":"sg-903004f8"
+              }
+            ]
+        }
+######## EC2-Classic
+The following command creates a security group for EC2-Classic:
+
+        aws ec2 create-sescurity-group --group-name my-sg --description "My security group"
+        {
+          "GroupId":"sg-903004f8"
+        }
+To view the initial information for my-sg, use the `describe-security-groups` command as follows:
+
+        aws ec2 describe-security-groups --group-names my-sg
+        {
+          "SecurityGroups":[
+            {
+              "IpPermissionsEgress":[],
+              "Description":"My security group",
+              "IpPermissions":[].
+              "GroupName":"my-sg",
+              "OwnerId":"123456789012",
+              "GroupId":"sg-903004f8"
+            }
+          ]
+        }
+####### Adding Rules to Your Security Group
+If you're launching a Windows instance, you must add a rule to allow inbound traffic on TCP port (RDP). If you're launching a Linux instance, yo must add a rule to allow inbound traffic on TCP port 22 (SSH). Use the `authorize-security-group-ingress` command to add a rule to your security group. One of the required parameters of this command is the public IP address of your computer, in CIDR notation.
+**Note**: You can get the public IP address of your local computer using a service. For example, we provide the following service:
+https://checkip.amazonaws.com/. To locate another service that provides your IP address, use the search phrase "what is my IP address". If you are connecting through an ISP or from behind you firewall without s static IP address, you need to find out the range of IP addresses used by client computers.
+######## EC2-VPC
+The following command adds a rule for RDP to the security group with the ID sg-903004f8:
+`aws ec2 authorize-security-group-ingress --group-id sg-903004f8 --protocol tc --port 3389 -cidr 203.0.113.0/24`
+The following command adds a rule for SSH to the security group with the ID sg-903004f8:
+`aws ec2 authorize-security-group-ingress --group-id sg-903004f8 --protocol tcp --port 22 cidr 203.0.113.0/24`
+To view the changes to my-sg, use the `describe-security-groups` command as follows:
+
+        aws ec2 describe-security-groups --group-ids sg-903004f8
+        {
+          "SecurityGroups":[
+            {
+              "IpPermissionsEgress":[
+                {
+                  "IpProtocol":"-1",
+                  "IpRanges":[
+                    {
+                      "CidrIp":"0.0.0.0/0"
+                    }
+                  ],
+                  "UserIdGroupPairs":[]
+                }
+              ],
+              "Description":"My security group"
+              "IpPermissions":[
+                {
+                  "ToPort":22,
+                  "IpProtocol":"tcp",
+                  "IpRanges":[
+                    {
+                      "CidrIp":"203.0.113.0/24"
+                    }
+                  ]
+                  "UserIdGroupPairs":[],
+                  "FromPort":22
+                }
+              ],
+              "GroupName":"my-sg",
+              "OwnerId":"123456789012",
+              "GroupId":"sg-903004f8"
+            }
+          ]
+        }
+######## EC2-Classic
+The following command adds a rule for RDP to the security group my-sg:
+`aws ec2 autorize-security-group-ingress --group-name my-sg --protocol tcp --port 3389 --cidr 203.0.113.0/24`
+The following command adds a rule for SSH to the security group for my-sg:
+        
+        aws ec2 authorize-security-group-ingress --group-names my-sg
+        {
+          "IpPermissionsEgress":[],
+          "Description":"My security group"
+          "IpPermissions":[
+            {
+              "ToPort":22,
+              "IpProtocol":"tcp",
+              "IpRanges":[
+                {
+                  "CidrIp":"203.0.113.0/24"
+                }
+              ]
+              "UserIdGroupPairs":[],
+              "FromPort":22
+            }
+           ],
+           "GroupName":"my-sg",
+           "OwnerId":"123456789012",
+           "GroupId":"sg-903004f8"
+          }
+        ]
+        }
+####### Deleting Your Security Group
+To delete a security group, use the `delete-security-group` command. Note that you can't delete a security group if it is attached to an environment.
+######## EC2-VPC
+The following command deletes the security group with the ID sg-903004f8:
+`aws ec2 delete-security-group --group-id sg-903004f8`
+######## EC2-Classic
+`aws ec2 delete-sescurity-group --group-name my-sg`
+###### Using Amazon EC2 Instances
+You can use the AWS CLI to launch, list, and terminate instances. You'll need a key pair and a security group; for information about creating these  through the AWS CLI, see Using Key Pairs and Using Security Groups. You'll also need to select an Amazon Machine Image (AMI) and note its AMI ID. For more information, see Finding a Suitable AMI in the Amazon EC2 User Guide for Linux Instances.
+If you launch an instance that is not within the AWS Free Tier, you are billed after yo launch the instance and charged for the time that the instance is running, even if it remains idle.
+**Note**: Before you try the example command, set your default credentials.
+####### Launching an Instance
+To launch a single Amazon EC2 instance using the AMI you selected, use the `run-instances` command. Depending on the platforms that your account supports, you can launch the instance into EC2-Classic or EC2-VPC.
+Initially, your instance is in the `pending` state, but will be in the `running` state in a few minutes.
+######## EC2-VPC
+The following command launches a t2.micro instance in the specified subnet:
+
+        aws ec2 run-instances --image-id ami-xxxxxxxxx --count 1 --instance-type t2.micro --key-name MyKeyPair --security-group-ids sg-xxxxxxxx --subnet-id subnet-xxxxxxxx
+        {
+            "OwnerId": "123456789012",
+            "ReservationId": "r-5875ca20",
+            "Groups": [
+                {
+                    "GroupName": "my-sg",
+                    "GroupId": "sg-903004f8"
+                }
+            ],
+            "Instances": [
+                {
+                    "Monitoring": {
+                        "State": "disabled"
+                    },
+                    "PublicDnsName": null,
+                    "Platform": "windows",
+                    "State": {
+                        "Code": 0,
+                        "Name": "pending"
+                    },
+                    "EbsOptimized": false,
+                    "LaunchTime": "2013-07-19T02:42:39.000Z",
+                    "PrivateIpAddress": "10.0.1.114",
+                    "ProductCodes": [],
+                    "VpcId": "vpc-1a2b3c4d",
+                    "InstanceId": "i-5203422c",
+                    "ImageId": "ami-173d747e",
+                    "PrivateDnsName": ip-10-0-1-114.ec2.internal,
+                    "KeyName": "MyKeyPair",
+                    "SecurityGroups": [
+                        {
+                            "GroupName": "my-sg",
+                            "GroupId": "sg-903004f8"
+                        }
+                    ],
+                    "ClientToken": null,
+                    "SubnetId": "subnet-6e7f829e",
+                    "InstanceType": "t2.micro",
+                    "NetworkInterfaces": [
+                        {
+                            "Status": "in-use",
+                            "SourceDestCheck": true,
+                            "VpcId": "vpc-1a2b3c4d",
+                            "Description": "Primary network interface",
+                            "NetworkInterfaceId": "eni-a7edb1c9",
+                            "PrivateIpAddresses": [
+                                {
+                                    "PrivateDnsName": "ip-10-0-1-114.ec2.internal",
+                                    "Primary": true,
+                                    "PrivateIpAddress": "10.0.1.114"
+                                }
+                            ],
+                            "PrivateDnsName": "ip-10-0-1-114.ec2.internal",
+                            "Attachment": {
+                                "Status": "attached",
+                                "DeviceIndex": 0,
+                                "DeleteOnTermination": true,
+                                "AttachmentId": "eni-attach-52193138",
+                                "AttachTime": "2013-07-19T02:42:39.000Z"
+                            },
+                            "Groups": [
+                                {
+                                    "GroupName": "my-sg",
+                                    "GroupId": "sg-903004f8"
+                                }
+                            ],
+                            "SubnetId": "subnet-6e7f829e",
+                            "OwnerId": "123456789012",
+                            "PrivateIpAddress": "10.0.1.114"
+                        }              
+                    ],
+                    "SourceDestCheck": true,
+                    "Placement": {
+                        "Tenancy": "default",
+                        "GroupName": null,
+                        "AvailabilityZone": "us-west-2b"
+                    },
+                    "Hypervisor": "xen",
+                    "BlockDeviceMappings": [
+                        {
+                            "DeviceName": "/dev/sda1",
+                            "Ebs": {
+                                "Status": "attached",
+                                "DeleteOnTermination": true,
+                                "VolumeId": "vol-877166c8",
+                                "AttachTime": "2013-07-19T02:42:39.000Z"
+                            }
+                        }              
+                    ],
+                    "Architecture": "x86_64",
+                    "StateReason": {
+                        "Message": "pending",
+                        "Code": "pending"
+                    },
+                    "RootDeviceName": "/dev/sda1",
+                    "VirtualizationType": "hvm",
+                    "RootDeviceType": "ebs",
+                    "Tags": [
+                        {
+                            "Value": "MyInstance",
+                            "Key": "Name"
+                        }
+                    ],
+                    "AmiLaunchIndex": 0
+                }
+            ]
+        }
+######## EC2-Classic
+The following command launches a t1.micro instance in EC2-Classic:
+
+        aws ec2 run-instances --image-id ami-xxxxxxxx --count 1 --instance-type t1.micro --key-name MyKeyPair --security-groups my-sg
+        {
+            "OwnerId": "123456789012",
+            "ReservationId": "r-5875ca20",
+            "Groups": [
+                {
+                    "GroupName": "my-sg",
+                    "GroupId": "sg-903004f8"
+                }
+            ],
+            "Instances": [
+                {
+                    "Monitoring": {
+                        "State": "disabled"
+                    },
+                    "PublicDnsName": null,
+                    "Platform": "windows",
+                    "State": {
+                        "Code": 0,
+                        "Name": "pending"
+                    },
+                    "EbsOptimized": false,
+                    "LaunchTime": "2013-07-19T02:42:39.000Z",
+                    "ProductCodes": [],
+                    "InstanceId": "i-5203422c",
+                    "ImageId": "ami-173d747e",
+                    "PrivateDnsName": null,
+                    "KeyName": "MyKeyPair",
+                    "SecurityGroups": [
+                        {
+                            "GroupName": "my-sg",
+                            "GroupId": "sg-903004f8"
+                        }
+                    ],
+                    "ClientToken": null,
+                    "InstanceType": "t1.micro",
+                    "NetworkInterfaces": [],
+                    "Placement": {
+                        "Tenancy": "default",
+                        "GroupName": null,
+                        "AvailabilityZone": "us-west-2b"
+                    },
+                    "Hypervisor": "xen",
+                    "BlockDeviceMappings": [
+                        {
+                            "DeviceName": "/dev/sda1",
+                            "Ebs": {
+                                "Status": "attached",
+                                "DeleteOnTermination": true,
+                                "VolumeId": "vol-877166c8",
+                                "AttachTime": "2013-07-19T02:42:39.000Z"
+                            }
+                        }              
+                    ],
+                    "Architecture": "x86_64",
+                    "StateReason": {
+                        "Message": "pending",
+                        "Code": "pending"
+                    },
+                    "RootDeviceName": "/dev/sda1",
+                    "VirtualizationType": "hvm",
+                    "RootDeviceType": "ebs",
+                    "Tags": [
+                        {
+                            "Value": "MyInstance",
+                            "Key": "Name"
+                        }
+                    ],
+                    "AmiLaunchIndex": 0
+                }
+            ]
+        }
+####### Adding a Block Device Mapping to Your Instance
+Each instance that you launch has an associated root device volume. You can use block device mapping to specify additional EBS volumes or instance store volumes to attach to an instance when it's launched.
+To add a block device mapping to your instance, specify the `--block-device-mappings` option when you use `run-instances`.
+The following example adds a standard Amazon EBS volume, mapped to `/dev/sdf`, that's 20 GB in size.
+`--block-device-mappings "[{\"DeviceName\":\"/dev/sdf\",\"Ebs\":{\"VolumeSize\":20,\"DeleteOnTermination\":false}}]"`
+The following example adds an Amazon EBS volume, mapped to `/dev/sdf`, based on a snapshot. When you  specify a snapshot, it isn't necessary to specify a volume size, but if you do, it must be greater or equal to the size of the snapshot.
+`--block-device-mappings "[{\"DeviceName\":\"/dev/sdf\",\"Ebs\":{\"SnapshotId\":\"snap-xxxxxxxx\"}}]"`
+The following example adds two instance store volumes. Note that the number of instance store volumes available to your instance depends on its instance type.
+`--block-device-mappings "[{\"DeviceName\":\"/dev/sdf\",\"VirtualName\":\"ephemeral0\"},{\"DeviceName\":\"/dev/sdg\",\"VirtualName\":\"ephemeral1\"}]"`
+The following example omits a mapping for a device specified by the AMI used to launch the instance (`/dev/sdj`):
+`--block-device-mappings "[{\"DeviceName\":\"/dev/sdj\",\"NoDevice\":\"\"}]"`
+For more information, see Block Device Mapping in the Amazon EC2 User Guide for Linux Instances.
+####### Adding a Name Tag to Your Instance
+To add the tag `Name=MyInstance` to your instance, use the `create-tags` commands as follows:
+`aws ec2 create-tags --resources i-xxxxxxxxx --tags Key=Name,Value=MyInstance`
+For more information, see Tagging Your Resources in the Amazon EC2 User Guide for Linux Instances.
+####### Connecting to Your Instance
+While your instance is running, you can connect to it and use it just as you'd use a computer sitting in front of you. For more information, see Connect to Your Amazon EC2 Instance in the Amazon EC2 User Guide for Linux Instances.
+####### Listing Your Instances
+You can use the AWS CLI to list your instances and view information about them. You can list all your instances, or filter the results based on the instances that you're interested in.
+**Note**: Before you try the example commands, set your default credentials.
+The following examples show how to use the `describe-instances` command.
+**Example 1: List the instances with the specified instance type**
+The following command lists your t2.micro instances.
+`aws ec2 describe-instances --filters "Name=instance-type,Values=t2.micro" --query Reservations[].Instances[].InstanceId`
+**Example 2: List the instances with the specified tag**
+The following command lists the instances with a tag "Name=MyInstance".
+`aws ec2 describe-instances --filters "Name=tag:Name,Values=MyInstance"`
+**Example 3: List the instances launched using the specified images**
+The following command lists your instances that were launched from the following AMIs: ami-x0123456,ami-y0123456,ami-z0123456.
+`aws ec2 describe-instances --filters "Name=image-id,Values=ami-x0123456,ami=y0123456,ami-z0123456"`
+####### Terminating Your Instance
+Terminating an instance effectively deletes it; you can't reconnect to an instance after you've terminated it. As soon as the state of the instance changes to `shutting-down` or `terminated`, you stop incurring charges for that instance.
+When you are finished with the instance, use the `terminate-instances` command as follows:
+
+        aws ec2 terminate-instances --instance-ids i-5203422c
+        {
+          "TerminatingInstances":[
+            {
+              "InstanceId":"i-5203422c",
+              "CurrentState":{
+                "Code":32,
+                "Name":"shutting-down"
+              },
+              "PreviousState":{
+                "Code":16,
+                "Name":"running"
+              }
+            }
+          ]
+        }
+For more information, see Terminate Your Instance in the Amazon EC2 User Guide for Linux Instances.
+
+##### Troubleshooting AWS CLI errors
+After installing with `pip`, you may need to add the aws executable to your OS's PATH environment variable, or change its mode to make it executable.
+###### **Error**: `aws: scommand not found`
+You may need to add the aws executable to your OS's PATH environment variable.
+If aws is in your PATH and you still see this error, you may no have the right file mode. Try running it directly.
+`$ ~/.local/bin/aws --version`
+###### Error: `permission denied`
+Make sure that the aws script has a file mode that is executable. For example, 755.
+Run `chmod +x` to make the file executable.
+`$ chmod +x ~/.local/bin/aws`
+###### Error: `AWS was not able to validate the provided credentials`
+The AWS CLI may be reading credentials from a different location than you expect. Run `aws configure list` to confirm that the correct crednetials are used.
+
+        $ aws configure list
+        Name        Value       Type        Location
+        ----        ----        ----        ----
+        profile     <not set>   None        None
+        access_key  \*********   XYVA        shared-credential-file
+        secret_key  *********   ZAGY        shared-credential-file
+        region      us-west-2   config-file ~/.aws/config
+
+If the correct credentials are used, your clock may be out of sync. On Linux, macOS, or Unix, run `date` to check the time.
+`date`
+###### Error:`An error occurred (UnauthorizedOperation) when calling the CreateKeyPair operation: You are not authorized to perform this operation.
+Your IAM user or role needs permission to call the API actions that correspond to the commands that you run with the AWS CLI. Most commands call a single action with a name that matches the command name; however, custom commands like `aws s3 sync` call multiple APIs. You can see which APIs a command calls by using the `--debug` option.
+### User Guide for Linux Instances on Amazon EC2
+#### [What Is Amazon EC2?](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/concepts.html)
+##### Features of Amazon EC2
+##### How to get started with Amazon EC2
+##### Related Services
+##### Accessing Amazon EC2
+##### Pricing for Amazon EC2
+##### [Instances and AMIs](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-instances-and-amis.html)
+###### Instances
+####### Storage for Your Instance
+####### Security Best Practices
+####### Stopping, Starting, and Terminating Instances
+###### AMIs
+##### [Regions and Availability Zones](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-regions-availability-zones.html)
+###### Region and Availability Zone Concepts
+####### Regions
+####### Availability Zones
+###### Available Regions
+###### Regions and Endpoints
+###### Describing Your Regions and Availability Zones
+####### To find your regions and Availability Zones using the console
+####### To find your regions and Availability Zones using the command line
+###### Specifying the Region for a Resource
+####### To specify the region for a resource using the console
+####### To specify the default region using the environment
+####### To specify the default region using the command line
+###### Launching Instances in an Availability Zone
+####### To specify an Availability Zone for your instance using the console
+####### To specify an Availability Zone for your instance using the AWS CLI
+####### To specify an Availability Zone for your instance using the AWS Tools for Windows PowerShell
+###### Migrating an Instance to Another Availability Zone
+##### [Amazon EC2 Root Device Volume](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/RootDeviceStorage.html)
+###### Root Device Storage concepts
+####### Instance Store-backed Instances
+####### Amazon EBS-backed Instances
+###### Choosing an AMI by Root Device Type
+####### To choose an Amazon EBS-backed AMI using the console
+####### To choose an instance store-backed AMI using the console
+####### To verify the type of the root device volume of an AMI using the command line
+###### Determining the Root Device Type of Your Instance
+####### To determine the root device type of an instance using the console
+####### To determine the root device type of an instance using the command line
+###### Changing the Root Device Volume to Persist
+####### To change the root device volume of an instance to persist at launch using the console
+####### Changing the Root Volume of an Instance to Persist Using the AWS CLI
+######## Example at Launch
+######## Example While the Instance is Running
+#### Setting Up with Amazon EC2
+##### Sign Up for AWS
+###### To create an AWS account
+##### Create an IAM User
+###### To create an IAM user for yourself and add the user to an Administrators group
+##### Create a Key Pair
+###### To create a key pair
+###### To connect to your instance using your key pair
+##### Create a Virtual Private Cloud (VPC)
+##### Create a Security Group
+#### Getting Started with Amazon EC2 Linux Instances
+##### Overview
+##### Prerequisites
+##### Step 1: Launch an Instance
+##### Step 2: Connect to Your Instance
+##### Step 3: Clean Up Your Instance
+##### Next Steps
+* Learn how to remotely manage your EC2 instance using Run Command.
+* Configure a CloudWatch alarm to notify you if your usage exceeds the Free Tier.
+* Add an EBS volume.
+* Install the LAMP stack.
+#### [Best Practices for Amazon EC2](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-best-practices.html)
+
 #### How to get prepare for hashcat
 ##### Setting up p3.16xlarge for hashcat
 First of, you may need to request a limit increase so that you are allowed to launch the new p3.16xlarge instances. AWS was pretty responsive, it only took them 20 minutes or so.
