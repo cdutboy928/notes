@@ -2777,6 +2777,16 @@ Your IAM user or role needs permission to call the API actions that correspond t
 * Add an EBS volume.
 * Install the LAMP stack.
 #### [Best Practices for Amazon EC2](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-best-practices.html)
+#### Amazon EC2 Instances
+##### [Instance Types](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/instance-types.html)
+###### Available Instance Types
+####### Current Generation Instances
+####### Previous Generation Instances
+###### Hardware Specification
+###### Virtualization Types
+###### Networking and Storage Features
+###### Instance Limits
+###### Burstable Performance Instances
 
 #### How to get prepare for hashcat
 ##### Setting up p3.16xlarge for hashcat
