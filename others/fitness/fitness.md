@@ -1,7 +1,7 @@
-# Fitness
+# Fitness(欢宝贝儿，看这里,乖☻ )
 ## Chest Muscle
 ### To larger
-push-ups
+push-ups:要尽量贴地面，胸部肌肉伸展开。
 ### To make raphe
 ![To make raphe](raphe.gif)
 
@@ -16,3 +16,4 @@ push-ups
 
 * plank,向上拱起
     ![plank](腹肌3.png)
+* 双膝着地，身体向前倾更容易用力

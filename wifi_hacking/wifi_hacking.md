@@ -2787,7 +2787,808 @@ Your IAM user or role needs permission to call the API actions that correspond t
 ###### Networking and Storage Features
 ###### Instance Limits
 ###### Burstable Performance Instances
-
+####### Hardware Specifications
+####### Burstable Performance Instance Requirements
+####### Best Practices
+###### [CPU Credits and Baseline Performance](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/t2-credits-baseline-concepts.html)
+####### [Unlimited Mode](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/t2-unlimited.html)
+####### [Standard Mode](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/t2-std.html)
+####### [Working with T2 and T3 Instances](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/t-how-to.html)
+####### [Monitoring Your CPU Credits](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/t2-instances-monitoring-cpu-credits.html)
+###### [General Purpose Instances](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/general-purpose-instances.html)
+**M5 Instances**
+**T3 Instances**
+**T2 Instances**
+####### Hardware Specifications
+####### Instance Performance
+####### Network Performance
+####### Instance Features
+####### Release Notes
+###### [Compute Optimized Instances](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/compute-optimized-instances.html)
+####### Hardware Specifications
+###### [Memory Optimized Instances](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/memory-optimized-instances.html)
+###### [Storage Optimized Instances](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/storage-optimized-instances.html)
+###### [Linux Accelerated Computing Instances](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/accelerated-computing-instances.html)
+####### Accelerated Computing Instance Families
+######## F1 Instances
+######## P3 Instances
+######## P2 Instances
+######## G3 Instances
+######## G2 Instances
+####### Hardware Specifications
+####### Network Performance
+####### Instance Features
+####### Release Notes
+####### AMIs for GPU-Based Accelerated Computing Instances
+* [NVIDIA P3 AMIs](https://aws.amazon.com/marketplace/search/results/?page=1&filters=instance_types&instance_types=p3.2xlarge&searchTerms=NVIDIA)
+* [NVIDIA P2 AMIs](https://aws.amazon.com/marketplace/search/results/?page=1&filters=instance_types&instance_types=p2.xlarge&searchTerms=NVIDIA)
+You can also install the NVIDIA driver manually. For more information, see [Installing the NVIDIA Driver on Linux Instances](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/install-nvidia-driver.html)
+####### [Installing the NVIDIA Driver on Linux Instances](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/install-nvidia-driver.html)
+######## Uninstalling Amazon-provided NVIDIA packages
+######## Downloading the NVIDIA GRID Driver (G3)
+######## Downloading a Public NVIDIA Driver (G2, P2, P3)
+######## Installing the NVIDIA Driver Manually
+**To install the driver on a Linux instance**
+####### [Activate NVIDIA GRID Virtual Applications (G3 Instances Only)](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/activate_grid.html)
+####### [Optimizing GPU Settings (P2, P3, and G3 Instances)](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/optimize_gpu.html)
+####### [Getting Started with FPGA Development](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/fpga-getting-started.html)
+###### [T1 Micro Instances](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/concepts_micro_instances.html)
+###### [Changing the Instance Type](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-instance-resize.html)
+####### Compatibility for Resizing Instances
+####### Resizing an Amazon EBS-backed Instance
+####### Migrating to a New Instance Configuration
+###### [Optimizing CPU Options](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/instance-optimize-cpu.html)
+####### Rules for Specifying CPU Options
+####### CPU Cores and Threads Per CPU Core Per Instance Type
+####### Specifying CPU Options for Your Instance
+######## To disable Intel Hyper-Threading Technology during instance launch
+######## To specify a custom number of vCPUs during instance launch
+####### Viewing the CPU Options for Your Instance
+##### [Instance Purchasing Options](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/instance-purchasing-options.html)
+###### Determining the Instance Lifecycle
+####### To determine the instance lifecycle using the console
+####### To determine the instance lifecycle using the AWS CLI
+###### [Reserved Instances](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-reserved-instances.html)
+####### Payment Options
+####### Using Reserved Instances in a VPC
+####### Reserved Instance Limits
+###### [Scheduled Reserved Instances](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-scheduled-instances.html)
+###### [Spot Instances](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-spot-instances.html)
+####### Concepts
+* Spot Instance pool
+* Spot price
+* Spot Instance request
+* Spot Fleet
+* Spot Instance interruption
+####### How to Get Started
+####### Pricing
+* View Prices
+* View Billing
+####### [How Spot Instances Work](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/how-spot-instances-work.html)
+######## Launching Spot Instances in a Launch Group
+######## Launching Spot Instances in an Availability Zone Group
+######## Launching Spot Instances in a VPC
+####### [How Spot Fleet Works](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/spot-fleet.html)
+######## On-Demand in Spot Fleet
+######## Allocation Strategy for Spot Instances
+* Maintaining Target Capacity
+* Configuring Spot Fleet for Cost Optimization
+* Configuring Spot Fleet or Cost Optimization and Diversification
+* Choosing an Appropriate Allocation Strategy
+######## Spot Price Overrides
+######## Spot Fleet Instance Weighting
+######## Walkthrough: Using Spot Fleet with Instance Weighting
+####### [Spot Instance Pricing History](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-spot-instances-history.html)
+######## To view the Spot price history using the console
+######## To view the Spot price history using the command line
+####### [Spot Instance Requests](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/spot-requests.html)
+######## Spot Instance Request States
+######## Specifying a Duration for Your Spot Instances
+######## Specifying a Tenancy for Your Spot Instances
+**To create the IAM role**
+######## Creating a Spot Instance Request
+* Prerequisites
+* To create a Spot Instance request using the console
+* To create a Spot Instance request using the AWS CLI
+######## Finding Running Spot Instances
+* To find running Spot Instances using the console
+* To find running Spot Instances using the AWS CLI
+######## Tagging Spot Instances Requests
+* To add a tag to your Spot Instance request or Spot Instance using the AWS
+######## Canceling a Spot Instance Request
+######## [Spot Request Example Launch Specifications](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/spot-request-examples.html)
+* Example 1: Launch Spot Instances
+* Example 2: Launch Spot Instances in the Specified Availability Zone
+* Example 3: Launch Spot Instances in the Specified Subnet
+####### [Spot Fleet Requests](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/spot-fleet-requests.html)
+######## Spot Fleet Request States
+######## Spot Fleet Prerequisites
+**To create the IAM role for Spot Fleet**
+######## Spot Fleet and IAM Users
+######## Spot Fleet Health Checks
+######## Planning a Spot Fleet Request
+######## Creating a Spot Fleet Request
+* To create a Spot Fleet request using the console
+* To create a Spot Fleet request using the AWS CLI
+######## Monitoring Your Spot Fleet
+* To monitor your Spot Fleet using the console
+* To monitor your Spot Fleet using the AWS CLI
+######## Modifying a Spot Fleet Request
+* To modify a Spot Fleet request using the console
+* To modify a Spot Fleet request using the AWS CLI
+######## Canceling a Spot Fleet Request
+* To cancel a Spot Fleet request using the console
+* To cancel a Spot Fleet request using the AWS CLI
+######## [Spot Fleet Example Configurations](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/spot-fleet-examples.html)
+######## Example 1: Launch Spot Instances Using the Lowest-Priced Availability Zone or Subnet in the Region
+######## Example 2: Launch Spot Instances Using the Lowest-Priced Availability Zone or Subnet in a Specified List
+######## Example 3: Launch a Spot Instances Using the Lowest-Priced Instance Type in a Specified List
+######## Example 4: Override the Price for the Request
+######## Example 5: Launch a Spot Fleet Using the Diversified Allocation Strategy
+######## Example 6: Launch a Spot Fleet Using the Instance Weighting
+######## Example 7: Launch a Spot Fleet with On-Demand Capacity
+####### [CloudWatch Metrics for Spot Fleet](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/spot-fleet-cloudwatch-metrics.html)
+######## Spot Fleet Metrics
+######## Spot Fleet Dimensions
+######## View the ClouWatch Metrics for your Spot Fleet
+####### [Automatic Scaling for Spot Fleet](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/spot-fleet-automatic-scaling.html)
+####### [Spot Request Status](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/spot-bid-status.html)
+######## Life Cycle of a Spot Request
+######## Getting Request Status Information
+* To get request status information using the console
+* To get request status information using the command line
+######## Spot Request Status Codes
+####### [Spot Instance Interruptions](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/spot-interruptions.html)
+######## Interruption Behavior
+* Stopping Interrupted Spot Instances
+* Hibernating Interrupted Spot Instances
+######## Preparing for Interruptions
+######## Preparing for Instance Hibernation
+######## Spot Instance Interruption Notices
+* EC2 Spot Instance Interruption Warning
+* instance-action
+* termination-time
+####### [Spot Instance Data Feed](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/spot-data-feeds.html)
+######## Data Feed File Name and Format
+######## Amazon S3 Bucket Requirements
+######## Subscribing to Your Spot Instance Data Feed
+######## Deleting Your Spot Instance Data Feed
+####### [Spot Instance Limits](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-spot-limits.html)
+######## Spot Request Limits
+######## Spot Fleet Limits
+######## T2 Instances
+##### [Instance Lifecycle](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-instance-lifecycle.html)
+###### Instance Launch
+###### Instance Stop and Start (Amazon EBS-Backed Instances Only)
+###### Instance Reboot
+###### Instance Retirement
+###### Instance Termination
+###### Differences Between Reboot, Stop, and Terminate
+###### [Launch Your Instance](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/LaunchingAndUsingInstances.html)
+####### [Launching an Instance Using the Launch Instance Wizard](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/launching-instance.html)
+######## Launching Your Instance from an AMI
+####### [Launching an Instance from a Launch Template](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-launch-templates.html)
+######## Launch Template Restrictions
+######## Using Launch Templates to Control Launch Parameters
+######## Controlling the Use of Launch Templates
+######## Creating a Launch Template
+* To create a new launch template using the console
+* To create a launch template from an existing launch template using the console
+* To create a launch template using the command line
+* To get instance data for a launch template using the command line
+########  Managing Launch Template Versions
+* Creating a Launch Template Version
+    * To create a launch template version using the console
+    * To create a launch template version using the command line
+* Setting the Default Template Version
+    * To set the default launch template version using the console
+    * To set the default launch template version using the command line
+* Deleting a Launch Template Version
+    * To delete a launch template version using the console
+    * To delete a launch template version using the command line
+######## Launching an Instance from a Launch Template
+* To launch an instance from a launch template using the console
+* To launch an instance from a launch template using the command line
+######## Using Launch templates with Amazon EC2 Auto Scaling
+######## Using Launch Templates with EC2 Fleet
+######## Using Launch Templates with Spot Fleet
+######## Deleting a Launch Template
+####### [Launching an Instance Using Parameters from an Existing Instance](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/launch-more-like-this.html)
+####### [Launching a Linux Instance from a Backup](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/instance-launch-snapshot.html)
+####### [Launching an AWS Marketplace Instance](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/launch-marketplace-console.html)
+* To launch an instance from the AWS Marketplace using the launch wizard
+* Launching an AWS Marketplace AMI Instance Using the API and CLI
+####### [Launching an EC2 Fleet](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-fleet.html)
+######## EC2 Fleet Limitations
+######## [EC2 Fleet Configuration Strategies](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-fleet-configuration-strategies.html)
+* Planning an EC2 Fleet
+* EC2 Fleet Request Types
+* Allocation Strategy for Spot Instance
+    * Maintaining Target Capacity
+    * Configuring EC2 Fleet for Cost Optimization
+    * Configuring EC2 Fleet for Cost Optimization and Diversification
+    * Choosing the Appropriate Allocation Strategy
+* Configuring EC2 Fleet for On-Demand Backup
+    * Prioritizing Instance Types for On-Demand Capacity
+* Maximum Price Overrides
+* EC2 Fleet Instance Weighting
+* Walkthrough: Using EC2 Fleet with Instance Weighting
+* Walkthrough: Using EC2 Fleet with On-Demand as the Primary Capacity
+######## [Managing an EC2 Fleet](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/manage-ec2-fleet.html)
+* EC2 Fleet Request States
+* EC2 Fleet Prerequisites
+* EC2 Fleet Health Checks
+* Generating an EC2 Fleet JSON Configuration File
+    * To generate a JSON file with all possible EC2 Fleet parameters using the command line
+    * EC2 Fleet JSON Configuration File Reference
+* Creating an EC2 Fleet
+* Tagging an EC2 Fleet
+* Monitoring Your EC2 Fleet
+    * To monitor your EC2 Fleet using the AWS CLI
+* Modifying an EC2 Fleet
+* Deleting an EC2 Fleet
+* [EC2 Fleet Example Configuration](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-fleet-examples.html)
+    * Example 1: Launch Spot Instances as the Default Purchasing Model
+    * Example 2: Launch On-Demand Instances as the Default Purchasing Model
+    * Example 3: Launch On-Demand Instances as the Primary Capacity
+    * Example 4: Launch Spot Instances Using the Lowest Price Allocation Strategy
+###### [Connect to Your Linux Instance](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/AccessingInstances.html)
+####### [Connecting to Your Linux Instance Using SSH](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/AccessingInstancesLinux.html)
+######## Prerequisites
+######## Connecting to Your Linux Instance
+######## Transferring Files to Linux Instances from Linux Using SCP
+###### [Stop and Start Your Instance](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/Stop_Start.html)
+####### Overview
+####### Stopping and Starting Your Instances
+* To stop and start an Amazon EBS-backed instance using the console
+* To stop and start an Amazon EBS-backed instance using the command line
+    * [Stop-instances](https://docs.aws.amazon.com/cli/latest/reference/ec2/stop-instances.html)
+####### Modifying a Stopped Instance
+* To modify an instance attribute
+* To modify an instance attribute using the command line
+    * [modify-instance-attribute](https://docs.aws.amazon.com/cli/latest/reference/ec2/modify-instance-attribute.html)
+####### Troubleshooting
+###### [Reboot Your Instance](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-instance-reboot.html)
+* To reboot an instance using the console
+* To reboot an instance using the command line
+    * [reboot-instances](https://docs.aws.amazon.com/cli/latest/reference/ec2/reboot-instances.html)
+###### [Instance Retirement](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/instance-retirement.html)
+####### Identifying Instances Scheduled for Retirement
+* To identify instances scheduled for retirement using the console
+* To identify instances scheduled for retirement using the command line
+    * [describe-instance-status](https://docs.aws.amazon.com/cli/latest/reference/ec2/describe-instance-status.html#describe-instance-status)
+####### Working with Instances Scheduled for Retirement
+* Determining Your Instance Root Device Type
+    * To determine your instance root device type using the console
+    * To determine your instance root device type using the command line
+        * [describe-instances](https://docs.aws.amazon.com/cli/latest/reference/ec2/describe-instances.html)
+* Managing Instances Scheduled for Retirement
+###### [Terminate Your Instance](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/terminating-instances.html)
+####### Instance Termination
+####### Terminating an Instance
+* To terminate an instance using the console
+* To terminate an instance using the command line
+    * [terminate-instances](https://docs.aws.amazon.com/cli/latest/reference/ec2/terminate-instances.html)
+####### Enabling Termination Protection for an Instance
+* Limits
+* To enable termination protection for an instance at launch time
+* To enable termination protection for a running or stopped instance
+* To disable termination protection fora running or stopped instance
+* To enable or disable termination protection using the command line
+    * [modify-instance-attribute](https://docs.aws.amazon.com/cli/latest/reference/ec2/modify-instance-attribute.html)
+####### Changing the Instance Initiated Shutdown Behavior
+* To change the shutdown behavior of an instance using the console
+* To change the shutdown behavior of an instance using the command line
+####### Preserving Amazon EBS Volumes on Instance Termination
+* To change the root volume of an instance to persist at launch using the console
+* Changing the Root Volume to Persist at Launch Using the Command Line
+* Changing the Root Volume of a Running Instance to Persist Using the Command Line
+####### Troubleshooting
+###### [Recover Your Instance](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-instance-recover.html)
+##### [Configure Instances](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/Configure_Instance.html)
+###### Common Configuration Scenarios
+###### [Managing Software on Your Linux Instance](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/managing-software.html)
+####### [Updating Instance Software](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/install-updates.html)
+####### [Adding Repositories](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/add-repositories.html)
+####### [Finding Software Packages](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/find-software.html)
+####### [Installing Software Packages](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/install-software.html)
+####### [Preparing to Compile Software](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/compile-software.html)
+###### [Managing User Accounts on Your Linux Instance](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/managing-users.html)
+* To add a user account
+* To remove a user from the system
+###### [Processor State Control for Your EC2 Instance](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/processor_state_control.html)
+####### Highest Performance with Maximum Turbo Boost Frequency
+####### High Performance and Low Latency by Limiting Deeper C-states
+* To limit deeper sleep states on Amazon Linux 2
+* To limit deeper states on Amazon Linux AMI
+####### Baseline Performance with the Lowest Variability
+* To limit deeper sleep states and disable Turbo Boost on Amazon Linux 2
+* To limit deeper sleep states and disable Turbo Boost on Amazon Linux AMI
+###### [Setting the Time for Your Linux Instance](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/set-time.html)
+####### Configuring the Amazon Time Sync Service on Amazon Linux AMI
+####### Configuring the Amazon Time Sync Service on Ubuntu
+####### Configuring the Amazon Time Sync Service on SUSE Linux
+####### Changing the Time Zone on Amazon Linux
+###### [Changing the Hostname of Your Linux Instance](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/set-hostname.html)
+* To change the system hostname to a public DNS name
+* To change the system hostname without a public DNS name
+####### Changing the Shell Prompt Without Affecting the Hostname
+####### Changing the Hostname on Other Linux Distributions
+###### [Setting Up Dynamic DNS on Your Linux Instance](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/dynamic-dns.html)
+###### [Running Commands on Your Linux Instance at Launch](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/user-data.html)
+####### Prerequisites
+####### User Data and Shell Scripts
+####### User Data and the Console
+* Specify Instance User Data at Launch
+* View and Update the Instance User Data
+####### User Data and cloud-init Directives
+* To pass cloud-init directives to an instance with user data
+####### User Data and the AWS CLI
+* Example: Specify User Data at Launch
+* Example: Modify the User Data of a Stopped Instance
+* Example: View User Data
+###### [Instance Metadata and User Data](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-instance-metadata.html)
+####### Retrieving Instance Metadata
+* Examples of Retrieving Instance Metadata
+####### Working with Instance User Data
+* Specify Instance User Data at Launch
+* Modify Instance User Data
+* Retrieve Instance User Data
+####### Retrieving Dynamic Data
+####### Example: AMI Launch Index Value
+####### Instance Metadata Categories
+####### [Instance Identity Documents](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/instance-identity-documents.html)
+* Obtaining the Instance Identity Document and Signatures
+* Verifying the PKCS7 Signature
+##### [Identify EC2 Linux Instances](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/identify_ec2_instances.html)
+###### Inspecting the System UUID
+###### Inspecting the Instance Identity Document
+#### [Monitoring](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/monitoring_ec2.html)
+#### [Network and Security](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/EC2_Network_and_Security.html)
+##### [Amazon EC2 Key Pairs](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-key-pairs.html)
+* Creating a Key Pair
+* Launching and Connecting to Your Instance
+* Key Pairs for Multiple Users
+###### Creating a Key Pair Using Amazon EC2
+* To create your key pair using the Amazon EC2 console
+* To create your key pair using the command line
+    * [create-key-pair](https://docs.aws.amazon.com/cli/latest/reference/ec2/create-key-pair.html)
+###### Importing Your Own Public Key to Amazon EC2
+* To create a key pair using a third-party tool
+* To import the public key
+* To import the public key using the command line
+    * [import-key-pair](https://docs.aws.amazon.com/cli/latest/reference/ec2/import-key-pair.html)
+* To verify that your key pair was imported
+* To view your key pair using the command line
+    * [describe-key-pairs](https://docs.aws.amazon.com/cli/latest/reference/ec2/describe-key-pairs.html)
+###### Retrieving the Public Key for Your Key Pair on Linux
+###### Retrieving the Public Key for Your Key Pair From Your Instance
+###### Verifying Your Key Pair's Fingerprint
+###### Deleting Your Key Pair
+* To delete your key pair using the console
+* To delete you key pair using the command line
+    * [delete-key-pair](https://docs.aws.amazon.com/cli/latest/reference/ec2/delete-key-pair.html)
+###### Adding or Replacing a Key Pair for Your Instance
+###### Connecting to Your Linux Instance if You Lose Your Private Key
+##### [Amazon EC2 Security Groups for Linux Instances](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-network-security.html)
+###### Security Groups for EC2-Classic
+###### Security Groups for EC2-VPC
+###### Security Group Rules
+* Connection Tracking
+###### Default Security Groups
+###### Custom Security Groups
+###### Working with Security Groups
+* Creating a Security Group
+    * To create a new security group using the console
+    * To create a security group using the command line
+        * [create-security-group](https://docs.aws.amazon.com/cli/latest/reference/ec2/create-security-group.html)
+    * To copy a security group using the console
+    * [EC2-VPC] To modify the security groups for an instance using the command line
+        * [modify-instance-attribute](https://docs.aws.amazon.com/cli/latest/reference/ec2/modify-instance-attribute.html)
+    * To describe your security groups for EC2-Classic using the console
+    * To describe you security groups for EC2-VPC using the console
+        * [describe-security-groups](https://docs.aws.amazon.com/cli/latest/reference/ec2/describe-security-groups.html)
+* Adding Rules to a Security Group
+    * To add rules to a security group using the console
+    * To add one or more ingress rules to a security group using the command line
+        * [authorize-security-group-ingress](https://docs.aws.amazon.com/cli/latest/reference/ec2/authorize-security-group-ingress.html)
+    * [EC2-VPC] To add one or more egress rules to a security group using the command line
+        * [authorize-security-group-egress](https://docs.aws.amazon.com/cli/latest/reference/ec2/authorize-security-group-egress.html)
+* Updating Security Groups Rules
+    * To update a security group rule using the console
+    * To update the description for an ingress security group rule using the command line
+        * [update-security-group-rule-descriptions-ingress](https://docs.aws.amazon.com/cli/latest/reference/ec2/update-security-group-rule-descriptions-ingress.html)
+    * [EC2-VPC] To update the description for an egress security group rule using the command line
+        * [update-security-group-rule-descriptions-egress](https://docs.aws.amazon.com/cli/latest/reference/ec2/update-security-group-rule-descriptions-egress.html)
+* Deleting Rules from a Security Group
+    * To delete a security group rule using the console
+    * To remove one or more ingress rules from a security group using the command line
+        * [revoke-security-group-ingress](https://docs.aws.amazon.com/cli/latest/reference/ec2/revoke-security-group-ingress.html)
+    * [EC2-VPC] To remove one or more egress rules from a security group using the command line
+        * [revoke-security-group-egress](https://docs.aws.amazon.com/cli/latest/reference/ec2/revoke-security-group-egress.html)
+* Deleting a Security Group
+    * To delete a security group using the console
+    * To delete a security group using the command line
+        * [delete-security-group](https://docs.aws.amazon.com/cli/latest/reference/ec2/delete-security-group.html)
+###### [Security Group Rules Reference](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/security-group-rules-reference.html)
+##### [Controlling Access to Amazon EC2 Resources](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/UsingIAM.html)
+* Network Access to Your Instance
+* Amazon EC2 Permission Attributes
+* IAM and Amazon EC2
+    * Creating an IAM Group and Users
+        * To create an IAM group
+        * To create an IAM user, add the user to your group, and create a password for the user
+###### [IAM Policies for Amazon EC2](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/iam-policies-for-amazon-ec2.html)
+* Getting started
+####### [Policy Structure](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/iam-policy-structure.html)
+* Policy Syntax
+* Actions for Amazon EC2
+* Amazon Resource Names for Amazon EC2
+* Condition Keys for Amazon EC2
+* Checking That Users Have the Required Permissions
+####### [Supported Resource-Level Permissions for Amazon EC2 API Actions](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-supported-iam-actions-resources.html)
+####### [Example Policies for Working with the AWS CLI or an AWS SDK](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ExamplePolicies_EC2.html)
+* 1: Read-Only Access
+* 2: Restricting Access to a Specific Region
+* 3: Working with Instances
+    * Describe, Launch, Stop, Start, and Terminate All Instances
+    * Describe All Instances, and Stop, Start, and Terminate Only Particular Instances
+* 4: Working with Volumes
+    * Attaching and Detaching Volumes
+    * Creating a Volume
+    * Creating a Volume with Tags
+* 5: Working with Snapshots
+    * Creating a Snapshot
+    * Creating a Snapshot with Tags
+    * Modifying Permissions Settings for Snapshot
+* 6: Launching Instances (RunInstances)
+    * AMI
+    * Instance Type
+    * Subnet
+    * EBS Volumes
+    * Applying Tags
+    * Applying Tags in a Launch Template
+    * Attaching an Elastic GPU
+    * Launch Templates
+* 7: Working with Reserved Instances
+* 8: Tagging Resources
+* 9: Working with IAM Roles
+* 10: Working with Route Tables
+* 11: Allowing a Specific Instance to View Resources in Other AWS Services
+* 12: Working with Launch Templates
+####### [Example Policies for Working in the Amazon EC2 Console](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/iam-policies-ec2-console.html)
+* 1: Read-Only Access
+    * a. View instances, AMIs, and Snapshots
+    * b. View instances and CloudWatch metrics
+* 2: Using the EC2 Launch Wizard
+    * a. Basic launch wizard access
+    * b. Restrict access to specific instance type, subnet, and region
+* 3: Working with Volumes
+* 4: Working with Security Groups
+    * a. View security groups and add and remove rules
+    * b. Working with the Create Security Group dialog box
+* 5: Working with Elastic IP Address
+* 6: Working with Reserved Instances
+###### [IAM Roles for Amazon EC2](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/iam-roles-for-amazon-ec2.html)
+####### Instance Profiles
+* [Using Instance Profiles](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_use_switch-role-ec2_instance-profiles.html)
+    * Managing Instance Profiles (Console)
+    * Managing Instance Profiles (AWS CLI or AWS API)
+####### Retrieving Security Credentials from Instance Metadata
+####### Granting an IAM User Permission to Pass an IAM Role to an Instance
+####### Working with IAM Roles
+* Creating an IAM Role
+    * To create an IAM role using the IAM console
+    * To create an IAM role and instance profile using the AWS CLI
+* Launching an Instance with an IAM Role
+    * To launch an instance with an IAM role using the console
+    * To launch an instance with an IAM role using the AWS CLI
+* Attaching an IAM Role to an Instance
+    * To attach an IAM role to an instance using the console
+    * To attach an IAM role to an instance using the AWS CLI
+* Detaching an IAM Role
+    * To detach an IAM role from an instance using the console
+    * To detach an IAM role from an instance using the AWS CLI
+* Replacing an IAM Role
+    * To replace an IAM role for an instance using the console
+    * To replace an IAM role for an instance using the AWS CLI
+###### [Network Access: Authorizing Inbound Traffic for Your Linux Instances](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/authorizing-access-to-an-instance.html)
+####### Before You Start
+####### Adding a Rule for Inbound SSH Traffic to a Linux Instance
+* To add a rule to a security group for inbound SSH traffic over IPv4 using the console
+* To add a rule to a security group for inbound SSH traffic over IPv6 using the console
+* To add a rule to a security group using the command line
+####### Assigning a Security Group to an Instance
+##### [Instance IP Addressing](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-instance-addressing.html)
+###### Private IPv4 Addresses and Internal DNS Hostnames
+###### Public IPv4 Addresses and External DNS Hostnames
+###### Elastic IP Addresses (IPv4)
+###### Amazon DNS Server
+###### IPv6 Addresses
+###### Working with IP Addresses for Your Instance
+* Determining Your Public, Private and Elastic IP Addresses
+    * To determine your instance's private IPv4 addresses using the console
+    * To determine your instance's public IPv4 addresses using the console
+    * To determine your instance's IPv4 addresses using instance metadata
+* Determining Your IPv6 Addresses
+    * To determine your instance's IPv6 addresses using the console
+    * To determine your instance's IPv6 addresses using instance metadata
+* Assigning a Public IPv4 Address During Instance Launch
+    * To access the public IP addressing feature when you launching an instance
+    * To enable or disable the public IP addressing feature using the command line
+* Assigning an IPv6 Address to an Instance
+    * To assign an IPv6 address to an instance during launch
+    * To assign an IPv6 address to an instance after launch
+    * To assign an IPv6 address to an instance using the command line
+* Unassigning an IPv6 address from an instance
+    * To unassign an IPv6 address from an instance
+    * To unassign an IPv6 address using the command line
+###### [Multiple IP Addresses](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/MultipleIP.html)
+* How Multiple IP Addresses Work
+* Working with Multiple IPv4 Addresses
+    * Assigning a Secondary Private IPv4 Address
+        * To assign a secondary private IPv4 address when launching an instance
+        * To assign a secondary IPv4 address during launch using the command line
+        * To assign a secondary private IPv4 address to a network interface
+        * To assign a secondary private IPv4 address to an existing instance using the command line
+    * Configuring the Operating System on Your Instance to Recognize the Secondary Private IPv4 Address
+    * Associating an Elastic IP Address with the Secondary Private IPv4 Address
+        * To associate an Elastic IP address with a secondary private IPv4 address
+        * To associate an Elastic IP address with a secondary private IPv4 address using the command line
+    * Viewing Your Secondary Private IPv4 Address
+        * To view the private IPv4 addresses assigned to a network interface
+        * To view the private IPv4 addresses assigned to an instance
+    * Unassigning a Secondary Private IPv4 Address
+        * To unassign a secondary private IPv4 address from an instance
+        * To unassign a secondary private IPv4 address from a network interface
+        * To unassign a secondary private IPv4 address using the command line
+* Working with Multiple IPv6 Addresses
+    * Assigning Multiple IPv6 Addresses
+        * To assign multiple IPv6 addresses during launch
+        * To assign multiple IPv6 addresses to an existing instance
+        * To assign multiple IPv6 addresses to a network interface
+        * CLI overview
+            * Assign an IPv6 address during launch
+            * Assign an IPv6 address to a network interface
+    * Viewing Your IPv6 Addresses
+        * To view the IPv6 addresses assigned to an instance
+        * To view the IPv6 addresses assigned to a network interface
+        * CLI overview
+            * View the IPv6 addresses for an instance
+            * View the IPv6 addresses for a network interface
+    * Unassigning an IPv6 Address
+        * To unassign an IPv6 address from an instance
+        * To unassign an IPv6 address from a network interface
+        * CLI Overview
+            * `unassign-ipv6-addresses`
+##### [Elastic IP Addresses](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/elastic-ip-addresses-eip.html)
+###### Elastic Elastic IP address basics
+###### Working with Elastic IP Addresses
+* Allocating an Elastic IP Address
+    * To allocate an Elastic IP Address using the console
+    * To allocate an Elastic IP Address using the command line
+* Describing Your Elastic IP Addresses
+    * To describe your Elastic IP Addresses using the console
+    * To describe your Elastic IP Addresses using the command line
+* Tagging an Elastic IP Address
+    * To tag an Elastic IP address using the console
+    * To tag an Elastic IP address using the command line
+        * [`create-tags`](https://docs.aws.amazon.com/cli/latest/reference/ec2/create-tags.html)
+* Associating an Elastic Address with a Running Instance
+    * To associate an Elastic IP address with an instance using the console
+    * To associate an Elastic IP address using the command line
+        * [`associate-address`](https://docs.aws.amazon.com/cli/latest/reference/ec2/associate-address.html)
+* Disassociating an Elastic IP Address and Reassociating with a Different Instance
+    * To disassociate and reassociate an Elastic IP address using the console
+    * To disassociate an Elastic IP address using the command line
+        * [`disassociate-address`](https://docs.aws.amazon.com/cli/latest/reference/ec2/disassociate-address.html)
+    * To associate an Elastic IP address using the command line
+        * [`associate-address`](https://docs.aws.amazon.com/cli/latest/reference/ec2/associate-address.html)
+* Releasing an Elastic IP Address
+    * To release an Elastic IP Address using the console
+    * To release an Elastic IP Address using the command line
+        * [`release-address`](https://docs.aws.amazon.com/cli/latest/reference/ec2/release-address.html)
+* Recovering an Elastic IP Address
+    * To recover an Elastic IP address using the command line
+###### Using Reverse DNS for Email Applications
+###### Elastic IP Address Limit
+##### [Elastic Network Interfaces](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-eni.html)
+###### Network Interface Basics
+* Public IPv4 addresses for network interfaces
+* IPv6 addresses for network interfaces
+* Monitoring IP Traffic
+###### IP Addresses Per Network Interface Per Instance Type
+###### Scenarios for Network Interfaces
+* Creating a Management Network
+* Use Network and Security Appliances in Your VPC
+* Creating Dual-homed Instances with Workloads/Roles on Distinct Subnets
+* Create a Low Budget High Availability Solution
+###### Best Practices for Configuring Network Interfaces
+###### Working with Network Interfaces
+* Creating a Network Interface
+    * To create a network interface using the console
+    * To create a network interface using the command line
+        * [`create-network-interface`](https://docs.aws.amazon.com/cli/latest/reference/ec2/create-network-interface.html)
+* Deleting a network interface
+    * To delete a network interface using the console
+    * To delete a network interface using the command line
+        * [`delete-network-interface`](https://docs.aws.amazon.com/cli/latest/reference/ec2/delete-network-interface.html)
+* Viewing Details about a Network Interface
+    * To describe a network interface using the console
+    * To describe a network interface using the command line
+        * [`describe-network-interfaces`](https://docs.aws.amazon.com/cli/latest/reference/ec2/describe-network-interfaces.html)
+* Attaching a Network Interface When Launching an Instance
+    * To attach a network interface when launching an instance using the console
+    * To attach a network interface when launching an instance using the command line
+        * [`run-instances`](https://docs.aws.amazon.com/cli/latest/reference/ec2/run-instances.html)
+* Attaching a Network Interface to a Stopped or Running Instance
+    * To attach a network interface to an instance using the Instances page
+    * To attach a network interface to an instance using the Network Interfaces page
+    * To attach a network interface to an instance using the command line
+        * [`attach-network-interface`](https://docs.aws.amazon.com/cli/latest/reference/ec2/attach-network-interface.html)
+* Detaching a Network Interface from an Instance
+    * To detach a network interface from an instance using the Instances page
+    * To detach a network interface from an instance using the Network Interfaces page
+    * To detach a network interface using the command line
+        * [`detach-network-interface`](https://docs.aws.amazon.com/cli/latest/reference/ec2/detach-network-interface.html)
+* Changing the Security Group
+    * To change the security group of a network interface using the console
+    * To change the security group of a network interface using the command line
+        * [`modify-network-interface-attribut`](https://docs.aws.amazon.com/cli/latest/reference/ec2/modify-network-interface-attribute.html)
+* Changing the Source or Destination Checking
+    * To change the source/destination checking for a network interface using the console
+    * To change the source/destination checking for a network interface using the command line
+        * [`modify-network-interface-attribute`](https://docs.aws.amazon.com/cli/latest/reference/ec2/modify-network-interface-attribute.html)
+* Associating an Elastic IP Address (IPv4)
+    * To associate an Elastic IP address using the command line
+    * To associate an Elastic IP address using the command line
+        * [`associate-address`](https://docs.aws.amazon.com/cli/latest/reference/ec2/associate-address.html)
+* Disassociating an Elastic IP Address (IPv4)
+    * To disassociate an Elastic IP Address using the console
+    * To disassociate an Elastic IP Address using the command line
+        * [`disassociate-address`](https://docs.aws.amazon.com/cli/latest/reference/ec2/disassociate-address.html)
+* Assigning an IPv6 Address
+    * To assign an IPv6 address to a network interface using the console
+    * To assign an IPv6 address to a network interface using the command line
+        * [`assign-ipv6-addresses`](https://docs.aws.amazon.com/cli/latest/reference/ec2/assign-ipv6-addresses.html)
+* Unassigning an IPv6 Address
+    * To unassign an IPv6 address from a network interface using the console
+    * To unassign an IPv6 address from a network interface using the command line
+        * [`unassign-ipv6-addresses`](https://docs.aws.amazon.com/cli/latest/reference/ec2/unassign-ipv6-addresses.html)
+* Changing Termination Behavior
+    * To change the termination behavior for a network interface using the console
+    * To change the termination behavior for a network interface using the command line
+        * [`modify-network-interface-attribute`](https://docs.aws.amazon.com/cli/latest/reference/ec2/modify-network-interface-attribute.html)
+* Adding or Editing a Description
+    * To change the description for a network interface using the console
+    * To change the description for a network interface using the command line
+        * [`modify-network-interface-attribute`](https://docs.aws.amazon.com/cli/latest/reference/ec2/modify-network-interface-attribute.html)
+* Adding or Editing Tags
+    * To add or edit tags for a network interface using the console
+    * To add or edit tags for a network interface using the command line
+        * [`create-tags`](https://docs.aws.amazon.com/cli/latest/reference/ec2/create-tags.html)
+###### [Requester-Managed Network Interfaces](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/requester-managed-eni.html)
+##### [Enhanced Networking on Linux](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/enhanced-networking.html)
+###### Enhanced Networking Types
+###### Enabling Enhanced Networking on Your Instance
+###### [Enabling Enhanced Networking with the Intel 82599 VF Interface on Linux Instances](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/sriov-networking.html)
+* Requirements
+* Testing Whether Enhanced Networking is Enabled
+    * Instance Attribute (sriovNetSupport)
+        * [`describe-instance-attribute`](https://docs.aws.amazon.com/cli/latest/reference/ec2/describe-instance-attribute.html)
+        * `aws ec2 describe-instance-attribute --instance-id instance_id --attribute sriovNetSupport`
+    * Image Attribute (sriovNetSupport)
+        * [`describe-image-attribute`](https://docs.aws.amazon.com/cli/latest/reference/ec2/describe-image-attribute.html)
+        * `aws ec2 describe-image-attribute --image-id ami_id --attribute sriovNetSupport`
+    * Network Interface Driver (`ixgbevf`)
+        * `ethtool -i eth0`
+* Enabling Enhanced Networking on Amazon Linux
+    * To enable enhanced networking
+    * To enable enhanced networking (instance store-backed instances)
+* Enabling Enhanced Networking on Ubuntu
+    * To install the linux-aws kernel package
+* Enabling Enhanced Networking on Other Linux Distributions
+###### [Enabling Enhanced Networking with the Elastic Network Adapter (ENA) on Linux Instances](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/enhanced-networking-ena.html)
+* Requirements
+* Testing Whether Enhanced Networking is Enabled
+    * Kernel Module (ena)
+        * `modinfo ena`
+    * Instance Attribute (enaSupport)
+        * `aws ec2 describe-instances --instance-ids instance_id --query "Reservations[].Instances[].EnaSupport"`
+    * Image Attribure (enaSupport)
+        * `aws ec2 describe-images --image-id ami_id --query "Images[].EnaSupport"`
+    * Network Interface Driver
+        * `ethtool -i eth0`
+* Enabling Enhanced Networking on the Amazon Linux AMI
+    * To enable enhanced networking on Amazon Linux AMI
+    * To enable enhanced networking on Amazon Linux AMI (instance store-backed instances)
+* Enabling Enhanced Networking on Ubuntu
+    * To install the linux-aws kernel package
+* Enabling Enhanced Networking on Linux
+###### [Troubleshooting the Elastic Network Adapter](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/troubleshooting-ena.html)
+* Troubleshooting Connectivity Issues
+    * To disable enhanced networking with ENA (EBS-backed instances)
+    * To disable enhanced networking with ENA (instance store-backed instances)
+* Keep-Alive Mechanism
+* Register Read Timeout
+* Statistics
+* Driver Error Logs in syslog
+##### [Placement Groups](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/placement-groups.html)
+###### Cluster Placement Groups
+###### Spread Placement Groups
+###### Placement Group Rules and Limitations
+###### Creating a Placement Group
+* To create a placement group using the console
+* To create a placement group using the command line
+    * [`create-placement-group`](https://docs.aws.amazon.com/cli/latest/reference/ec2/create-placement-group.html)
+###### Launching Instances in a Placement Group
+* To launch instances into a placement group using the console
+* To launch instances into a placement group using the command line
+    * 1. Create an AMI for your instances using the following command:
+        * [`create-image`](https://docs.aws.amazon.com/cli/latest/reference/ec2/create-image.html)
+    * 2. Launch instances into your placement group using the following command:
+        * `--placement` with `run-instances`
+###### Changing the Placement Group for an Instance
+* To move an instance to a placement group using the command line
+    * 1. Stop the instance using the following command:
+        * [`stop-instances`](https://docs.aws.amazon.com/cli/latest/reference/ec2/stop-instances.html)
+    * 2. Use the `modify-instance-placement` command to specify the name of the placement group to which to move the instance.
+        * `aws ec2 modify-instance-placement --instance-id i-0aa51192b00939a40 --group-name MySpreadGroup`
+    * 3. Restart the instance using the following command
+        * [`start-instances`](https://docs.aws.amazon.com/cli/latest/reference/ec2/start-instances.html)
+* To remove an instance from a placement group using the command line
+###### Deleting a placement group
+* To terminate or move instances and delete a placement group using the console
+* To terminate instances and delete a placement group using the command line
+##### [Network Maximum Transmission Unit (MTU) for Your EC2 Instance](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/network_mtu.html)
+###### Jumbo Frames (9001 MTU)
+###### Path MTU Discovery
+###### Check the Path MTU Between Two Hosts
+* To check path MTU using tracepath
+###### Check and Set the MTU on Your Linux Instance
+* To check the MTU setting on a Linux instance
+* To set the MTU value on a Linux instance
+##### [Virtual Private Clouds](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-vpc.html)
+#### [VPC](https://docs.aws.amazon.com/vpc/latest/userguide/what-is-amazon-vpc.html)
+##### [What is Amazon VPC](https://docs.aws.amazon.com/vpc/latest/userguide/what-is-amazon-vpc.html)
+###### Amazon EC2 Concepts
+* VPCs and Subnets
+* Supported Platforms
+* Default and Nondefault VPCs
+* Accessing the internet
+* Accessing a Corporate or Home Network
+* Accessing Services Through AWS PrivateLink
+###### How to Get Started with Amazon VPC
+###### Accessing Amazon VPC
+###### Pricing for Amazon VPC
+###### Amazon VPC Limits
+###### PCI DSS Compliance
+##### [Getting Started with Amazon VPC](https://docs.aws.amazon.com/vpc/latest/userguide/vpc-getting-started.html)
+###### [Getting Started with IPv4 for Amazon VPC](https://docs.aws.amazon.com/vpc/latest/userguide/getting-started-ipv4.html)
+* Step 1: Create the VPC
+    * To create a VPC using the Amazon VPC Wizard
+    * Viewing Information About Your VPC
+* Step 2: Create a Security Group
+    * Rules for the WebServerSG Security Group
+    * Creating Your WebServerSG Security Group
+* Step 3: Launch an Instance into Your VPC
+* Step 4: Assign an Elastic IP Address to Your Instance
+* Step 5: Clean up
+###### [Getting Started with IPv6 for Amazon VPC](https://docs.aws.amazon.com/vpc/latest/userguide/get-started-ipv6.html)
+* Step 1: Create the VPC
+    * To create a VPC using the Amazon VPC wizard
+    * Viewing information About Your VPC
+* Step 2: Create a Security Group
+    * Rules for the WebServerSG Security Group
+    * Creating Your WebServerSG Security Group
+* Step 3: Launch an Instance
+##### [Scenarios and Examples](https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Scenarios.html)
+##### [VPCs and Subnets](https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Subnets.html)
+###### VPC and Subnet Basics
+###### VPC and Subnet Sizing
+* VPC and Subnet Sizing for IPv4
+* Adding IPv4 CIDR Blocks to a VPC
+* VPC and Subnet Sizing for IPv6
 #### How to get prepare for hashcat
 ##### Setting up p3.16xlarge for hashcat
 First of, you may need to request a limit increase so that you are allowed to launch the new p3.16xlarge instances. AWS was pretty responsive, it only took them 20 minutes or so.
