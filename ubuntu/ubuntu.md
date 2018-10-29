@@ -841,3 +841,30 @@ The script downloads and installs the latest version of pip and another required
 `$ pip --version`
 `pip 8.1.2 from ~/.local/lib/python3.4/site-packaes (python 3.4)`
 
+## [free up space on Ubuntu](https://www.linuxdashen.com/debianubuntu%E6%B8%85%E7%90%86%E7%A1%AC%E7%9B%98%E7%A9%BA%E9%97%B4%E7%9A%848%E4%B8%AA%E6%8A%80%E5%B7%A7)
+* 删除剩余的配置文件
+    * `dpkg --list | grep "^rc" | cut -d " " -f 3 | xargs sudo dpkg --purge`
+* 删除没用的deb软件安装包
+    * `du -sh /var/cache/apt/archives`
+    * `sudo apt-get clean`
+    * `sudo apt-get autoclean`
+* 删除孤儿软件包
+    * `sudo apt-get autoremove`
+    * `sudo apt install deborphan`
+        * `deborphan`
+        * `deborphan | xargs sudo apt-get purge -y`
+* 删除过时的软件包
+    * `sudo aptitude search ?obsolete`
+        * `sudo apt-get purge linux-3.2.0-29-generic`
+* 清理日志文件
+    * `sudo apt-get install ncdu`
+    * `sudo ncdu /var/log`
+    * `sudo dd if=/dev/null of=/var/log/shadowsocks.log`
+* baobab硬盘空间用量分析工具
+    * `baobab`
+* 删除大容量软件包
+    * `sudo apt-get install debian-goodies`
+    * `dpigs -H --line=20`
+* 使用ubuntu-tweak来清理
+    * `sudo apt-get install gdebi`
+    * `sudo gdebi ubuntu-tweak*.deb`
