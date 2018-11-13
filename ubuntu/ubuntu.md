@@ -868,3 +868,8 @@ The script downloads and installs the latest version of pip and another required
 * 使用ubuntu-tweak来清理
     * `sudo apt-get install gdebi`
     * `sudo gdebi ubuntu-tweak*.deb`
+## wc
+`-c`
+`-l`
+`-w`
+`cat test.txt | wl -l`

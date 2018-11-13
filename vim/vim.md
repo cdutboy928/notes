@@ -459,3 +459,21 @@ Using space to toggle
 `set scb`, `set noscb`: need to run on every window
 ### 关闭分屏
 `ctrl+w c` or `ctrl+w q`
+## Copy or delete matching lines
+### Copy matching lines
+
+        qaq
+        :g/pattern/y A
+        :let @+ =@a
+The first command clears register a (:help q). The second appends all matching lines to that register (:help quotea). The third copies register a to the clipboard (register +) for easy pasting into another application. Replace pattern with what you want to search for, or omit it (:g//y A) to use the last search.
+### Delete matching lines
+
+        :g/pattern/d
+        :g//d
+The first of the following commands deletes all lines containing pattern, while the second deletes all lines matching the last search.
+
+### Delete not matching lines
+
+    :v/pattern/d
+    :v//d
+Use `:v//d` to delete all lines that do not match the last search pattern, or `:v/pattern/d` to delete all lines that do not match the given pattern.

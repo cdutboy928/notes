@@ -39,11 +39,38 @@ We recommend that you use the Amazon EC2 console, a command line tool, or the Am
     * reboot-instances (AWS CLI)
     * Restart-EC2Instance (AWS Tools for Windows PowerShell)
 
-##### [Amazon EC2 Spot Instances Pricing](https://amazonaws-china.com/ec2/spot/pricing/)
+##### [Amazon EC2 Spot Instances Pricing](https://amazonaws-china.com/ec2/spot/pricing/)???
 With Spot instances, You pay the Spot price that's in effect for the time period your instances are running. Spot instance prices are set by Amazon EC2 and adjust gradually based on long-term trends in supply and demand for Spot instance capacity. The following table displays the Spot price for each region and instance type (updated every 5 minutes).
 Spot instances are available at a discount of up to 90% off compared to On-Demand pricing. To compare the current Spot prices against standard On-Demand rates, visit the [Spot Instance Advisor](https://amazonaws-china.com/ec2/spot/instance-advisor/) and [Simple Monthly Calculator](https://calculator.s3.amazonaws.com/index.html)
 You can bid on excess capacity that Amazon has and so in this particular case for a GPU box you can see they actually show me in the bottom middle left that it actually costs around 35 cents per hour for their available capacity. I bid 55 cents per hour. They would only charge me with the going rate so if I bid 55 cents and the going rate is 35 then they only charge m 35 cents .
 Spot instances are also available to run for a predefined duration-in hourly increments up to six hours in length-at a discount of up to 30-50% compared to On-Demand pricing.
+Spot Instances perform exactly like other EC2 instances while running and can be terminated when you no longer need them. If you terminate your instance, you pay for any partial hour used (as you do for On-Demand or Reserved Instances). However, you are not charged for any partial hour of usage if the Spot price goes above your maximum price and Amazon EC2 interrupts your Spot Instance.
+If your Spot instance is interrupted by Amazon EC2, you will not be charged for any partial hour of usage. [...] However, if you terminate your instance, you will pay for any partial hour of usage as you would for On-Demand Instances.
+**Which price is used to calculate the pro-rated per second price?**
+The answer to this one appears to be that it will remain the same as in the hourly billing case. The price used for calculating the partial hour is the price at the beginning of that hour, ignoring any fluctuations in price over the partial hour. If you bid $0.30 on a Spot instance that was priced at $0.10 at launch time, and one minute later the price went to $0.25 and stayed there, and you terminated it after 30 minutes, you would only pay $0.05 (half an hour at $0.10). This opens up some new and interesting optimization strategies since for a significant period of time an instance is being charged per second at either over or under the current Spot market value. Even though the price in this Spot market has risen considerably, my “locked in” price might still be cheaper than other available markets, and I might make the decision to let it continue to run there at least until the next hour mark comes up and the price would get updated. Or in the flipside case, where the price has dropped considerably from what I am paying. It might be cost-effective to start a new instance at the lower price and terminate the current one. We are still analyzing and testing variations on this strategy, if it proves effective we will make another blog post on the topic in the future.
+**When AWS terminates an instance due to price, do we pay for that partial hour?**
+The answer to this one has a surprising twist we did not expect. The twist is: it depends on which hour you are in. For the first hour, it appears to be exactly as before, you pay nothing and essentially receive free compute for however long the instance was running before it was taken away. For the second or subsequent hour, you will be charged for the pro-rated hour, identically to how you would be charged if you had terminated the instance yourself. So the free-compute bidding strategy loophole appears to have been made considerably smaller, but not closed completely.
+**Per-second Billing for EC2 and EBS**
+Back in the old days, you needed to buy or lease a server if you needed access to compute power. When we launched EC2 back in 2006, the ability to use an instance for an hour, and to pay only for that hour, was big news. The pay-as-you-go model inspired our customers to think about new ways to develop, test, and run applications of all types.
+Today, services like AWS Lambda prove that we can do a lot of useful work in a short time. Many of our customers are dreaming up applications for EC2 that can make good use of a large number of instances for shorter amounts of time, sometimes just a few minutes.
+Effective October 2nd, usage of Linux instances that are launched in On-Demand, Reserved, and Spot form will be billed in one-second increments. Similarly, provisioned storage for EBS volumes will be billed in one-second increments.
+Some of our more sophisticated customers have built systems to get the most value from EC2 by strategically choosing the most advantageous target instances when managing their gaming, ad tech, or 3D rendering fleets. Per-second billing obviates the need for this extra layer of instance management, and brings the costs savings to all customers and all workloads.
+
+While this will result in a price reduction for many workloads (and you know we love price reductions), I don’t think that’s the most important aspect of this change. I believe that this change will inspire you to innovate and to think about your compute-bound problems in new ways. How can you use it to improve your support for continuous integration? Can it change the way that you provision transient environments for your dev and test workloads? What about your analytics, batch processing, and 3D rendering?
+
+One of the many advantages of cloud computing is the elastic nature of provisioning or deprovisioning resources as you need them. By billing usage down to the second we will enable customers to level up their elasticity, save money, and customers will be positioned to take advantage of continuing advances in computing.
+When you are running an Amazon Linux Spot instance under the new per-second charging model:
+
+* If AWS terminates your instance in the first hour, there is no charge
+* If AWS terminates your instance after the first hour, you will be charged for the actual time that the instance was running (down to the second)
+
+At the start of each instance hour, you are charged based on the Spot price. If Amazon EC2 terminates your Spot Instance in the first instance hour because the Spot price exceeded your bid, you are not charged for the partial hour of usage. If Amazon EC2 terminates your Spot Instance in any subsequent hour, you are charged for your usage to the nearest second. If you terminate your Spot Instance in the middle of an instance hour—be it the first or any subsequent hour—you are charged for your usage rounded to the nearest second.
+And for the sake of completeness "There is a 1 minute minimum charge per-instance". And this shouldn't apply to an instance that is terminated by AWS -- only to instances terminated by the user.
+**Things to Know**
+This change is effective in all AWS Regions and will be effective October 2, for all Linux instances that are newly launched or already running. There is a 1 minute minimum charge per-instance.
+Per-second billing is not currently applicable to instances running Microsoft Windows or Linux distributions that have a separate hourly charge. Marketplace AMIs that do not have a separate hourly charge are eligible for per-second billing.
+List prices and Spot Market prices are still listed on a per-hour basis, but bills are calculated down to the second, as is Reserved Instance usage (you can launch, use, and terminate multiple instances within an hour and get the Reserved Instance Benefit for all of the instances). Also, bills will show times in decimal form, like this:
+![per-second billing bill example](per-second_billing_bill_example_1.png)
 
 GPU Instances-Current Generation|Linux/UNIX Usage|Windows Usage
 --|--|--
@@ -1939,6 +1966,7 @@ Your IAM user or role needs permission to call the API actions that correspond t
 ######## Example While the Instance is Running
 #### [Setting Up with Amazon EC2](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/get-set-up-for-amazon-ec2.html)
 ##### Sign Up for AWS
+They do require a credit/bank card on file.
 ###### To create an AWS account
 ##### Create an IAM User
 ###### To create an IAM user for yourself and add the user to an Administrators group

