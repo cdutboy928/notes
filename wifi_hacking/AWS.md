@@ -3,6 +3,7 @@ There are only AWS EC2 instances available.
 ### AWS EC2
 #### how to choose instances
 !!!Instances suitable for Hashcat
+Choose p3.x2large when tasks are few. p3dn.x24large when tasks are many and heavy.
 ##### [P2 Instance Details](https://amazonaws-china.com/ec2/instance-types/p2/)
 
 Name|GPUs|vGPUs|RAM|Network Brandwidth|Benchmark for WPA!!!
@@ -2354,9 +2355,21 @@ P3|Tesla|V-Series|V-100
     * Example 4: Launch Spot Instances Using the Lowest Price Allocation Strategy
 ###### [Connect to Your Linux Instance](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/AccessingInstances.html)
 ####### [Connecting to Your Linux Instance Using SSH](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/AccessingInstancesLinux.html)
+####### keeping alive online
+* use `ssh -i path/to/pem -o serveraliveinterval=60 ubuntu@34.201.59.34` to keep alive online.
+* add
+      `ServerAliveInterval 120`
+      `ServerAliveCountMax 1200`
+  to `~/.ssh/config` (create the file if it does not exist)
+
+        echo 'ServerAliveInterval 30' | sudo tee -a ~/.ssh/config
+        echo 'ServerAliveCountMax 1200' | sudo tee -a ~/.ssh/config
+`ServerAliveCountMax` by default this is set to 3. Therefore once the `ServerAliveInterval` has sent 3 small packs of info to your server it will then automatically log out. Setting it to 1200 means this process will have to occur at least 1200 times. In short you should be connected at least 30*1200 seconds (10 hours).
+* use screen
 ######## Prerequisites
 ######## Connecting to Your Linux Instance
 ######## Transferring Files to Linux Instances from Linux Using SCP
+Add `-r` to transfer one or more directories.
 ###### [Stop and Start Your Instance](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/Stop_Start.html)
 ####### Overview
 ####### Stopping and Starting Your Instances

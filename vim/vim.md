@@ -477,3 +477,9 @@ The first of the following commands deletes all lines containing pattern, while 
     :v/pattern/d
     :v//d
 Use `:v//d` to delete all lines that do not match the last search pattern, or `:v/pattern/d` to delete all lines that do not match the given pattern.
+## remove BOM
+* `: set bomb?`
+* `: set nobomb`
+* `wq`
+* `vim -c "set nobomb" -c wq!`
+* `find . -type f -name "*.txt" -exec vim -c "set nobomb" -c wq! {} \;`

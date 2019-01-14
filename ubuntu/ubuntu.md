@@ -873,3 +873,275 @@ The script downloads and installs the latest version of pip and another required
 `-l`
 `-w`
 `cat test.txt | wl -l`
+## 命令连接符
+* `&`: 单纯的连接命令，不管前面的命令是否执行成功，都执行后面的命令。
+* `;`: 同`&`。
+* `&&`: 前面的执行成功了才会执行后面的命令。
+* `||`: 前面的命令执行成功了就不执行后面的命令了。
+* `|`: 管道命令，前面命令的执行结果传输给后面的命令。
+## Named Pipe
+Almost everything in Linux can be considered a file, but the main difference between a **regular file** and a **named pipe** is that a named pipe is a special instance of a file that has no contents on the filesystem.
+Here is quote from `man fifo`:
+A FIFO special file (a named pipe) is similar to a pipe, except that it is accessed as part of the filesystem. It can be opened by multiple processes for reading or writing. When processes are exchanging data via the FIFO, the kernel passes all data internally without writing it to the filesystem. Thus, the FIFO special file has no contents on the filesystem; the filesystem entry merely serves as a reference point so that processes can access the pipe using a name in the filesystem.
+The kernel maintains exactly one pipe object for each FIFO special file that is opened by at least one process. The FIFO must be opened on both ends (reading and writing) before data can be passed. Normally, opening the FIFO blocks until the other end is opened also.
+So actually a named pipe does nothing until some process reads and writes to it. It does not take any space on the hard disk (except a bit of meta information), it does not use the CPU.
+`mkfifo blah`
+`find . -type p`
+`rm ./blah`
+`find . -type p -delete`
+`find . -maxdepth 1 -type p -delete`
+## using screen in SSH
+The `screen` command is very useful for remote administration. It can prevent the sessions being executed on the server through ssh from the local computer to be closed or interrupted even when the local terminal is closed or the local computer is shutdown.
+你是不是经常需要 SSH 或者 telent 远程登录到 Linux 服务器？你是不是经常为一些长时间运行的任务而头疼，比如系统备份、ftp 传输等等。通常情况下我们都是为每一个这样的任务开一个远程终端窗口，因为他们执行的时间太长了。必须等待它执行完毕，在此期间可不能关掉窗口或者断开连接，否则这个任务就会被杀掉，一切半途而废了。
+### session
+一个session可以包含多个window。
+* `screen`: create a session and a window
+* `screen -S session_name`: create a session named of session_name and enter a window
+* `screen vim test.c`: create a session and execute the following command.
+* `C-a d`: detach the current session. 暂时离开当前session，将目前的 screen session (可能含有多个 windows) 丢到后台执行，并会回到还没进 screen 时的状态，此时在 screen session 里，每个 window 内运行的 process (无论是前台/后台)都在继续执行，即使 logout 也不影响。
+* `screen -d session_name/session_id`: same as `C-a d`
+* `screen -ls`: list all sessions
+* `screen -r session_name/session_id`
+* `screen -d -r session_name/session_id`: detach the current session and recover to the specified session
+* `screen -wipe`
+
+        [root@tivf18 root]# kill -9 8462
+        [root@tivf18 root]# screen -ls  
+        There are screens on:
+                8736.pts-1.tivf18       (Detached)
+                8462.pts-0.tivf18       (Dead ???)
+        Remove dead screens with 'screen -wipe'.
+        2 Sockets in /root/.screen.
+         
+        [root@tivf18 root]# screen -wipe
+        There are screens on:
+                8736.pts-1.tivf18       (Detached)
+                8462.pts-0.tivf18       (Removed)
+        1 socket wiped out.
+        1 Socket in /root/.screen.
+         
+        [root@tivf18 root]# screen -ls  
+        There is a screen on:
+                8736.pts-1.tivf18       (Detached)
+        1 Socket in /root/.screen.
+         
+        [root@tivf18 root]#
+### window
+* `C-a ?`
+* `C-a w`: list all the windows
+* `C-a C-a`: toggle to the previously displayed window
+* `C-a c`: create a new shell window and toggle to it
+* `C-a n`: toggle to the next window
+* `C-a p`: toggle to the previous window
+* `C-a 0..9`: toggle to the window 0..9
+* `C-a K`: kill the current window
+* `C-a |`: split the window vertically
+* `C-a S`: split the window horizontally
+* `C-a A`: name the current window
+### copy and paste
+* `C-a` [ -> 进入 copy mode，在 copy mode 下可以回滚、搜索、复制就像用使用 vi 一样
+    * `C-b` Backward，PageUp 
+    * `C-f` Forward，PageDown 
+    * `H`(大写) High，将光标移至左上角 
+    * `L` Low，将光标移至左下角 
+    * `0` 移到行首 
+    * `$` 行末 
+    * `w` forward one word，以字为单位往前移 
+    * `b` backward one word，以字为单位往后移 
+    * `Space` 第一次按为标记区起点，第二次按为终点 
+    * `Esc` 结束 copy mode
+* `C-a ]` -> Paste，把刚刚在 copy mode 选定的内容贴上
+### share the session
+还有一种比较好玩的会话恢复，可以实现会话共享。假设你在和朋友在不同地点以相同用户登录一台机器，然后你创建一个screen会话，你朋友可以在他的终端上命令：
+`[root@TS-DEV ~]# screen -x`
+这个命令会将你朋友的终端Attach到你的Screen会话上，并且你的终端不会被Detach。这样你就可以和朋友共享同一个会话了，如果你们当前又处于同一个窗口，那就相当于坐在同一个显示器前面，你的操作会同步演示给你朋友，你朋友的操作也会同步演示给你。当然，如果你们切换到这个会话的不同窗口中去，那还是可以分别进行不同的操作的。
+## 7z
+* `7z a dicmerge_1.zip dicmerge_1.txt`
+* `7z x dicmerge_1.zip`
+* `find . -type f -name "*.7z" -exec 7z e {} \;`
+
+## [Dropbox-Uploader](https://github.com/andreafabrizi/Dropbox-Uploader)
+
+### Getting started
+* `git clone https://github.com/andreafabrizi/Dropbox-Uploader.git`
+* `cd Dropbox-Uploader`
+* `chmod +x dropbox_uploader.sh`
+* `./dropbox_uploader.sh`
+* The first time you run `dropbox_uploader`, you'll be guided through a wizard in order to configure access to your Dropbox. This configuration will be stored in `~/.dropbox_uploader`. aVWek70BOpgAAAAAAAAAR5a65CsgUEpJOSxEdqsj3xLZv0uUm52M6aTl2lDPyQOn
+
+### Setup a proxy
+* `export HTTP_PROXY_USER=XXXX`
+* `export HTTP_PROXY_PASSWORD=YYYY`
+* `export https_proxy=http://127.0.0.1:8123`
+### Usage
+
+        ./dropbox_uploader.sh [PARAMETERS] COMMAND...
+        
+        [%%]: Optional param
+        <%%>: Required param
+* commands
+    * `upload <LOCAL_FILE/DIR ...> <REMOTE_FILE/DIR>`
+    * `download <REMOTE_FILE/DIR> [LOCAL_FILE/DIR]`
+    * `delete <REMOTE_FILE/DIR>`
+    * `move <REMOTE_FILE/DIR> <REMOTE_FILE/DIR>`
+    * `copy <REMOTE_FILE/DIR> <REMOTE_FILE/DIR>`
+    * `mkdir <REMOTE_DIR>`
+    * `list [REMOTE_DIR]`
+    * `monitor [REMOTE_DIR] [TIMEOUT]`
+    * `share <REMOTE_FILE>`
+    * `saveurl <URL> <REMOTE_DIR>`
+    * `search <QUERY>`
+    * `info`
+    * `space`
+    * `unlink`
+* Optional parameters
+    * `-f <FILENAME>`
+    * `-s`
+    * `-d`
+    * `-q`
+    * `-h`
+    * `-x <filename>`
+* Examples
+
+        ./dropbox_uploader.sh upload /etc/passwd /myfiles/passwd.old
+        ./dropbox_uploader.sh upload *.zip /
+        ./dropbox_uploader.sh -x .git upload ./project /
+        ./dropbox_uploader.sh download /backup.zip
+        ./dropbox_uploader.sh delete /backup.zip
+        ./dropbox_uploader.sh mkdir /myDir/
+        ./dropbox_uploader.sh upload "My File.txt" "My File 2.txt"
+        ./dropbox_uploader.sh share "My File.txt"
+        ./dropbox_uploader.sh list
+
+## [Xmonad](http://www.ruanyifeng.com/blog/2017/07/xmonad.html)
+每个人的偏好不一样，我的开发环境是 Fish Shell + Xfce + xmonad + Vim，已经用了好多年，非常满意。
+### 一、xmonad 是什么？
+xmonad 是一种窗口管理器（window manager），用来管理软件窗口的位置和大小，会自动在桌面上平铺（tiling）窗口。
+注意，窗口管理器不是桌面环境（desktop environment）。后者是一套功能完善、集成各种工具的图形用户界面，比如 Gnome 和 KDE。桌面环境肯定包含了窗口管理器，但是（某些）窗口管理器可以不需要桌面环境，独立运行，xmonad 就是这种。
+### 二、安装
+`$ sudo apt-get install xmonad`
+`$ sudo apt-get install xmobar dmenu`
+`$ sudo apt install xmonad-contrib`
+安装完成后，退出当前对话（session），选择 xmonad 会话重新登录。登录后，你会看到一个完全空白的桌面，什么也没有，这说明 xmonad 起作用了，因为这时还没有任何软件窗口。
+### how to start
+Click the "config" icon and choose the "Xmonad" when prepare to enter the password.
+### 三、常用命令
+#### 3.1 打开终端
+第一步，你需要打开一个窗口。一般来说，总是打开命令行终端窗口。
+xmonad 提供一个功能键，称为`mod`键（modifier 的缩写），所有操作都要使用这个键，默认为`alt`键，但是一般会把它改掉，比如改成Windows键，具体修改方法请看后文。
+* 打开终端窗口，按下`mod + shift + return`（默认为`alt + shift + return`）。这会打开一个终端窗口，占据了所有桌面空间。
+* 按下`mod + shift + return`，再打开一个终端窗口。它与第一个窗口水平地平分屏幕，每个窗口占据50%空间。
+    注意，第二个窗口占据桌面的左边，自动获得焦点，成为当前窗口。这个左边部分就称为"主栏"（master pane），右边部分称为"副栏"，前面打开的第一个窗口自动进入副栏。
+* 再按一次`mod + shift + return`，打开第三个窗口。
+    这时，第三个窗口就会占据主栏，前两个窗口自动进入副栏。规则就是，新窗口总是独占主栏，旧窗口平分副栏。
+#### 3.2 布局模式
+默认的布局模式是，主栏在左边，副栏在右边。
+* 按下`mod + space`，布局模式改成主栏在上方，副栏在下
+* 再按一次`mod + space`，就变成独占模式，当前窗口独占整个桌面，其他窗口不可见。
+* 再按一次`mod + space`，就变回默认模式（主栏在左边，副栏在右边）。
+* 按下`mod + ,`（mod + 逗号），一个副栏窗口会移动到主栏，即主栏变成有两个窗口，副栏变成只有一个窗口
+* 再按一次`mod + ,`（mod + 逗号），主栏变成三个窗口，副栏消失。
+* 按下`mod + .`（mod + 句号），主栏减少一个窗口，副栏增加一个窗口。
+#### 3.3 移动焦点
+* 新窗口总是自动获得焦点，变成当前窗口。按下`mod + j`，焦点顺时针移动到下一个窗口。
+* 按下`mod + k`，焦点逆时针移动到上一个窗口。
+* 如果当前窗口在副栏，按下`mod + return`，会与主栏窗口对调位置。
+#### 3.4 调整窗口顺序
+* 按下`mod + shift + j`，按照顺时针的顺序，当前窗口与下一个窗口交换位置，即当前窗口前进到下一个位置。
+* 按下`mod + shift + k`，按照逆时针顺序，当前窗口与上一个窗口交换位置。即当前窗口后退到上一个位置。
+#### 3.5 调整栏位大小
+* 按下`mod + l`，主栏增加尺寸。
+* 按下`mod + h`，副栏增加尺寸。
+#### 3.6 浮动窗口
+正常情况下，xmonad 决定了窗口的位置和大小，但有时我们希望自己控制。xmonad 允许某个窗口浮动，脱离原有的布局。
+* 按下`mod + 鼠标左键`拖动窗口，该窗口就会变成浮动窗口，可以放到屏幕的任何位置。
+* 按下`mod + 鼠标右键`可以调整窗口大小。
+* 按下`mod + t`，当前浮动窗口就会结束浮动，重新回到 xmonad 的布局。
+#### 3.7 关闭窗口
+* 窗口可以自然关闭（比如终端窗口按ctrl + d），也可以让 xmonad 强行关闭它。
+* 按下`mod + shift + c`，会关闭当前窗口，焦点移到下一个窗口。
+#### 3.8 退出 xmonad
+按下`mod + shift + q`，将会立刻关闭所有窗口，退出 xmonad，用户需要重新登录。
+### 四、工作区
+xmonad 提供9个工作区，相当于提供9个桌面。按下`mod + 1`到`mod + 9`切换。 xmonad 启动后，默认处于1号工作区 。
+如果要将一个窗口移到不同的工作区，先用`mod + j`或`mod + k`，将其变成焦点窗口，然后使用`mod + shift + 6`，就将其移到了6号工作区。
+我的习惯是，1号工作区是终端，2号是浏览器，4号是虚拟机。
+### 五、多显示器
+多显示器需要使用配置工具，我用的是 xrandr。其他工具还有 Xinerama 和 winView，另外 arandr 是 xrandr 的图形界面，也可以用。
+下面的命令查看显示器的连接情况。
+`$ xrandr -q`
+具体的配置教程可以看[这里](https://wiki.archlinux.org/index.php/xrandr)。
+使用多显示器时，每个显示器会分配到一个工作区。默认情况下，1号工作区显示在主显示器，2号工作区显示在第二个显示器。如果要将4号工作区显示在当前显示器，那么按下`mod + 4`，4号工作就会与当前屏幕中的工作区互换位置。
+`mod + w` 转移焦点到左显示器，`mod + e`转移焦点到右显示器。
+`mod + shift + w`将当前窗口移到左显示器，`mod + shift + e`将当前窗口移到右显示器。
+### 六、配置文件
+xmonad 的配置文件是～/.xmonad/xmonad.hs。该文件需要用户自己新建，这里是一个简单的范例，详细的解释可以看官网。
+这个文件里面，modMask决定了mod到底是哪一个键(`modMask = mod4Mask`)。
+
+        import XMonad
+        import XMonad.Config.Desktop
+        import XMonad.Hooks.EwmhDesktops
+        import XMonad.Hooks.DynamicLog
+        import XMonad.Hooks.ManageDocks
+        import XMonad.Util.Run(spawnPipe)
+        import XMonad.Util.EZConfig(additionalKeys)
+        import System.IO
+        
+        main = do
+            xmproc <- spawnPipe "xmobar"
+        
+            xmonad $ defaultConfig
+                { manageHook = manageDocks <+> manageHook defaultConfig
+                , layoutHook = avoidStruts  $  layoutHook defaultConfig
+                , logHook = dynamicLogWithPP xmobarPP
+                                { ppOutput = hPutStrLn xmproc
+                                , ppTitle = xmobarColor "green" "" . shorten 50
+                                }
+                , modMask = mod4Mask     -- Rebind Mod to the Windows key
+                } `additionalKeys`
+                [ ((mod4Mask .|. shiftMask, xK_z), spawn "xscreensaver-command -lock; xset dpms force off")
+                , ((controlMask, xK_Print), spawn "sleep 0.2; scrot -s")
+                , ((0, xK_Print), spawn "scrot")
+                ]
+
+修改配置文件以后，按下`mod + q`，or `xmonad --recompile && xmonad --restart`新的配置就会生效。
+### 七、xmobar
+xmonad 的默认桌面，什么也没有，不太方便。xmobar 提供了一个状态栏，将常用信息显示在上面，比如 CPU 和内存的占用情况、天气、时间等等。
+它的配置文件是~/.xmobarrc（教程1，2，3）。[这里](https://gist.github.com/ruanyf/a640a98d41383387d3a6401796f54710)是一个最简单配置，这里是我的笔记本电脑使用的配置。
+
+        Config { font = "-*-Fixed-Bold-R-Normal-*-13-*-*-*-*-*-*-*"
+        , bgColor = "black"
+        , fgColor = "grey"
+        , position = Top
+        , lowerOnStart = True
+        , commands = [ Run Weather "EGPN" ["-t","<station>: <tempC>C","-L","18","-H","25","--normal","green","--high","red","--low","lightblue"] 36000
+                     , Run Network "eth0" ["-L","0","-H","32","--normal","green","--high","red"] 10
+                     , Run Network "eth1" ["-L","0","-H","32","--normal","green","--high","red"] 10
+                     , Run Cpu ["-L","3","-H","50","--normal","green","--high","red"] 10
+                     , Run Memory ["-t","Mem: <usedratio>%"] 10
+                     , Run Swap [ ] 10
+                     , Run Date "%a %b %_d %Y %H:%M:%S" "date" 10
+                     ]
+        , sepChar = "%"
+        , alignSep = "}{"
+        , template = "%cpu% | %memory% * %swap% | %eth0% }{ %EGPN% | <fc=#ee9a00>%date%</fc>"
+        }
+
+Change `, lowerOnStart = True` to `False` if the bar doesn't appear.
+
+### 八、dmenu
+最后，dmenu 在桌面顶部提供了一个菜单条，可以快速启动应用程序。
+（图片说明：dmenu 显示在屏幕顶部，输入fire会自动显示包含fire的启动命令。）
+它从系统变量$PATH指定的路径中，寻找所有的应用程序，根据用户的键入，动态提示最符合的结果。
+按下mod + p就会进入dmenu菜单栏，按下ESC键可以退出。方向键用来选择应用程序，return键用来启动。
+### run `<command> & disown` and then you can exit the window without killing the process.
+### When xmonad shortcuts stops working
+* run `ls -l /proc/1001/fd/` and look for the largest numbered pipe
+* run `cat /proc/1001/fd/4` to unblock xmonad so you can fix your xmonad
+## `date`
+## tee
+Copy standard input to each FILE, and also to standard output.
+* `-a`, `--append`: append to the given FILEs, do not overwrite.
+* `-i`, `--ignore-interrupts`: ignore interrupt signals
+* `cat slayers.story | tee ss-copy1 ss-copy2 ss-copy3`
+

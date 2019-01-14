@@ -101,3 +101,5 @@ curl -LSso ~/.vim/autoload/pathogen.vim https://tpo.pe/pathogen.vim
     git clone https://github.com/tpope/vim-sensible.git
 ## Note:
 * **The spf13-vim makes many things not working and me really confused!!!**
+* Reinstall the plugin `iamcco` when it doesn't work properly.
+* Run `MarkdownPreviewStop` if the `iamcco` plugin doesn't work properly.
