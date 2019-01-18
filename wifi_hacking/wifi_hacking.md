@@ -1113,6 +1113,16 @@ PC可以容易看到 FakeAP，但是 Android 的 WLAN 扫描不容易看到，�
               -b <character set>              #设置字符集
 
 ## [Hashcat 说明](https://klionsec.github.io/2017/04/26/use-hashcat-crack-hash/)
+### Install Hashcat on Ubuntu
+* wget https://hashcat.net/files/hashcat-5.1.0.7z
+* sudo 7z x hashcat-5.1.0.7z
+* cd hashcat-5.1.0
+* ls /usr/bin/ | grep -i hash
+* sudo cp -v hashcat64.bin /usr/bin/
+* sudo ln -s /usr/bin/hashcat64.bin /usr/bin/hashcat
+* sudo cp -Rv OpenCL/ /usr/bin/
+* sudo cp -v hashcat.hcstat2 /usr/bin/
+* sudo cp -v hashcat.hctune /usr/bin/
 ### [New features in v5.0.0](https://hashcat.net/forum/thread-7903.html)
 #### Allow hashfile for -m 16800 to be used with -m 16801
 #### Slow candidates
@@ -1142,12 +1152,13 @@ Here's the exact same attack, but using the new -S option to turn on slow candid
         ...
         Speed.#2.........:   361.3 kH/s (3.54ms)
 #### The Hashcat brain
+Keep in mind that according to the release notes, it is only worthy to use brain for very slow algorithms, otherwise the brain is a bottleneck.
 ##### By running command
 Normally speaking, the hashcat brain server should have a large RAM.
 No need to add `-z` in the task command of hashtopolis.
 ###### on the brain server side
-    `hashcat --brain-server --brain-port=13743`???
-    root@Helium-XR-01:~# hashcat --brain-server --brain-port=13743
+    `hashcat --brain-server --brain-port=13743`
+    root@Helium-XR-01:~# hashcat --brain-server --brain-port=13743 --brain-password=Woaini123
 
     1540763657.002542 | 0.00s | 0 | Generated authentication password: 78f581b2296937fb
     1540763657.002943 | 0.00s | 0 | Brain server started
@@ -1184,7 +1195,7 @@ No need to add `-z` in the task command of hashtopolis.
     Description= Start hashcat brain server
     [Service]
     Type=simple
-    ExecStart=/bin/bash -c "/usr/local/bin/hashcat --brain-server --brain-host=IP --brain-port=1374 --brain-password=password"
+    ExecStart=/bin/bash -c "/usr/local/bin/hashcat --brain-server --brain-port=1374 --brain-password=password"
     Restart=on-failure
     [Install]
     WantedBy=multi-user.target
@@ -1261,6 +1272,7 @@ No need to add `-z` in the task command of hashtopolis.
 ##### requirements
 Intel CPUs require "OpenCL Runtime for Intel Core and Intel Xeon Processors" (16.1.1 or later)
 ##### how to install/reinstall
+Plug the HDMI cable on the port of the integrated graphic card if you want to use the integrated card.
 1. Completely uninstall the current driver
   * Windows: use software center
   * Linux:
@@ -1279,6 +1291,11 @@ Intel CPUs require "OpenCL Runtime for Intel Core and Intel Xeon Processors" (16
 7. Reboot
 8. For Linux only: apt-get install ocl-icd-libopencl1 opencl-headers clinfo
 9. Install the driver recommended on https://hashcat.net/hashcat/. If it says *exact* it means exact.
+    * install the drivers first, including drivers for CPU and GPU.
+        * "Intel Driver and Support Assistant Installer" and "Driver Genius" can be used
+        * make sure the drivers has been installed properly
+    * then run the "opencl_runtime_16.1.2_x64_setup.exe"
+    * then run the "intel_sdk_for_opencl_2017_7.0.0.2567"
     For AMD GPUs, see ROCm instructions here.
 10. Reboot
 11. For Linux only: rm -rf ~/.hashcat/kernels
@@ -1288,6 +1305,7 @@ Intel CPUs require "OpenCL Runtime for Intel Core and Intel Xeon Processors" (16
     * Development version: git clone https://github.com/hashcat/hashcat
 13. For Linux only: try to run “clinfo” first in your terminal
 14. Try to run hashcat --benchmark
+    * add `--force` and `-D 1,2` to the command
 ##### the file used for intel cpu
 ./opencl_runtime_16.1.2_x64_setup.msi
 #### for intel gpu
@@ -2448,6 +2466,8 @@ https://www.newegg.com/Product/Product.aspx?Item=N82E16820147373
 Total for new password cracking machine
 $5110
 ### [Install the drivers](https://www.unix-ninja.com/p/Building_a_Password_Cracking_Rig_for_Hashcat_-_Part_III)
+
+[A reference](https://gist.github.com/alexanderjsingleton/d00a56a51127e73b70a2cdffcd75c9e2)
 I am going to cover the steps for installing both AMD and NVIDIA drivers for completeness, however I would strongly encourage you to use NVIDIA cards in your builds. The AMD drivers are essentially garbage.
 #### set BIOS
 * download the latest BIOS driver
@@ -2576,15 +2596,98 @@ Check the agents
 * to transfer between Linux and windows
     * type `binary` and then type `pass`
 #### proxy
-#### install the Intel CPU and GPU drivers
+#### install the Intel CPU and GPU drivers and opencl runtime
 cannot use integrated GPU???
-#### install the opencl runtime
-#### install the nvidia driver
+Plug the HDMI cable on the port of the integrated graphic card if you want to use the integrated card.
+1. Completely uninstall the current driver
+  * Windows: use software center
+  * Linux:
+    * NVIDIA: nvidia-uninstall
+    * AMD: amdconfig --uninstall=force
+    * If you installed the driver via a package manager (Linux), then you need to remove these packages too
+    * Make sure to purge those package, not to just uninstall them
+2. Reboot
+3. For Windows only: download and start Driver Fusion (free version is enough; select “Display”, AMD/NVidia/Intel, ignore the warning about Premium version), then Reboot
+4. Make sure that no Intel OpenCL SDK, AMD-APP-SDK or CUDA-SDK framework is installed – if it is installed, uninstall it!
+5. For Windows only: manually delete remaining OpenCL.dll, OpenCL32.dll, OpenCL64.dll files on all folders. You should find at least 2. They usually reside in “c:\windows\syswow64” and “c:\windows\system32”. This step is very important!
+6. For Linux only:
+
+        dpkg -S libOpenCL to find all packages installed that provide a libOpenCL, then purge them
+        find / -name libOpenCL\* -print0 | xargs -0 rm -rf
+7. Reboot
+8. For Linux only: apt-get install ocl-icd-libopencl1 opencl-headers clinfo
+9. Install the driver recommended on https://hashcat.net/hashcat/. If it says *exact* it means exact.
+    * install the drivers first, including drivers for CPU and GPU.
+        * "Intel Driver and Support Assistant Installer" and "Driver Genius" can be used
+        * make sure the drivers has been installed properly
+    * then run the "opencl_runtime_16.1.2_x64_setup.exe"
+    * then run the "intel_sdk_for_opencl_2017_7.0.0.2567"
+    For AMD GPUs, see ROCm instructions here.
+10. Reboot
+11. For Linux only: rm -rf ~/.hashcat/kernels
+12. Reinstall hashcat, choose:
+    * Stable version: Download and extract (under Linux, make sure to use: “7z x” to extract) the newest hashcat from https://hashcat.net/
+    * Beta version: https://hashcat.net/beta/
+    * Development version: git clone https://github.com/hashcat/hashcat
+13. For Linux only: try to run “clinfo” first in your terminal
+14. Try to run hashcat --benchmark
+    * add `--force` and `-D 1,2` to the command
+#### Bitvise Client and Bitvisee server
+* on the server
+    * Access control
+        * Windows groups: check the "Everyone" to be allowed access.
+        * Add a local account
+    * Enable the remote desktop in the system setting
 #### test hashcat
 #### turbo and test the speed
 #### set up hashtopolis
-#### set ssh and RDP
+.NET 4.5 Run-time is needed, the included client provided will only run on 64-bit machines.
+* install python and python3
+    * [download python3](https://www.python.org/downloads/)
+    * run the downloaded installer and check "add to path"
+    * python -v
+    * pip -v
+* install pip and pip3
+* pip3 install psutil
+* mkdir hashtopolis && cd hashtopolis
+* download hashtopolis.zip from from http://34.201.59.34/agents.php?download=1
+* python3 hashtopolis.zip
+    * run `pip install requests` if prompted with "No module requests"
 
+http://34.201.59.34/api/server.php
+Woaini123
+#### [Overclocking](https://www.overclockersclub.com/guides/nvidia_gtx_1080ti_oc_guide/)
+Overclocking can only be done on Windows.
+##### Tools needed
+* suggested softwares:
+  * GPU-Z
+  * MSI Afterburner
+  * HWMonitor
+  * Unigine Heaven Benchmark
+* Per Brand:
+  * EVGA: EVGA Precision XOC
+  * Zotac: FireStorm Utilty
+  * MSI: MSI Afterburner
+  * Gigabyte: Xtreme Engine Gaming
+  * ASUS: GPU Tweak II
+* Software used
+  * GPU-Z
+  * Unigine Heaven Benchmark
+  * ASUS: GPU Tweak II
+* basics
+    * GPU Clock: the base clock
+    * Boost Clock: overclocked GPU Clock by manufacture
+* how to overclock
+    * test by running hashcat64.exe
+    * drag the "Power Target" to the largest
+    * drat the "Fan Speed" to 50% larger
+    * increase the Boost Clock and Memory Clock gradually by 10 and test with hashcat, make sure hashcat can run stably for a long time without crash or stuck.
+    * the appropriate parameter for 1080ti
+        * Boost Clock: 1781
+        * Memory Clock: 11292
+        * Fan Speed: 93
+        * Power Target: 150
+        * Temperature limit: 87
 ## How to get prepare for hashcat
 While creating this tutorial I realized by “default” I have an instance limit of “0” for this type of instance (p2.8xlarge) but was able to get the limit boosted to “1” by contacting their support through the support tab on the AWS console.
 (See Sneak Peak for Next HOWTo:) where I snipped a sample from my conversation with their support team. You may also need to do this if you intend to follow along. It took a few days before they granted the request. When submitting the request I just said I was doing research as an IT professional. When you have been approved, these are the next steps….
@@ -2723,8 +2826,14 @@ In Hashtopolis you can configure a global Hashcat brain server which can be used
         ...
     * `sudo systemctl status apache2`
     * `sudo apt install php-mcrypt`???
+        * cannot find the php-mcrypt package on ubuntu 18
+            * sudo apt-get install libssl-dev php7.2-dev php-dev libmcrypt-dev gcc make autoconf libc-dev pkg-config -f
+            * sudo pecl install mcrypt-1.0.1
+            * echo "extension=mcrypt.so" | sudo tee -a /etc/php/7.2/apache2/conf.d/mcrypt.ini
+            * sudo service apache2 restart
     * Create a mySQL User and a Database the user can read and write to by navigating to:
         `http://34.201.59.34/phpmyadmin`
+         
     * Clone the source code and put it into the `www` dir:
     
             git clone https://github.com/s3inlc/hashtopolis.git
@@ -2750,14 +2859,14 @@ In Hashtopolis you can configure a global Hashcat brain server which can be used
             `sudo mysql --user=root mysql`
         * Create a user for phpMyAdmin
     
-            CREATE USER 'phpmyadmin'@'localhost' IDENTIFIED BY 'some_pass';
-            GRANT ALL PRIVILEGES ON *.* TO 'phpmyadmin'@'localhost' WITH GRANT OPTION;
+            CREATE USER 'phpmyadmin1'@'localhost' IDENTIFIED BY 'some_pass';
+            GRANT ALL PRIVILEGES ON *.* TO 'phpmyadmin1'@'localhost' WITH GRANT OPTION;
             FLUSH PRIVILEGES;
     
         * Optional and unsafe: allow remote connections
     
-            CREATE USER 'phpmyadmin'@'%' IDENTIFIED BY 'some_pass';
-            GRANT ALL PRIVILEGES ON *.* TO 'phpmyadmin'@'%' WITH GRANT OPTION;
+            CREATE USER 'phpmyadmin1'@'%' IDENTIFIED BY 'some_pass';
+            GRANT ALL PRIVILEGES ON *.* TO 'phpmyadmin1'@'%' WITH GRANT OPTION;
             FLUSH PRIVILEGES;
     
         * Update phpMyAdmin
@@ -2766,7 +2875,7 @@ In Hashtopolis you can configure a global Hashcat brain server which can be used
 
                 # dbc_dbuser: database user
                 #       the name of the user who we will use to connect to the database.
-                dbc_dbuser='phpmyadmin'
+                dbc_dbuser='phpmyadmin1'
                 
                 # dbc_dbpass: database user password
                 #       the password to use with the above username when connecting
@@ -2777,6 +2886,7 @@ In Hashtopolis you can configure a global Hashcat brain server which can be used
     `local`
     `Woaini123`
     `slGY4JAGVxUfCKfG`
+    `a6M7KHqRlRHlZDNw`
     check the 'create the database with the same name'
 * Install hashtopolis
     * `http://34.201.59.34/install/`
@@ -2793,6 +2903,11 @@ In Hashtopolis you can configure a global Hashcat brain server which can be used
     * `cd /var/www/hashtopolis`
     * `sudo rm -r -v install`
 
+* Before upload through HTTP, you should change the php default configuration by running `sudo vim /etc/php/7.2/apache2/php.ini`, and set the following parameters:
+ `upload_max_filesize=500M`
+ `memory_limit=500M`
+ `post_max_size=500M`
+* sudo /etc/init.d/apache2 restart
 ###### [Migration Update](https://github.com/s3inlc/hashtopolis/wiki/Migration-Update)
 
 ###### [Hashcat Installation](https://github.com/s3inlc/hashtopolis/wiki/Installation)
