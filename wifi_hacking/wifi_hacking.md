@@ -2638,6 +2638,15 @@ Plug the HDMI cable on the port of the integrated graphic card if you want to us
         * Windows groups: check the "Everyone" to be allowed access.
         * Add a local account
     * Enable the remote desktop in the system setting
+* skills on ssh on Windows
+    * use ssh instead of RDP to save resources
+    * `.\a1commands_multiple.bat`
+    * how to edit and save file on putty
+    * Screen -S
+    * to check the memory usage
+        * `wmic OS get FreePhysicalMemory /Value`
+    * to check the cpu usage
+        * `wmic cpu get loadpercentage`
 #### test hashcat
 #### turbo and test the speed
 #### set up hashtopolis
@@ -2658,6 +2667,7 @@ http://34.201.59.34/api/server.php
 Woaini123
 #### [Overclocking](https://www.overclockersclub.com/guides/nvidia_gtx_1080ti_oc_guide/)
 Overclocking can only be done on Windows.
+Do not Over clock if you want to avoid stuck for running a long time.
 ##### Tools needed
 * suggested softwares:
   * GPU-Z
@@ -2674,20 +2684,105 @@ Overclocking can only be done on Windows.
   * GPU-Z
   * Unigine Heaven Benchmark
   * ASUS: GPU Tweak II
+  * AORUS Engine
 * basics
     * GPU Clock: the base clock
     * Boost Clock: overclocked GPU Clock by manufacture
 * how to overclock
     * test by running hashcat64.exe
     * drag the "Power Target" to the largest
-    * drat the "Fan Speed" to 50% larger
+    * leave "Fan Speed" default
     * increase the Boost Clock and Memory Clock gradually by 10 and test with hashcat, make sure hashcat can run stably for a long time without crash or stuck.
     * the appropriate parameter for 1080ti
-        * Boost Clock: 1781
-        * Memory Clock: 11292
-        * Fan Speed: 93
-        * Power Target: 150
-        * Temperature limit: 87
+        * Boost Clock: 1770
+        * Memory Clock: 11540
+        * Fan Speed: default
+        * Power Target: max
+        * Temperature limit: max
+#### Tasks can only be run on agents
+##### -a 0
+The hashrate of dictionary task will gets down when being run through hashtopolis on agents. So run `-a 0` on agent locally, not through hashtopolis.
+Actually the hashrate of all ataacking modes will get down through hashtopolis on agents, but the `-a 0` mode the worst.
+Caculate the total time by timing number of hashes to decide whether via hashtopolis or not. Normally speaking, run through hashtopolis when there are many hashes to crack.
+adding `--brain-client` on the agent will lower the hashrate.
+I was doing bitcoin and litecoin mining, can I use my FPGA or ASIC for hashcat?
+FPGA are sub-optimal for advanced password cracking in a few key ways. They are best for brute forcing single hash of a single algorithm (like bitcoin). They do not provide the flexibility needed for multiple attack modes, multiple hashes, or multiple algorithms. Too much would have to be done on the host system.
+The problem with ASIC is that they are, by definition, application-specific. Bitcoin ASIC will only work for bitcoin, and nothing else. Well, you could attempt to use them for password cracking, but you would only be able to crack passwords that were exactly 80 characters long and hashed as double SHA256. So, virtually worthless for anything but bitcoin.
+By the same token, building ASIC specifically for password cracking would be a huge waste of time and money. And to make an ASIC that was flexible enough to handle multiple hashes, multiple algorithms, and multiple attack modes, you'd essentially just end up with a GPU. They really are the sweet spot. cheap, fast, flexible, easy to program.
+##### -a 1
+* a1commands_single.bat:
+
+        hashcat64.exe --session names_1234d -D 1,2 -w 4 -m 2500 #HL# -a 1 C:\Users\cdutboy\Dropbox\others\names_cn.txt C:\Users\cdutboy\Dropbox\others\1234d.txt
+        del names_1234d.restore
+        hashcat64.exe --session family_names_1234d -D 1,2 -w 4 -m 2500 #HL# -a 1 C:\Users\cdutboy\Dropbox\others\family_names.txt C:\Users\cdutboy\Dropbox\others\1234d.txt
+        del family_names_1234d.restore
+        hashcat64.exe --session shengmu_years_months_days -D 1,2 -w 4 -m 2500 #HL# -a 1 C:\Users\cdutboy\Dropbox\others\shengmu.txt C:\Users\cdutboy\Dropbox\others\years_months_days.txt
+        del shengmu_years_months_days.restore
+        hashcat64.exe --session shengmu_months_days -D 1,2 -w 4 -m 2500 #HL# -a 1 C:\Users\cdutboy\Dropbox\others\shengmu.txt C:\Users\cdutboy\Dropbox\others\months_days.txt
+        del shengmu_months_days.restore
+        hashcat64.exe --session months_days_shengmu -D 1,2 -w 4 -m 2500 #HL# -a 1 C:\Users\cdutboy\Dropbox\others\months_days.txt C:\Users\cdutboy\Dropbox\others\shengmu.txt
+        del months_days_shengmu.restore
+        hashcat64.exe --session shengmu_shengmu -D 1,2 -w 4 -m 2500 #HL# -a 1 C:\Users\cdutboy\Dropbox\others\shengmu.txt C:\Users\cdutboy\Dropbox\others\shengmu.txt
+        del shengmu_shengmu.restore
+        hashcat64.exe --session shengmu_months_days_shengmu_months_days -D 1,2 -w 4 -m 2500 #HL# -a 1 C:\Users\cdutboy\Dropbox\others\shengmu_months_days.txt C:\Users\cdutboy\Dropbox\others\shengmu_months_days.txt
+        del shengmu_months_days_shengmu_months_days.restore
+        hashcat64.exe --session shengmu_shengmu_1234d -D 1,2 -w 4 -m 2500 #HL# -a 1 C:\Users\cdutboy\Dropbox\others\shengmu.txt C:\Users\cdutboy\Dropbox\others\shengmu_1234d.txt
+        del shengmu_shengmu_1234d.restore
+        hashcat64.exe --session names_years_months_days -D 1,2 -w 4 -m 2500 #HL# -a 1 C:\Users\cdutboy\Dropbox\others\names_cn.txt C:\Users\cdutboy\Dropbox\others\years_months_days.txt
+        del names_years_months_days.restore
+        hashcat64.exe --session names_months_days -D 1,2 -w 4 -m 2500 #HL# -a 1 C:\Users\cdutboy\Dropbox\others\names_cn.txt C:\Users\cdutboy\Dropbox\others\months_days.txt
+        del names_months_days.restore
+        hashcat64.exe --session family_names_years_months_days -D 1,2 -w 4 -m 2500 #HL# -a 1 C:\Users\cdutboy\Dropbox\others\family_names.txt C:\Users\cdutboy\Dropbox\others\years_months_days.txt
+        del family_names_years_months_days.restore
+        hashcat64.exe --session years_months_days_family_names -D 1,2 -w 4 -m 2500 #HL# -a 1 C:\Users\cdutboy\Dropbox\others\years_months_days.txt C:\Users\cdutboy\Dropbox\others\family_names.txt
+        del years_months_days_family_names.restore
+        hashcat64.exe --session family_names_months_days -D 1,2 -w 4 -m 2500 #HL# -a 1 C:\Users\cdutboy\Dropbox\others\family_names.txt C:\Users\cdutboy\Dropbox\others\months_days.txt
+        del family_names_months_days.restore
+        hashcat64.exe --session months_days_family_names -D 1,2 -w 4 -m 2500 #HL# -a 1 C:\Users\cdutboy\Dropbox\others\months_days.txt C:\Users\cdutboy\Dropbox\others\family_names.txt
+        del months_days_family_names.restore
+        hashcat64.exe --session years_months_days_years_months_days -D 1,2 -w 4 -m 2500 #HL# -a 1 C:\Users\cdutboy\Dropbox\others\years_months_days.txt C:\Users\cdutboy\Dropbox\others\years_months_days.txt
+        del years_months_days_years_months_days.restore
+        hashcat64.exe --session months_days_months_days -D 1,2 -w 4 -m 2500 #HL# -a 1 C:\Users\cdutboy\Dropbox\others\months_days.txt C:\Users\cdutboy\Dropbox\others\months_days.txt
+        del months_days_months_days.restore
+        hashcat64.exe --session years_months_days_months_days -D 1,2 -w 4 -m 2500 #HL# -a 1 C:\Users\cdutboy\Dropbox\others\years_months_days.txt C:\Users\cdutboy\Dropbox\others\months_days.txt
+        del years_months_days_months_days.restore
+        hashcat64.exe --session shengmu_beijing_phonenumbers -D 1,2 -w 4 -m 2500 #HL# -a 1 C:\Users\cdutboy\Dropbox\others\shengmu.txt C:\Users\cdutboy\Dropbox\others\beijing_phonenumbers.txt
+        del shengmu_beijing_phonenumbers.restore
+        hashcat64.exe --session beijing_phonenumbers_shengmu -D 1,2 -w 4 -m 2500 #HL# -a 1 C:\Users\cdutboy\Dropbox\others\beijing_phonenumbers.txt C:\Users\cdutboy\Dropbox\others\shengmu.txt
+        del beijing_phonenumbers_shengmu.restore
+        hashcat64.exe --session names_beijing_phonenumbers -D 1,2 -w 4 -m 2500 #HL# -a 1 C:\Users\cdutboy\Dropbox\others\names_cn.txt C:\Users\cdutboy\Dropbox\others\beijing_phonenumbers.txt
+        del names_beijing_phonenumbers.restore
+        hashcat64.exe --session beijing_phonenumbers_names -D 1,2 -w 4 -m 2500 #HL# -a 1 C:\Users\cdutboy\Dropbox\others\beijing_phonenumbers.txt C:\Users\cdutboy\Dropbox\others\names_cn.txt
+        del beijing_phonenumbers_names.restore
+        hashcat64.exe --session family_names_beijing_phonenumbers -D 1,2 -w 4 -m 2500 #HL# -a 1 C:\Users\cdutboy\Dropbox\others\family_names.txt C:\Users\cdutboy\Dropbox\others\beijing_phonenumbers.txt
+        del family_names_beijing_phonenumbers.restore
+        hashcat64.exe --session beijing_phonenumbers_family_names -D 1,2 -w 4 -m 2500 #HL# -a 1 C:\Users\cdutboy\Dropbox\others\beijing_phonenumbers.txt C:\Users\cdutboy\Dropbox\others\family_names.txt
+        del beijing_phonenumbers_family_names.restore
+        hashcat64.exe --session names_names_months_days -D 1,2 -w 4 -m 2500 #HL# -a 1 C:\Users\cdutboy\Dropbox\others\names_cn.txt C:\Users\cdutboy\Dropbox\others\names_months_days.txt
+        del names_names_months_days.restore
+        hashcat64.exe --session names_months_days_names -D 1,2 -w 4 -m 2500 #HL# -a 1 C:\Users\cdutboy\Dropbox\others\names_months_days.txt C:\Users\cdutboy\Dropbox\others\names_cn.txt
+        del names_months_days_names.restore
+        hashcat64.exe --session shengmu_love_shengmu -D 1,2 -w 4 -m 2500 #HL# -a 1 C:\Users\cdutboy\Dropbox\others\shengmu_love.txt C:\Users\cdutboy\Dropbox\others\shengmu.txt
+        del shengmu_love_shengmu.restore
+        hashcat64.exe --session names_love_names -D 1,2 -w 4 -m 2500 #HL# -a 1 C:\Users\cdutboy\Dropbox\others\names_love.txt C:\Users\cdutboy\Dropbox\others\names_cn.txt
+        del names_love_names.restore
+        hashcat64.exe --session familynames_love_family_names -D 1,2 -w 4 -m 2500 #HL# -a 1 C:\Users\cdutboy\Dropbox\others\familynames_love.txt C:\Users\cdutboy\Dropbox\others\family_names.txt
+        del familynames_love_family_names.restore
+        hashcat64.exe --session shengmu_ai_shengmu -D 1,2 -w 4 -m 2500 #HL# -a 1 C:\Users\cdutboy\Dropbox\others\shengmu_ai.txt C:\Users\cdutboy\Dropbox\others\shengmu.txt
+        del shengmu_ai_shengmu.restore
+        hashcat64.exe --session names_ai_names -D 1,2 -w 4 -m 2500 #HL# -a 1 C:\Users\cdutboy\Dropbox\others\names_ai.txt C:\Users\cdutboy\Dropbox\others\names_cn.txt
+        del names_ai_names.restore
+        hashcat64.exe --session familynames_ai_family_names -D 1,2 -w 4 -m 2500 #HL# -a 1 C:\Users\cdutboy\Dropbox\others\familynames_ai.txt C:\Users\cdutboy\Dropbox\others\family_names.txt
+        del familynames_ai_family_names.restore
+        hashcat64.exe --session family_names_family_months_days -D 1,2 -w 4 -m 2500 #HL# -a 1 C:\Users\cdutboy\Dropbox\others\family_names.txt C:\Users\cdutboy\Dropbox\others\family_months_days.txt
+        del family_names_family_months_days.restore
+        hashcat64.exe --session familynames_months_days_family_names -D 1,2 -w 4 -m 2500 #HL# -a 1 C:\Users\cdutboy\Dropbox\others\familynames_months_days.txt C:\Users\cdutboy\Dropbox\others\family_names.txt
+        del familynames_months_days_family_names.restore
+
+* a1commands_multiple.bat:
+
+        hashcat64.exe --session names_1234d -D 1,2 -w 4 -m 2500 #HL# -a 1 C:\Users\cdutboy\Dropbox\others\names_cn.txt C:\Users\cdutboy\Dropbox\others\1234d.txt && del names_1234d.restore && hashcat64.exe --session family_names_1234d -D 1,2 -w 4 -m 2500 #HL# -a 1 C:\Users\cdutboy\Dropbox\others\family_names.txt C:\Users\cdutboy\Dropbox\others\1234d.txt && del family_names_1234d.restore && hashcat64.exe --session shengmu_years_months_days -D 1,2 -w 4 -m 2500 #HL# -a 1 C:\Users\cdutboy\Dropbox\others\shengmu.txt C:\Users\cdutboy\Dropbox\others\years_months_days.txt && del shengmu_years_months_days.restore && hashcat64.exe --session shengmu_months_days -D 1,2 -w 4 -m 2500 #HL# -a 1 C:\Users\cdutboy\Dropbox\others\shengmu.txt C:\Users\cdutboy\Dropbox\others\months_days.txt && del shengmu_months_days.restore && hashcat64.exe --session months_days_shengmu -D 1,2 -w 4 -m 2500 #HL# -a 1 C:\Users\cdutboy\Dropbox\others\months_days.txt C:\Users\cdutboy\Dropbox\others\shengmu.txt && del months_days_shengmu.restore && hashcat64.exe --session shengmu_shengmu -D 1,2 -w 4 -m 2500 #HL# -a 1 C:\Users\cdutboy\Dropbox\others\shengmu.txt C:\Users\cdutboy\Dropbox\others\shengmu.txt && del shengmu_shengmu.restore && hashcat64.exe --session shengmu_months_days_shengmu_months_days -D 1,2 -w 4 -m 2500 #HL# -a 1 C:\Users\cdutboy\Dropbox\others\shengmu_months_days.txt C:\Users\cdutboy\Dropbox\others\shengmu_months_days.txt && del shengmu_months_days_shengmu_months_days.restore && hashcat64.exe --session shengmu_shengmu_1234d -D 1,2 -w 4 -m 2500 #HL# -a 1 C:\Users\cdutboy\Dropbox\others\shengmu.txt C:\Users\cdutboy\Dropbox\others\shengmu_1234d.txt && del shengmu_shengmu_1234d.restore && hashcat64.exe --session names_years_months_days -D 1,2 -w 4 -m 2500 #HL# -a 1 C:\Users\cdutboy\Dropbox\others\names_cn.txt C:\Users\cdutboy\Dropbox\others\years_months_days.txt && del names_years_months_days.restore && hashcat64.exe --session names_months_days -D 1,2 -w 4 -m 2500 #HL# -a 1 C:\Users\cdutboy\Dropbox\others\names_cn.txt C:\Users\cdutboy\Dropbox\others\months_days.txt && del names_months_days.restore && hashcat64.exe --session family_names_years_months_days -D 1,2 -w 4 -m 2500 #HL# -a 1 C:\Users\cdutboy\Dropbox\others\family_names.txt C:\Users\cdutboy\Dropbox\others\years_months_days.txt && del family_names_years_months_days.restore && hashcat64.exe --session years_months_days_family_names -D 1,2 -w 4 -m 2500 #HL# -a 1 C:\Users\cdutboy\Dropbox\others\years_months_days.txt C:\Users\cdutboy\Dropbox\others\family_names.txt && del years_months_days_family_names.restore && hashcat64.exe --session family_names_months_days -D 1,2 -w 4 -m 2500 #HL# -a 1 C:\Users\cdutboy\Dropbox\others\family_names.txt C:\Users\cdutboy\Dropbox\others\months_days.txt && del family_names_months_days.restore && hashcat64.exe --session months_days_family_names -D 1,2 -w 4 -m 2500 #HL# -a 1 C:\Users\cdutboy\Dropbox\others\months_days.txt C:\Users\cdutboy\Dropbox\others\family_names.txt && del months_days_family_names.restore && hashcat64.exe --session years_months_days_years_months_days -D 1,2 -w 4 -m 2500 #HL# -a 1 C:\Users\cdutboy\Dropbox\others\years_months_days.txt C:\Users\cdutboy\Dropbox\others\years_months_days.txt && del years_months_days_years_months_days.restore && hashcat64.exe --session months_days_months_days -D 1,2 -w 4 -m 2500 #HL# -a 1 C:\Users\cdutboy\Dropbox\others\months_days.txt C:\Users\cdutboy\Dropbox\others\months_days.txt && del months_days_months_days.restore && hashcat64.exe --session years_months_days_months_days -D 1,2 -w 4 -m 2500 #HL# -a 1 C:\Users\cdutboy\Dropbox\others\years_months_days.txt C:\Users\cdutboy\Dropbox\others\months_days.txt && del years_months_days_months_days.restore && hashcat64.exe --session shengmu_beijing_phonenumbers -D 1,2 -w 4 -m 2500 #HL# -a 1 C:\Users\cdutboy\Dropbox\others\shengmu.txt C:\Users\cdutboy\Dropbox\others\beijing_phonenumbers.txt && del shengmu_beijing_phonenumbers.restore && hashcat64.exe --session beijing_phonenumbers_shengmu -D 1,2 -w 4 -m 2500 #HL# -a 1 C:\Users\cdutboy\Dropbox\others\beijing_phonenumbers.txt C:\Users\cdutboy\Dropbox\others\shengmu.txt && del beijing_phonenumbers_shengmu.restore && hashcat64.exe --session names_beijing_phonenumbers -D 1,2 -w 4 -m 2500 #HL# -a 1 C:\Users\cdutboy\Dropbox\others\names_cn.txt C:\Users\cdutboy\Dropbox\others\beijing_phonenumbers.txt && del names_beijing_phonenumbers.restore && hashcat64.exe --session beijing_phonenumbers_names -D 1,2 -w 4 -m 2500 #HL# -a 1 C:\Users\cdutboy\Dropbox\others\beijing_phonenumbers.txt C:\Users\cdutboy\Dropbox\others\names_cn.txt && del beijing_phonenumbers_names.restore && hashcat64.exe --session family_names_beijing_phonenumbers -D 1,2 -w 4 -m 2500 #HL# -a 1 C:\Users\cdutboy\Dropbox\others\family_names.txt C:\Users\cdutboy\Dropbox\others\beijing_phonenumbers.txt && del family_names_beijing_phonenumbers.restore && hashcat64.exe --session beijing_phonenumbers_family_names -D 1,2 -w 4 -m 2500 #HL# -a 1 C:\Users\cdutboy\Dropbox\others\beijing_phonenumbers.txt C:\Users\cdutboy\Dropbox\others\family_names.txt && del beijing_phonenumbers_family_names.restore && hashcat64.exe --session names_names_months_days -D 1,2 -w 4 -m 2500 #HL# -a 1 C:\Users\cdutboy\Dropbox\others\names_cn.txt C:\Users\cdutboy\Dropbox\others\names_months_days.txt && del names_names_months_days.restore && hashcat64.exe --session names_months_days_names -D 1,2 -w 4 -m 2500 #HL# -a 1 C:\Users\cdutboy\Dropbox\others\names_months_days.txt C:\Users\cdutboy\Dropbox\others\names_cn.txt && del names_months_days_names.restore && hashcat64.exe --session shengmu_love_shengmu -D 1,2 -w 4 -m 2500 #HL# -a 1 C:\Users\cdutboy\Dropbox\others\shengmu_love.txt C:\Users\cdutboy\Dropbox\others\shengmu.txt && del shengmu_love_shengmu.restore && hashcat64.exe --session names_love_names -D 1,2 -w 4 -m 2500 #HL# -a 1 C:\Users\cdutboy\Dropbox\others\names_love.txt C:\Users\cdutboy\Dropbox\others\names_cn.txt && del names_love_names.restore && hashcat64.exe --session familynames_love_family_names -D 1,2 -w 4 -m 2500 #HL# -a 1 C:\Users\cdutboy\Dropbox\others\familynames_love.txt C:\Users\cdutboy\Dropbox\others\family_names.txt && del familynames_love_family_names.restore && hashcat64.exe --session shengmu_ai_shengmu -D 1,2 -w 4 -m 2500 #HL# -a 1 C:\Users\cdutboy\Dropbox\others\shengmu_ai.txt C:\Users\cdutboy\Dropbox\others\shengmu.txt && del shengmu_ai_shengmu.restore && hashcat64.exe --session names_ai_names -D 1,2 -w 4 -m 2500 #HL# -a 1 C:\Users\cdutboy\Dropbox\others\names_ai.txt C:\Users\cdutboy\Dropbox\others\names_cn.txt && del names_ai_names.restore && hashcat64.exe --session familynames_ai_family_names -D 1,2 -w 4 -m 2500 #HL# -a 1 C:\Users\cdutboy\Dropbox\others\familynames_ai.txt C:\Users\cdutboy\Dropbox\others\family_names.txt && del familynames_ai_family_names.restore && hashcat64.exe --session family_names_family_months_days -D 1,2 -w 4 -m 2500 #HL# -a 1 C:\Users\cdutboy\Dropbox\others\family_names.txt C:\Users\cdutboy\Dropbox\others\family_months_days.txt && del family_names_family_months_days.restore && hashcat64.exe --session familynames_months_days_family_names -D 1,2 -w 4 -m 2500 #HL# -a 1 C:\Users\cdutboy\Dropbox\others\familynames_months_days.txt C:\Users\cdutboy\Dropbox\others\family_names.txt && del familynames_months_days_family_names.restore
+* check the log file: The modified time of the log file is exactly the time of the session finished.
 ## How to get prepare for hashcat
 While creating this tutorial I realized by “default” I have an instance limit of “0” for this type of instance (p2.8xlarge) but was able to get the limit boosted to “1” by contacting their support through the support tab on the AWS console.
 (See Sneak Peak for Next HOWTo:) where I snipped a sample from my conversation with their support team. You may also need to do this if you intend to follow along. It took a few days before they granted the request. When submitting the request I just said I was doing research as an IT professional. When you have been approved, these are the next steps….
@@ -3193,3 +3288,33 @@ Check the agents
 * Benchmark result is 0
 * I cannot log in after installation and I'm using WAMP
 
+## Marketing
+* Propaganda
+    * xiaoli WiFi
+        * logo
+            * reveal
+        * matrix
+    * Coworkers
+    * Friends
+    * Relatives
+    * agents
+    * Wechat(group, moments, nearby), QQ(group, moments, nearby), MoMo(moments,nearby, chat room), TanTan, Weibo, Facebook, Twitter, MaiMai, Douban, Nico, Blued and so on
+    * bbs
+        * tianya
+        * 1618xiaolin
+        * taobao
+        * cell phone bbs
+        * zhibo
+        * 58 assign
+        * 软文
+    * local
+        * cell phone fixing store
+            * yakeli
+        * guitar
+        * restaurant
+        * sticky notes
+        * matrix code
+        * 兼破各种密码：Windows系统密码，压缩包压缩密码，Word/Excel文档密码等等。
+    * to crack packets from website
+        * xioalin
+        * kali
