@@ -695,6 +695,25 @@ c_amount: 色彩强度，取值范围-2.0-5.0，负数为模糊效果，默认�
             sudo vim /etc/fstab
             /dev/sda4 /home/cdutboy/disk ext4 defaults 0 0
  - `df -hl` 查看已有分区的使用情况。
+## Extend the home directory of Ubuntu using gparted
+* through CD-ROM on Vmware
+    * download the ISO file from https://jaist.dl.sourceforge.net/project/gparted/gparted-live-stable/0.32.0-1/gparted-live-0.32.0-1-amd64.iso
+    * Vmware Machine Settings>CD/DVD>Use ISO file
+    * reboot and select the GParted boot option
+* through U disk
+    * Download Tuxboot on your computer
+        * sudo apt-add-repository ppa:thomas.tsai/ubuntu-tuxboot
+        * sudo apt-get update
+        * sudo apt-get install tuxboot
+        * tuxboot
+    * format the U disk to exfat and plug in
+    * select the 64-bit Gparted
+    * select the right U disk
+    * click on OK and start downloading the ISO file
+* move and resize
+    * select the partition to free space and fill the preceding size
+    * move on and forward the unlocated space to the order after the home directory
+    * resize and expand the home partition by adding the unlocated space.
 ## vmware ubuntu share folder
 1. 安装vmware tools
     - 挂载镜像文件

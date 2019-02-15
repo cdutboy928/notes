@@ -1,0 +1,1 @@
+https://jaist.dl.sourceforge.net/project/gparted/gparted-live-stable/0.32.0-1/gparted-live-0.32.0-1-amd64.iso

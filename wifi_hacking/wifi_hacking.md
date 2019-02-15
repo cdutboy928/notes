@@ -3027,6 +3027,8 @@ In Hashtopolis you can configure a global Hashcat brain server which can be used
       * **URL Download**: The file will be downloaded from a specified URL.
       * **HTTP upload**: The file will be uploaded from your browser. Suitable for smaller files because the default server limits are not very generous.
       * **Import**: The file will be moved from the directory called 'import' you can create inside the web directory (`/var/www/hashtopolis/import`). Suitable for large files, you can copy them via FTP/SSH or locally and then simply import. Because these files will be delivered to every agent who needs them for their current task, you can compress them 7zip to save bandwidth.
+          `Import` works again!
+          To make `Import` work properly: `cd /var/www/hashtopolis/import`,`sudo chmod a+x *`, `sudo chmod a+r`.
           However, you need to keep some basic rules: the file cannot be in any subdirectory inside the archive and the algorithm needs to be LZMA (to be specific, it must be extractable by 7z). Every time an agent will download a file ending with `.7z`, it will first extract it prior to starting the task. You can mark any file as "Secret" using the check box in the column with a lock icon. This will allow only trusted agents to download the file. Agents not marked as trusted won't even get such task to begin with.
           If get errors when importing files, run `sudo ncdu /var/log`, and then run `sudo dd if=/dev/null of=/var/log/apache2/error.log`
           Before upload through HTTP, you should change the php default configuration by running `sudo vim /etc/php/7.2/apache2/php.ini`, and set the following parameters:
@@ -3044,6 +3046,7 @@ In Hashtopolis you can configure a global Hashcat brain server which can be used
         * run `sudo chmod a+r <file>` to add the read permission
         * copy the URL (`ftp://34.201.59.34/names_months_days1.7z`) to the hashtopolis file URL
         * Click the "Download file" button. It is fast too!
+    * Delete the corresponding file in `/var/www/hashtopoli/files` when prompted with "File already exists." when failing to upload a file.
     * file lists
         * Rules
             * best64.rule

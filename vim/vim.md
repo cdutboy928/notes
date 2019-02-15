@@ -481,5 +481,5 @@ Use `:v//d` to delete all lines that do not match the last search pattern, or `:
 * `: set bomb?`
 * `: set nobomb`
 * `wq`
-* `vim -c "set nobomb" -c wq!`
+* `sudo vim -c "set nobomb" -c wq! 1-3alpha.txt`
 * `find . -type f -name "*.txt" -exec vim -c "set nobomb" -c wq! {} \;`
