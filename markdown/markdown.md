@@ -100,6 +100,7 @@ alert(s);
         ![test a image](standfor_parent.png)
         *.. stands for the up parent directory*
         ![test a image](../git/git_on_android_gif.gif)
+        ![test gif](bili_v_d_1582993084879.gif)
    * does not display the inline image
               [Benjamin Bannekat](https://octodex.github.com/images/bannekat.png)
           [Benjamin Bannekat](https://octodex.github.com/images/bannekat.png)
