@@ -101,6 +101,7 @@ alert(s);
         *.. stands for the up parent directory*
         ![test a image](../git/git_on_android_gif.gif)
         ![test gif](bili_v_d_1582993084879.gif)
+        **Note:图片链接的前面最好有一个空白行，不然容易导致图片不能正常显示**
    * does not display the inline image
               [Benjamin Bannekat](https://octodex.github.com/images/bannekat.png)
           [Benjamin Bannekat](https://octodex.github.com/images/bannekat.png)

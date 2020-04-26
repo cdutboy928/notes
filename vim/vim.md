@@ -530,3 +530,8 @@ Use `:v//d` to delete all lines that do not match the last search pattern, or `:
     补充说明一点，上面使用了\1、\2等来引用正则表达式引用的各个部分，如果想引用匹配的整体，除了在正则表达式整体加上一个括号外，也可以直接使用\0来引用它，在上文中，\0就是整个日期字符串。利用\0，你可以使用命令 :%s/正则表达式/\0\0\0/g 在全文中将某个模式字符串由一个复制成若干个，而这却是由替换命令来完成的！
    ???在替换命令中还有一个用于匹配指定位置的特殊字符，\zs和\ze，它俩不匹配任何字符，仅仅是一个位置标记，就好比^和$分别匹配行首和行尾一样，例如你想把 forever 中的 for 改成 FOR，但又不希望 forest 中的 for 有任何变化，你除了使用 :s/forever/FORever/g 之外也可以使用 :s/\zsfor\zeever/FOR/g 来完成这一点，这在有时非常有用，因为它搜索的条件更精确，而替换的只是某一部分。
 ## [vim高级查找替换实例](substitute_commands.txt)
+* `:%s/\(^\n\)\{3,}/\1/gc`去除太多的空白行
+* `:%s/^$\n//gc` to delete blank lines
+## set no highlight
+`: noh`
+
