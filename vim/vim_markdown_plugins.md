@@ -29,6 +29,7 @@
     * `[]`
     * ]c
     * ]u
+ * install it through vundle
 ## 5. [mkdx.vim](https://github.com/SidOfc/mkdx)
 ### Install
 Vundle
