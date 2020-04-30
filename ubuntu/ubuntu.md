@@ -992,6 +992,8 @@ The `screen` command is very useful for remote administration. It can prevent th
 * `export HTTP_PROXY_USER=XXXX`
 * `export HTTP_PROXY_PASSWORD=YYYY`
 * `export https_proxy=http://127.0.0.1:8123`
+* `export http_proxy=socks5://127.0.0.1:1081`
+* `export https_proxy=socks5://127.0.0.1:1081`
 ### Usage
 
         ./dropbox_uploader.sh [PARAMETERS] COMMAND...
@@ -1164,3 +1166,13 @@ Copy standard input to each FILE, and also to standard output.
 * `-i`, `--ignore-interrupts`: ignore interrupt signals
 * `cat slayers.story | tee ss-copy1 ss-copy2 ss-copy3`
 
+## ConEmu
+* shortcuts
+    * `Ctrl`+`N` to create a new `{Bash::bash}`
+    * `Alt + K => Tab(4, -1); Tab(1);`
+    * `Alt + J => Tab(4, 1); Tab(1);`
+    * `Ctrl+Alt+K => Move active tab lefward`
+    * `Ctrl+Alt+J => Move active tab rightward`
+* proxy
+    * `export http_proxy=socks5://127.0.0.1:1081`
+    * `export https_proxy=socks5://127.0.0.1:1081`
