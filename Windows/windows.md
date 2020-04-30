@@ -166,3 +166,16 @@ IF ERRORLEVEL 4 ECHO 拷贝过程中写盘错误
 用户通过ctrl-c中止拷贝操作
 预置错误阻止文件拷贝操作
 拷贝过程中写盘错误
+## how to set up a startup task
+* set user to login automatically
+    * Win+R: `netplwiz`
+    * uncheck "users must enter password to login"
+* set up a task scheduler
+    * name: hashtopolis
+    * account: cdutboy
+    * run only when user is logged on
+    * trigger: At log on
+    * start a program:
+        * cmd
+        * /k "C:\Desktop...\hashtopolis.bat"
+

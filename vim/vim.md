@@ -1,4 +1,28 @@
 # Vim Skills
+## basic operations
+### on and of
+`:set numbers`
+`:syntax on`
+`:syntax off`
+### jump
+`10gg`
+`:10`
+### copy
+`10yy`
+`y10j`
+`y^`
+`y$`
+`dd`
+`10dd`
+`d10j`
+### save
+* `:wq /Path/filename`: 同时保存到`/Path/filename`
+* `:m,n w /Path/filename`: m到n行，保存为`/Path/filename`
+* `:m,n >> /Path/filename`: m到n行，追加到`/Path/filename`
+### command
+* `:!CMD`
+* `:e /Path/filename`: 打开`/Path/filename`文件
+
 ## insert special characters
 * *Note: `Ctrl+Shift+_` or `Ctrl+7`to insert special characters.*
     * <C-k> and type 0U for a smile face: ☻
@@ -322,6 +346,18 @@ In a substitute, you can use `&` in the replacement to mean the "whole matched p
 If you do not want the whole matched pattern, you can use parentheses to group text in the search pattern, and use the replacement variable `\1` to specify the first group. For example, the following finds "color x" and replaces it with "colored x" where x is the whole word "red" or "green" or "blue":
 `:%s/color \<\(red\|green\|blue\)\>/colored \1/g`
 
+### Match a pattern not followed by a sub-pattern in vim
+...cat dog lorem ipsum...
+...cat lizard ...
+...cat bird ...
+...cat dog ...
+
+to 
+
+...cat lizard ...
+...cat bird ...
+
+`/cat (dog)@!`
 ### Finding two words in either order
 You can search for a line that contains two words, in any order. For example, the following pattern finds all lines that contain both "red" and "blue", in any order:
 `.*red\&.*blue`
@@ -343,7 +379,7 @@ You can use these special characters as commands to the search function. If you 
 \#|Matching
 ---|---
 `.`|any character except new line
-`\s`|whitespace character
+`\s`|whitespace character,use ` ` instead of `\s` for acuity
 `\d`|digit
 `\i`|lowercase character
 `\u`|uppercase character
@@ -368,7 +404,11 @@ Because this is a search for a string and not a word, this search pattern might 
     `/[a-z]*isinformation`
 
 
-## Substitute
+### special characters displayed in vim on Windows
+* on Windows
+    * `$`: end of line
+    * `~`: spaces at the end of line
+## Substitute (http://vimregex.com/)
 
 ### Range of Operation, Line Addressing and Marks
 
@@ -385,11 +425,708 @@ Option|Meaning
 
 Range Specifier|Description
 ---|---
-`<number>`|an absolute line number
+`<number>`|an absolute line number, e.g. `10,20`
 `.`|the current line
 `$`|the last line in the file
 `%`|the whole file. The same as `1,$`
 `'t`|position of mark "t"
+`/pattern[/]`| the nest line where text "pattern" matches
+`?pattern[?]`|the previous line where text "pattern" matches
+`\/`|the next line where the previously used searched pattern matches
+`\?`|the previous line where the previously used search pattern matches
+`\&`|the next line where the previously used substitute pattern matches
+If no line range is specified, the command will operate on the current line only.
+Examples:
+* `/Section 1/+,/Section 2/-`:
+    * Each may be followed (several times) by "+" or "-" and an optional number. This number is added or subtracted from the preceding line number. If the number is omitted, 1 is used.
+    * all liens between "Section 1" and "Section 2", non-inclusively, i.e. the lines containing "Section 1" and "Section 2" will not be affected.
+* `/Section 1/;/Subsection/-,/Subsection/+`:
+    * The `/pattern/` and `?pattern?` may be followed by another address separated by a semicolon.
+    * First find "Section 1", then the first line with "Section", step one line down (beginning of the range) and find the next line with "Subsection", step one line up (end of the range).
+* `:/Section/+ y`: this will search for the "Section" line and yank one line after the memory.
+* `:// normal p`: this will search for the next "Section" line and put(paste) the saved text on the nest line.
+* `s:/dir1/dir2/dir3/file:/dir4/dir5/file2:g`
+    * equals to `s/\/dir1\/dir2\/dir3\/file/dir4\/dir5\/file2/g`
+    * mass escape `/` in paths in S&R action
+* `'<,'>s`:the current line
+### Patterns Description
+#### Anchors
+* `s:\<vi\>:VIM:g`
+* `s:^vi\>:VIM:g`
+* `s:^vi$:VIM:g`
+* `%s:vi:VIM:gi`
+* `%s:[Vv]i:VIM`
+#### "Escaped" characters or metacharacters
+* `.`: any character except new line
+* `\s`:whitespace character
+* `\d`:digit,`\d\d/\d\d/\d\d\d\d` for `09/01/2000`
+* `\x`:hex digit
+* `\o`:octal digit
+* `\h`:head of word character (a,b,c...z,A,B,C...Z and \_)
+* `\p`:printable character
+* `\w`:word character, `\u\w\w\w\w\w`
+* `\a`:alphabetic character
+* `\l`:lowercase character
+* `\u`:uppercase character
+* `\S`:non-whitespace character
+* `\D`:non-digit
+* `\X`:non-hex digit
+* `\O`:non-octal digit
+* `\H`:non-head of word character
+* `\P`:like `\p`, but excluding digits
+* `\W`:non-word character
+* `\A`:non-alphabetic character
+* `\L`:non-lowercase character
+* `\U`:non-uppercase character
+#### Quantifiers, Greedy and Non-Greedy
+* `*` matches 0 or more of the preceding characters, ranges or metacharacters. `.*` matches everything including empty line
+* `\+`: matches 1 or more of the preceding characters...
+* `\=`: matches 0 or 1 more of the preceding characters...
+* `\{n,m}`: matches from n to m of the preceding characters...
+* `\{n}`: matches exactly n times of the preceding characters...
+* `\{,m}`: matches at most m (from 0 to m) of the preceding characters...
+* `\{n,}`: matches at least n of the preceding characters...
+where n and m are positive integers (>0)
+Now it's much easier to define a pattern that matches a word of any length `\u\w\+`
+These quantifiers are greedy-that your pattern will try to match **as much text as possible**. Sometimes it presents a problem. Let's consider a typical example-define a pattern to match delimited text, i.e. text enclosed in quotes, brackets, etc. Since we don't know what kind of text is inside the quotes we'll use `/".*"/`
+But this pattern will match **everything** between the first `"` and the last `"` in the following line:
+this file is normally "$VIM/.gvimrc". You can check this with ":version".
+This problem can be resolved by using non-greedy quantifiers:
+* `\{-}`: matches 0 or more of the preceding atom, as few as possible
+    * use `.\{-}` to avoid over match, because `.` represent any character; use `\t\+` instead of `\t\{-}` to avoid miss match.
+* `\{-n,m}`: matches 1 or more of the preceding characters....
+* `\{-n,}`: matches at least n or more of the preceding characters...
+    * `:%s/^.\{-}|.\{-}|.\{-}|//g` for "1|22|333|pppp" : at least 1
+    * `:%s/^.\{-2}|.\{-2}|.\{-2}|//g` for "11|22|333|pppp" : at least 2
+* `\{-,m}`: matches 1 or more of the preceding characters...
+Let's use `\{-}` in place of `*` in our pattern. So, now `".\{-}"` will match the first quoted text.
+this file is normally "$VIM/gvimrc". You can check this with ":version".
+`.\{-}` pattern is not without surprises. Look what will happen to the following text after we apply:
+`:s:.\{-}:_:g`
+Before:
+`n and m are decimal numbers between`
+After:
+`_n_ _a_n_d_ _m_ _a_r_e_ _d_e_c_i_m_a_l_ _n_u_m_b_e_r_s_ _b_e_t_w_e_e_n_`
+"As few as possible" applied here means zero character replacements. However match does occur between characters! To explain this behavior I quote Bram himself:
+Matching zero characters is still a match. Thus it will replace zero characters with a "_". And then go on to the next position, where it will match again.
+It's true that using `\{-}` is mostly useless. It works this way to be consistent with `*`, which also matches zero characters. There are more useless ones: `x\{-1,}` always matches one x. You could just use `x`. More useful is something like `x\{70}`. The others are just consistent behavior:...`x\{-3,}`,`x\{-2,}`,`x\{-1,}`.
+But what if we want to match only the second occurrence of quoted text? Or we want to replace only a part of the quoted text keeping the rest untouched? We will need grouping and backreferences. But before this let's talk more about character ranges.
+#### Character ranges
+Typical character rages:
+`[012345]` will match any of the numbers inside the brackets.
+`[0-5]`
+`[a-z]`
+`[a-zA-Z]`
+`[0-9a-zA-Z]`
+`s:[65]:Dig:g`
+`s:65:Dig:g`
+`/[^A-Z]`
+`/"[^"]\+"/`
+`/[-0-9]`
+`/\.\s\+[a-z]`: a period followed by one or more blanks and a lowercase word. Suppose you want to run a grammar check on your file and find all places where new sentence does not start with a capital letter. Now let's see how we can correct it. To do this we need some ways to remember our matched pattern and recall it later. That is exactly what backreferences are for.
+#### Grouping and Backreferences
+You can group parts of the pattern expression by enclosing them with `\(` and `\)` and refer to them inside the replacement pattern by their special number `\1`, `\2` ... `\9`. Typical example is swapping first two words of the line:
+`s:\(\w\+\)\(\s\+\)\(\w\+\):\3\2\1:`
+where `\1` holds the first word, `\2` holds any number of spaces or tabs between and `\3` holds the second word. How to decide what number holds what pair of `\(\)`?-count opening `\(` from the left.
+##### Replacement Part of :substitute
+Replacement part of the S&R has its own special characters which we are going to use to fix grammar:
+* `&`:the whole matched pattern
+* `\0`:the whole matched pattern
+* `\1`:the matched pattern in the first pair of `\(\)`
+* `\2`:the matched pattern in the second pair of `\(\)`
+* ...
+* `\9`:the matched pattern in the ninth pair of `\(\)`
+* `~`:the previous substitute string
+* `\L`:the following characters are made lowercase
+* `\U`:the following characters are made uppercase
+* `\E`:end of `\U` and `\L`
+* `\e`:end of `\U` and `\L`
+* `\r`:split line in two at this point
+* `\l`:next character made lowercase
+* `\u`:next character made uppercase
+Now the full S&R to correct non-capital words at the beginning of the sentences looks like
+`s:\([.!?]\)\s\+\([a-z]\):\1  \u\2:g`
+We have corrected our grammar and as an extra job we replaced variable number of spaces between punctuation and the first letter of the next sentence with exactly two spaces.
+#### Alternations
+Using `\|` you can combine several expressions into one which matches any of its components. The first one matched will be used.
+`\(Date:\|Subject:\|From:\)\(\s.*\)`
+will parse various mail headings and their contents into `\1` and `\2`, respectively. The thing to remember about VIM alternation that it is not greedy. It won't search for the longest possible match, it will use the first that matched. That means that the order of the items in the alternation is important!
+#### Regexp Operator Precedence
+As in arithmetic expressions, regular expressions are executed in a certain order of precedence. Here the table of precedence, from highest to lowest:
+1. `\(\)`:grouping
+2. `\=`,`\+`,`*`,`\{n}`,etc: quantifiers
+3. `abc\t\.\w`:sequence of characters/metacharacters, not containing quantifiers or grouping
+4. `\|`:alternation
+### Global Command
+#### 5.1 Global search and execution
+I want to introduce another quite useful and powerful Vim command which we're going to use later.
+`:range g[lobal][!]/pattern/cmd`
+Execute the Ex command `cmd` (default:`:p`) on the lines within `[range]` where `pattern` matches. If `pattern` is preceded with a `!`-only where match **does not** occur.
+The global commands work by first scanning through the `[range]` of the lines and marking each line where a match occurs. In a second scan the `[cmd]` is executed for each marked line with its line number prepended. If a line is changed or deleted its mark disappears. The default for the `[range]` is the whole file.
+Note: Ex commands are all commands you are entering on the Vim command line like `:s[ubsitute]`, `:co[py]`, `:d[elete]`, `:w[rite]` etc. Non-Ex commands (normal mode commands) can be also executed via `:nor[al]non-ex command` mechanism.
+#### Examples
+* `:g/^$/ d`: delete all empty lines in a file
+* `g/^$/,/./-j`: reduce multiple blank lines to a single blank
+* `:10,20g/^/ mo 10`: reverse the order of the lines starting from the line 10 up to the line 20.
+* `\`a,\`b g/^Error/ . w! >> errors.txt`: in the text block marked by `\`a` and `\`b` find all the lines starting with "Error" and copy (append) them to "errors.txt" file. Note `.` (current line address) in front of the `w` is very important, omitting it will cause `:write` to write the whole file to "errors.txt" for every Error line found.
+* `:g/^Error:/ copy $ | s /Error/copy of the error/`: will copy all Error line to the end of the file and then make a substitution in the copied line. Without giving the line address, `:s` will operate on the current line, which is the newly copied line. You can give multiple commands after `:global` using `|` as a separator. If you want to use `|` in an argument, precede it with `\\`.
+* `:g/^Error:/ s /Error/copy of the error/ | copy $`: here the order is reversed: first modify the string then copy to the end.
+### Examples
+#### Tips and Techniques
+* `s:\s*$::`: a simple regexp I use quite often to clean up a text: it drops the blanks at the end of the line.
+* `s:\s\+$::`:or (to avoid acting on all lines)
+#### Creating outline
+For this example you need to know a bit of HTML. We want to make a table of `h1` and `h2` headings, which I will call majors and minors. HTML heading `h1` is a text enclosed by `<h1>` tags as in `<h1>Heading<\h1>`.
+1. First let's make named anchors in all headings, i.e. put `<h1><a name="anchor">Heading</a></h1>` around all headings. The `anchor` is a unique identifier of this particular place in HTML document. The following S&R does exactly this:
+`:s:\(<h[12]>\)\(.*\s\+\([-a-zA-Z]\+\)\)\s*\(</h[12]>\):\1<a name="\3">\2<\a>\4:`
+Explanation: the first pair of `\(\)` saves the opening tag (`h1` or `h2`) to the `\1`, the second pair saves all heading text before the closing tag, the third pair saves the last word in the heading which we will later use for "anchor" and the last pair saves the closing tag. The replacement is quite obvious-we just reconstruct a new "named" heading using `\1`-`\4` and link tag `<a>`.
+2. Now let's copy all headings to one place
+`:%g/<h[12]>/ t$`
+This command searches our file for the lines starting with `<h1>` or `<h2>` and copies them to the end of the file. Now we have a bunch of lines like:
+
+        <h1><a name="anchor1">Heading1></a></h1>
+        <h2><a name="anchor2">Heading2></a></h2>
+        <h2><a name="anchor3">Heading3></a></h2>
+        .............................
+        <h1><a name="anchorN">HeadingN></a></h1>
+First, we want to convert all `names="` to `href="#` in order to link table entries to their respective places in the text:
+`s:name=":href="#`
+Second, we want our `h1` entries look different from `h2`. Let's define CSS classes "majorhead" and "minorhead" and do the following:
+`g/<h1>/ s:<a:& class="majorhead":`
+`g/<h2>/ s:<a:& class="minorhead":`
+Now our entries look like:
+`<h1><a class="majorhead" name="anchor1">Heading1></a></h1>`
+`<h2><a class="minorhead" name="anchor2">Heading2></a></h2>`
+We no longer need `h1` and `h2` tags:
+`s:<h[12]>::`
+and replace closing tags with breaklines `<br>`
+`s:/h[21]>:br:`
+And finally our entries look like this:
+        
+        <a class="majorhead" name="anchor1">Heading1></a><br>
+        <a class="minorhead" name="anchor2">Heading2></a><br>
+#### Working with tables
+Quite often you want to work with a text organized in tables/columns. Consider, for example, the following text
+
+Asia    America     Africa      Europe
+Africa  Europe      Europe      Africa
+Europe  Asia        Europe      Europe
+
+* Suppose we want to change all "Europe" cells in the third column to "Asia":`:%s:\(\(\w\+\s\+\)\{2}\)Europe:\1Asia:`
+* To swap the first and the last columns:`:%s:\(\w\+\)\(.*\s\+\)\(\w\+\)$:\3\2\1:`
+#### some examples
+
+
+        59>-----RazielZamBukka>-medion500>------mike_at_ivybank@hotmail.co.uk$
+        :%s/^[^\t]*\t\([^\t]*\t[^\t]*\t\).*$/\1/g
+        :%s/\t/\r/g
+        :%s/^[^|-]*|[^|]*|//g
+        :%s/^.*----//g
+        :g/^.\{,7\}$/d
+        :sort u
+        
+        
+        find . -type f -name "*.txt" -exec vim -c "%s/^[^\t]*\t\([^\t]*\t[^\t]*\t\).*$/\1/g" -c "%s/\t/\r/g" -c "%s/^[^|-]*|[^|]*|//g" -c "%s/^.*----//g" -c "sort u" -c "g/^.\{,7\}$/d" -c "g/^.\{25,\}$/d" -c wq! {} \;
+        
+        =========================================================================================================================================
+        
+        431>----lakingfan3328>--lakingsfan3328>-lakingsfan3328>-lakingsfan3328@aol.com>-Bigwilly>-------Timothy>Holland>661-296-7708>---2006-09-22 06:50:23.500>>-------save them
+        %s/^.\{-}>-\+\(.\{-}\)>-\+\(.\{-}\)>-\+.*$/\1\r\2/g
+        
+        Clytemnestr c4874b8f3d6ae250e1eb3b3e62c77cb2 simon66l@sbcglobal.net>----tinker66
+        %s/^.\{-} \+.\{-} \+.\{-}>---//g
+        
+        
+        1607317339----qwedsa811527----QB:0.00----QD:0.0----áé?tê?éò  ??êD μ?D?(123.184.236.8)----2012-3-8 20:59:02
+        :%s/^.\{-}----\(.\{-}\)----.*$/\1/g
+        
+        942483052----a80139818
+        :%s/^.\{-}----\(.\{-}\)$/\1/g
+        
+        10>-----shomogus>-------tommy3252>------shomogus@hotmail.com>---Tom>----Nisson
+        :%s/^.\{-}\t\+\(.\{-}\)\t\+\(.\{-}\)\t\+.*$/\1\r\2/g
+        
+        
+        1|222|ppp
+        :%s/^.\{-2,}|.\{-2,}|//g
+        
+        9997￡ˉwatto94￡ˉforianz05￡ˉwatto@freemail.hu￡ˉ
+        :%s/^.\{-}￡ˉ\+\(.\{-}\)￡ˉ\+\(.\{-}\)￡ˉ\+.*$/\1\r\2/g
+        
+        
+        
+        
+        
+        
+        
+        find . -type f -name "*.txt" -exec vim -c "%s/^.\{-}>-\+\(.\{-}\)>-\+\(.\{-}\)>-\+.*$/\1\r\2/g" -c "%s/^.\{-} \+.\{-} \+.\{-}>---//g" -c "%s/^.\{-}----\(.\{-}\)----.*$/\1/g" -c "%s/^.\{-}----\(.\{-}\)$/\1/g" -c "%s/^.\{-}\t\+\(.\{-}\)\t\+\(.\{-}\)\t\+.*$/\1\r\2/g" -c "%s/^.\{-2,}|.\{-2,}|//g" -c "%s/^.\{-}￡ˉ\+\(.\{-}\)￡ˉ\+\(.\{-}\)￡ˉ\+.*$/\1\r\2/g" -c "sort u" -c wq! {} \;
+        
+        
+        
+        06 
+        615889910 hao7758521 QB: QD: 20:07:14 IP: 124.117.218.46 μ??·:D????ú?3????êDμ?D?  
+        %s/^.\{-} \+\(.\{-}\) \+QB.*$/\1/g
+        
+        
+        10 redo
+        
+        
+        
+        24
+        >-------KC42YV7GH>------abryden@gmail.com
+        %s/\t\+\(.\{-}\)\t\+.*$/\1/g
+        
+        
+        26
+        sandro.francioli@tin.it   getmss~~$
+        sandro.gubinelli@tin.it   nicholas$
+        sandro.gubinelli@tin.it nicholas~$
+        sandro.ice@tele2.it   gionata$
+        %s/^.*\.\(com\|it\) \+//g
+        
+        brian329 a51e47f646375ab6bf5dd2c42d3e6181 cybunny_100@hotmail.com>------rabbit
+        %s/^.*\t//g
+        
+        
+        
+        mrsyoder@aol.com melanie~$
+        %s/^\p\{19,} \(\p\{-}\)$/\1/g
+        
+        
+        
+        Qwertybn>-------sladjana>-------Qwertybn@hotmail.com
+        '<,'>s/^\p\{-}\t\(\p\{-}\)\t\p*$/\1/g
+        
+        
+        
+        870507777>------
+        '<,'>s/^\(.\{-}\)\t/\1/g
+        
+        
+                    446353 DaKruelOne fartfac3 khaosloki@yahoo.com~
+        :'<,'>s/^ \+.\{-} \(.\{-}\) \(.\{-}\) \(.\{-}\) $/\1\r\2/g
+        
+        
+        11691 Grady_123@hotmail.com adidas~
+        :'<,'>s/^.\{-} .\{-} \(.\{-}\) $/\1/g
+        
+        
+        =============================================163mail4=======================================================
+        halmburger>-----zfwbj@263.net>-->-------888888^M$
+        %s/^\(.\{-}\)\t.\{-}\t\t\(.\{-}\)$/\1\r\2/g
+        
+        abczhujiang@163.com----2042171587----zj_520^M$
+        %s/^.\{-}@.\{-}----\(.\{-}\)----\(.\{-}\)$/\1\r\2/g
+        
+        CHEN617681858@163.COM----huan520aijia----^M$
+        %s/^.\{-}@.\{-}----\(.\{-}\)----$/\1/g
+        
+        jane_70@163.com----jane70
+        %s/^.\{-}@.\{-}----//g
+        
+        jin11j----65661021
+        %s/----/\r/g
+        
+        small.lion.123@163.com smalljia  ^M$
+        b1233212@ms32.hinet.net o0footman0o  ^M$
+        shanwenyi3427@yahoo.com.cn  1103887448 ^M$
+        %s/^.\{-}@.\{-} \+\(.\{-}\) \+$/\1/g
+        
+        360999718@qq.com 74155211^M$
+        %s/^.\{-}@.\{-} \+\(.\{-}\)$/\1/g
+        
+        
+        
+        
+        
+        
+        
+        oxygen286,7276726dayy,xueliang1628@163.com^M$
+        %s/^\(.\{-}\),\(.\{-}\),.*$/\1\r\2/g
+        
+        
+        love348984182@163.com,luohualiqq^M$
+        %s/^.*,//g
+        
+        
+        vim -c "%s/^\(.\{-}\)\t.\{-}\t\t\(.\{-}\)$/\1\r\2/g" -c "%s/^.\{-}@.\{-}----\(.\{-}\)----\(.\{-}\)$/\1\r\2/g" -c "%s/^.\{-}@.\{-}----\(.\{-}\)----$/\1/g" -c "%s/^.\{-}@.\{-}----//g" -c "%s/----/\r/g" -c "%s/^.\{-}@.\{-} \+\(.\{-}\) \+$/\1/g" -c "%s/^.\{-}@.\{-} \+\(.\{-}\)$/\1/g" -c "%s/^\(.\{-}\),\(.\{-}\),.*$/\1\r\2/g" -c "%s/^.*,//g" -c wq! {} \;
+        
+        
+        
+        =================================================163mail5==============================================================
+        zhoulizheng2050@126.com----3640138^M$
+        %s/^.\{-}@.\{-}----//g
+        laa0702----3815072^M$
+        %s/----/\r/g
+        
+         a_j_w88@126.com    crazy  ^M$
+        %s/^ .\{-}@.\{-} \+\(.\{-}\) \+.*\r$/\1/g
+        cwg@.@naver.com c9131375^M$
+        rong919919@163.com    919919^M$
+        %s/^.\{-}@.\{-} \+\(.\{-}\)\s\+$/\1/g
+        
+        
+        >-------spunkypuppet08@163.com,patricia$
+        %s/^\t.\{-}@.\{-},\(.\{-}\)$/\1/g
+        defunkt@163.com>a68669232>------>------->------->------->------->-------^M$
+        %s/^.\{-}@.\{-}\t\(.\{-}\)\t\{6}.*$/\1/g
+        ytwqzdy>615685610@qq.com>-------f30450d348f752965d8abeccf3915454>-------zdy131425^M$
+        %s/^\(.\{-}\)\t.\{-}@.\{-}\t.\{-}\t\(.\{-}\).$/\1\r\2/g
+        abcde@.@naver.com>------23456a^M$
+        %s/^.\{-}@.\{-}\t//g
+        
+        495583961@163.com,Passyinguei^M$
+        %s/^.*,//g
+        
+        zxj1982819@163.com|1982105^M$
+        %s/^.\{-}@.\{-}|\(.\{4,}\)$/\1/g
+        
+        vim -c "%s/^.\{-}@.\{-}----//g" -c "%s/----/\r/g" -c "%s/^ .\{-}@.\{-} \+\(.\{-}\) \+.*\r$/\1/g" -c "%s/^.\{-}@.\{-} \+\(.\{-}\)\s\+\r$/\1/g" -c "%s/^\t.\{-}@.\{-},\(.\{-}\)$/\1/g" -c "%s/^.\{-}@.\{-}\t\(.\{-}\)\t\{6}.*$/\1/g" -c "%s/^\(.\{-}\)\t.\{-}@.\{-}\t.\{-}\t\(.\{-}\).$/\1\r\2/g" -c "%s/^.\{-}@.\{-}\t//g"  -c wq! {} \; && vim  -c "%s/^.*,//g" -c "%s/^.\{-}@.\{-}|\(.\{4,}\)$/\1/g" -c "%s/\t//g" -c "sort u" -c wq! {} \; 
+        ===============================================================163mail6=================================================================================
+        251339680----19881001@----520hongyu.love@163.com^M$
+        %s/^\(.\{-}\)----\(.\{-}\)@----.*$/\1\r\2/g
+        ---link---@163.com werwer^M$
+        %s/^.\{-}@.\{-} \+\(.\{-}\)$/\1/g
+        linmengjie8@126.com----mengjie5^M$
+        %s/^.\{-}@.\{-}----//g
+        yufa198752----198752^M$
+        %s/----/\r/g
+        capetowndee@yahoo.com,bananas3^M$
+        %s/^.*,//g
+        FXX1984824@163.COM----wzlw1234----^M$
+        %s/^.\{-}@.\{-}----\(.\{-}\)----$/\1/g
+        --zbmzbm12345@163.com>--58324697^M$
+        %s/^.\{-}@.\{-}\t//g
+        
+        vim -c "%s/^\(.\{-}\)----\(.\{-}\)@----.*$/\1\r\2/g" -c "%s/^.\{-}@.\{-} \+\(.\{-}\)$/\1/g" -c "%s/^.\{-}@.\{-}----//g" -c "%s/----/\r/g" -c "%s/^.*,//g" -c "%s/^.\{-}@.\{-}----\(.\{-}\)----$/\1/g" -c "%s/^.\{-}@.\{-}\t//g" -c "%s/\t//g" -c "sort u" -c wq! {} \;
+        
+        
+        =================================================163mail7=========================================================================
+        laphael1985@163.com----198587^M$
+        %s/^.\{-}@.\{-}----//g
+        dafei183654009----dafei521^M$
+        %s/----/\r/g
+        lovely97@126.com|songhaolin^M$
+        %s/^.\{-}@.\{-}|//g
+        twt1212@163.com 123456^M$
+        %s/^.\{-}@.\{-} \+\(.\{-}\)$/\1/g
+        
+        
+        vim -c "%s/^.\{-}@.\{-}----//g" -c "%s/----/\r/g" -c "%s/^.\{-}@.\{-}|//g" -c "%s/^.\{-}@.\{-} \+\(.\{-}\)$/\1/g" -c "sort u" -c wq! {} \;
+        ==================================================163mail8=================================================================================
+        ym090326good----090326@----20090326good@163.com^M$
+        %s/^\(.\{-}\)----\(.\{-}\)@----.\{-}@.*$/\1\r\2/g
+        WXF_SD1989@163.COM----shishang52113142----^M$
+        %s/^.\{-}@.\{-}----\(.\{-}\)----$/\1/g
+        abczhujiang@163.com----2042171587----zj_520^M$
+        %s/^.\{-}@.\{-}----\(.\{-}\)----\(.\{-}\)$/\1\r\2/g
+        w375571525@126.com----gatekeeper^M$
+        %s/^.\{-}@.\{-}----//g
+        qianmin916----xiaomin916^M$
+        %s/----/\r/g
+        
+        kobeliunash@yahoo.com.cn>-------19850822kb>----->------->------->------->------->-------^M$
+        %s/^.\{-}@.\{-}\t\(.\{-}\)\t\{6}.*$/\1/g
+        dbswhdghk1@.???>ekdma1>-^M$
+        %s/^.\{-}@.\{-}\t\(.\{-}\)\t\r$/\1/g
+        ytwqzdy>615685610@qq.com>-------f30450d348f752965d8abeccf3915454>-------zdy131425^M$
+        %s/^\(.\{-}\)\t.\{-}@.\{-}\t.\{-}\t\(.\{-}\).$/\1\r\2/g
+        >-------,yung_sexi_5000@126.com,lamar06^M$
+        %s/^\t,.\{-}@.\{-},\(.\{-}\)$/\1/g
+        abcde@.@naver.com>------23456a^M$
+        %s/^.\{-}@.\{-}\t//g
+        
+         a_leszczynski@126.com    gemma1  ^M$
+        %s/^ .\{-}@.\{-} \+\(.\{-}\) \+.*\r$/\1/g
+        #1stunna@126.com kevin^M$
+        %s/^.\{-}@.\{-} \+\(.\{-}\)$/\1/g
+        $bill7 bdollarbill@qq.com^M$
+        %s/^\(.\{-}\) \+.\{-}@.\{-}.*$/\1/g
+        
+        overafter,79642048,wangpeng84529@163.com^M$
+        %s/^\(.\{-}\),\(.\{-}\),.\{-}@.\{-}.*$/\1\r\2/g
+        .....jeah@163.com,86935657^M$
+        %s/^.\{-}@.\{-},\(.\{-}\)$/\1/g
+        
+        
+        
+        vim -c "%s/^\(.\{-}\)----\(.\{-}\)@----.\{-}@.*$/\1\r\2/g" -c "%s/^.\{-}@.\{-}----\(.\{-}\)----$/\1/g" -c "%s/^.\{-}@.\{-}----\(.\{-}\)----\(.\{-}\)$/\1\r\2/g" -c "%s/^.\{-}@.\{-}----//g" -c "%s/----/\r/g" -c "sort u" -c wq! {} \; && vim -c "%s/^.\{-}@.\{-}\t\(.\{-}\)\t\{6}.*$/\1/g" -c "%s/^.\{-}@.\{-}\t\(.\{-}\)\t\r$/\1/g" -c "%s/^\(.\{-}\)\t.\{-}@.\{-}\t.\{-}\t\(.\{-}\).$/\1\r\2/g" -c "%s/^\t,.\{-}@.\{-},\(.\{-}\)$/\1/g" -c "%s/^.\{-}@.\{-}\t//g" -c "sort u" -c wq! {} \; && vim -c "%s/^ .\{-}@.\{-} \+\(.\{-}\) \+.*\r$/\1/g" -c "%s/^.\{-}@.\{-} \+\(.\{-}\)$/\1/g" -c "%s/^\(.\{-}\) \+.\{-}@.\{-}.*$/\1/g" -c "%s/^\(.\{-}\),\(.\{-}\),.\{-}@.\{-}.*$/\1\r\2/g" -c "%s/^.\{-}@.\{-},\(.\{-}\)$/\1/g" -c "sort u" -c wq! {} \;
+        
+        
+        
+        =================================================================1t=====================================================================================
+        wanghuanjie1986@yahoo.cn----whj6670165----
+        %s/^.\{-}----\(.\{-}\)----$/\1/g
+        981809694@qq.com----14725896
+        %s/^.\{-}----//g
+        
+        vim -c "%s/^.\{-}----\(.\{-}\)----$/\1/g" -c "%s/^.\{-}----//g" -c "sort u" -c wq! {} \;
+        
+        
+        =========================================================土豆=================================================================================================
+        gottijcf@126.COM----billabong1230^M$
+        find . -type f -name "*.txt" -exec vim -c "%s/^.*----//g" -c "sort u" -c wq! {} \; && cat ./*.txt > QQ邮箱.txt && vim -c "sort u" -c wq! QQ邮箱.txt
+        
+        ===================================================================0301============================================================================================
+        ±±??3??>----1191027820>-----310824202jun>---70±±??3??123.113.59.187>----^M$
+        %s/^.\{-}\t.\{-}\t\(.\{-}\)\t.*$/\1/g
+        1 ????1?? 2399636896 13164991832kang 70????1??218.71.227.54  ^M$
+        %s/^.\{-} .\{-} .\{-} \(.\{-}\) .*$/\1/g
+        
+        vim -c "%s/^.\{-}\t.\{-}\t\(.\{-}\)\t.*$/\1/g" -c "%s/^.\{-} .\{-} .\{-} \(.\{-}\) .*$/\1/g" -c "sort u" -c wq! {} \;
+        
+        ===============================================================0303===================================================================================================
+        ±±??1??>----2508023121>-----HUANGhao521>----haixiao>5>------61267>--?μμà:|MAC:ip:111.194.165.12|ê±??:2012-03-03~10:23:23^M$
+        %s/.\{-}\t.\{-}\t\(.\{-}\)\t.*$/\1/g
+        1~????1??~785583401~boakobe123~a8~20~91753~?μμà:|MAC:ip:116.52.146.226|ê±??:2012-03-03~10:22:53~~^M$
+        %s/^.\{-} .\{-} .\{-} \(.\{-}\) .*$/\1/g
+        
+        vim -c "%s/.\{-}\t.\{-}\t\(.\{-}\)\t.*$/\1/g" -c "%s/.\{-} .\{-} .\{-} \(.\{-}\) .*$/\1/g" -c "sort u" -c wq! {} \;
+        
+        find . -type f -name "*.txt" -exec vim -c "%s/.\{-}\t.\{-}\t\(.\{-}\)\t.*$/\1/g" -c "%s/.\{-} .\{-} .\{-} \(.\{-}\) .*$/\1/g" -c "sort u" -c wq! {} \; && cat ./*.txt > 0303.txt && vim -c "sort u" -c wq! 0303.txt
+        
+        =============================================12月老信===============================================================================================
+        ±±??1??>----2508023121>-----HUANGhao521>----haixiao>5>------61267>--?μμà:|MAC:ip:111.194.165.12|ê±??:2012-03-03~10:23:23^M$
+        %s/.\{-}\t.\{-}\t\(.\{-}\)\t.*$/\1/g
+        ±±??1??~1002943980~YOUXIrensheng121~54~222.74.55.154~2012-11-30~10:8:42~^M$
+        %s/^.\{-} .\{-} \(.\{-}\) .*$/\1/g
+        
+        find . -type f -name "*.txt" -exec vim -c "%s/.\{-}\t.\{-}\t\(.\{-}\)\t.*$/\1/g" -c "%s/^.\{-} .\{-} \(.\{-}\) .*$/\1/g" -c "sort u" -c wq! {} \; && cat ./*.txt > 0303.txt && vim -c "sort u" -c wq! 0303.txt
+        
+        =======================================================================================================================================================
+        louis40~#~7474liu~#~louis40@sina.com$
+        %s/^\(.\{-}\) # \(.\{-}\) # .*$/\1\r\2/g
+        
+        ====================================================DNF====================================================================================
+        2428924773----songxi1650110028----QB:0----QD:0----????ê???í¨êDμ?D?----112.114.59.105----2012-7-29----17:26:02^M$
+        %s/^.\{-}----\(.\{-}\)----.*$/\1/g
+        1312017671----zwh9876543210zwh^M$
+        %s/^.*----//g
+        é?o￡1??>------1254159230>-----AIqing8913205>--180.175.192.200^M$
+        %s/^.\{-}\t.\{-}\t\(.\{-}\)\t.*$/\1/g
+        é?o￡1??~849430442~13166259488~90-2B-34-68-0D-E1~180.166.24.154^M$
+        %s/^.\{-} .\{-} \(.\{-}\) .*$/\1/g
+        
+        vim -c "%s/^.\{-}----\(.\{-}\)----.*$/\1/g" -c "%s/^.*----//g" -c "%s/^.\{-}\t.\{-}\t\(.\{-}\)\t.*$/\1/g" -c "%s/^.\{-} .\{-} \(.\{-}\) .*$/\1/g" -c "sort u" -c wq! {} \;
+        
+        ======================================================================book===================================
+        1752672>yaer5211314>----yaer5211314>----8d6a55cf0d8239df793eebdedbd9fdf8>-------1633573373@qq.com>------15836819782>----^M$
+        %s/^.\{-}\t\(.\{-}\)\t\(.\{-}\)\t.*$/\1\r\2/g
+        
+        =====================================cnzz=============================================================
+        
+        INSERT~INTO~`owner`~VALUES~('41',~'ANGEL',~'d4467b07ccac1c56cb18d11977d426f4',~'hhnn24@hotmail.com');$
+        :g!/^INSERT/d
+        s/^INSERT INTO .\{-} .\{-} .\{-} '\(.\{-}\)',.*$/\1/g
+        
+        ============================discuz================================================
+        E_D("replace~into~`cdb_members`~values('1500752','shiyi0512','4aa4e876f131f9e5e6f070a6f26fce1b','','0','0','10','0','','220.181.31.82','1128307754','220.181.31.82','0','0','0','0','0','0','0','25','25','26','0','0','0','0','0','0','shiyi0512@','0000-00-00','0','0','0','0','0','0','1','1','1','0','9999','0','0','2','26','0');");$
+        :g!/^E_D/d
+        %s/^E_D.\{-}('.\{-},'\(.\{-}\)',.*$/\1/g
+        
+        ============================================tianya==================================================================
+        rainbow116217~~~~~~~~~608121~~~~~~~~~rainbow116217@163.com^M$
+        %s/^\(\p\{-}\) \+\(\p\{-}\) \+.*$/\1\r\2/g
+        =====================================twitter====================================================
+        b.dias.souza@uol.com.br:lamn71^M$
+        %s/^.\{-}@.\{-}:\(.\{-}\)$/\1/g
+        Fabiola_cvz:4NV5me8C^M$
+        %s/:/\r/g
+        
+        ==================================renrenwang==========================================================
+        690326585@qq.com>-------690326585>------$
+        %s/^.\{-}\t\(.\{-}\)\t.*$/\1/g
+        liuji-1991@126.com>-----8914066$
+        %s/\t/\r/g
+        linda_9godwill@yahoo.com~godwill$
+        %s/^.\{-}@.\{-} //g
+        
+        ====================================================================================================
+        INSERT~INTO~`sys_user`~VALUES~('332491241',~'20',~'332491241',~'lixiaoqi1989',~'1',~'332491241@qq.com',~'2010-05-11~16:23:46',~'2010-05-11~16:23:46',~'2011-05-11~16:23:46',~null,~null,~'',~'/nas/nas1/52/users/332491241',~'simple~chinese',~null,~null,~null,~null,~'672200',~'1023',~'23',~'4',~null);$
+        g\!/^INSERT/d
+        %s/^.\{-} (.\{-} .\{-} .\{-} '\(.\{-}\)',.*$/\1/g
+        
+        =============================================================================================================
+        kuang114>-------kcqer@vip.qq.com>-------10466592>-------^M$
+        %s/\(.\{-}\)\t\+.\{-}\t\+\(.\{-}\)\t\+.*$/\1\r\2/g
+        a357065990>-----a357065990@163.com>-----a136200671^M$
+        %s/\(.\{-}\)\t\+.\{-}\t\+\(.\{-}\)\r$/\1\r\2/g
+        a19932130>------gottijcf@yahoo.com~billabong1230^M$
+        %s/\(.\{-}\)\t\+.\{-} \+\(.\{-}\)\r$/\1\r\2/g
+        
+        find . -type f -name "*" -exec vim -c "%s/\(.\{-}\)\t\+.\{-}\t\+\(.\{-}\)\t\+.*$/\1\r\2/g" -c "%s/\(.\{-}\)\t\+.\{-}\t\+\(.\{-}\)\r$/\1\r\2/g" -c "%s/\(.\{-}\)\t\+.\{-} \+\(.\{-}\)\r$/\1\r\2/g" -c "sort u" -c wq! {} \; && cat ./* > duduniu.txt && vim -c "sort u" -c wq! duduniu.txt
+        
+        =============================================================================================================================================
+        11768442>-------xsnakex>4321qazxc>------>-------xsnakex111^M$
+        %s/^.\{-}\t\(.\{-}\)\t.\{-}\t.\{-}\t\(.\{-}\)\r$/\1\r\2/g
+        
+        
+        1098893923----19970519wang----′ó ??:°2??3??--?°òμ:ê￥?°??--μè??:18$
+        %s/.\{-}----\(.\{-}\)----.*$/\1/g
+        
+        antakkkkk>------kema811@yahoo.com~m098849$
+        %s/^\(.\{-}\)\t.\{-} \(.\{-}\)$/\1\r\2/g
+        =============================================================================================================================================
+        1021314252~3w.2587.com~?ú ???D°à ?÷è?μ???×?ê?￡?www~?ú μ?3?éú μ?ê?￡?qqq~?ú D??§°à ?÷è?μ???×?ê?￡?eee~oúáú ?-2??^M$
+        %s/.\{-} \(.\{-}\) .*$/\1/g
+        
+        1???1??~1003683868~ojianQIANG1983.~70~113.108.111.25~2012-11-14~13:05:46~$
+        %s/^.\{-} .\{-} \(.\{-}\) .*$/\1/g
+        
+        yingsen1111>----yingsen123@163.com>-----yingsen123$
+        %s/^\(.\{-}\)\t.\{-}\t\(.\{-}\)$/\1\r\2/g
+        
+        ===================================================================================================================
+        INSERT~INTO~cdb_members~VALUES('105355',~'ruanziheng',~'652e68183c53d3bfee2ab814531f1583',~'',~'0',~'0',~'10',~'0',~'',~'221.200.36.31',~'1233662885',~'221.200.36.31',~'1233662885',~'1233662885',~'1233663261',~'1',~'0',~'0',~'0',~'1',~'0',~'3',~'0',~'0',~'0',~'0',~'0',~'0',~'ruanziheng@163.com',~'0000-00-00',~'0',~'0',~'0',~'0',~'0',~'0',~'0',~'0',~'0',~'0',~'',~'0',~'0',~'2',~'26',~'0',~'0',~'0',~'0');$
+        g!/^INSERT/d
+        %s/^INSERT.\{-}(.\{-} '\(.\{-}\)',.*$/\1/g
+        
+        oó??6??----??o?￡o1482827430----zhanpeng521.0----ip:218.28.99.74$
+        %s/^.\{-}----.\{-}----\(.\{-}\)----.*$/\1/g
+        
+        alsms210>-------546545735@qq.com>-------19880210>-------$
+        %s/^\(.\{-}\)\t.\{-}\t\(.\{-}\)\t$/\1\r\2/g
+        
+        sun306776674~|~26d76d54ed050c516c8f751a142b3dc7~|~sunxiaobao369@126.com~|~yuhan0210$
+        %s/^\(.\{-}\) | .\{-} | .\{-} | \(.\{-}\)$/\1\r\2/g
+        
+        
+        =================================================================================================================================
+        ot±±4??>---379611127>------maji123.>-------70>-----ot±±4??|MAC:0-0-0-0-0-0>---ip:219.140.174.138^M$
+        %s/^.\{-}\t.\{-}\t\(.\{-}\)\t.*$/\1/g
+        ot±±4??~476223558~new942170~ot±±4??|MAC:0-0-0-0-0-0~ip:59.174.215.155^M$
+        %s/^.\{-} .\{-} \(.\{-}\) .*$/\1/g
+        
+        
+        "42283398">-----"5546559@qq.com">-------"123456789">----"·?±?-μ°×ó"$
+        %s/.\{-}\t.\{-}\t"\(.\{-}\)"\t.*$/\1/g
+        
+        love125304~11814f26b507c8817a2b969cf77a0581~xjjysgy@163.com~8303045$
+        %s/^\(.\{-}\) .\{-} .\{-} \(.\{-}\)$/\1\r\2/g
+        
+        
+        218343~~é?o￡2??~~1083218398~~N=Q18256255113~~~~MAC:ip:~~220.180.8.42~~2~~18:40:02~~^M$
+        %s/^.\{-}  .\{-}  .\{-}  \(.\{-}\)    .*$/\1/g
+        
+        INSERT~INTO~pw_cmembers~VALUES('1903','345736','liuxuanji','liuxuanji','0','0','','','53','');$
+        g!/^INSERT/d
+        %s/^INSERT.\{-}(.\{-}','.\{-}','\(.\{-}\)','\(.\{-}\)','.*$/\1\r\2/g
+        
+        cross2000~~~~~~~,cross~~~~~~~~~~~,CROSS1978@263.NET$
+        %s/^\(.\{-}\) \{3,}\(.\{-}\) .*$/\1\r\2/g
+        
+        xuewei0204~~~~dc8af98d80be872bcede5ba97d874e83~~~~~~~~~~596683387@qq.com^M$
+        %s/\(.\{-}\) \+.*$/\1/g
+        
+        
+        646036;;lele20020;127583;;0;2012-07-06~01:29:00;59.59.244.92;0;0;0;0;??;-1$
+        %s/^.\{-};.\{-};\(.\{-}\);\(.\{-}\);.*$/\1\r\2/g
+        
+        
+        ?-ó??ò×í ~720302~cairenqun@126.com$
+        %s/^.\{-} \(.\{-}\) .*$/\1/g
+        
+        ======================================================================================================
+        only_mj@126.com>majun891020>----$
+        %s/^.\{-}\t\(.\{-}\)\t.*$/\1/g
+        
+        ing_ventas@hotmail.com~danipau$
+        %s/.\{-}@.\{-} \(.\{-}\)$/\1/g
+        
+        7312@330.com>---7312330$
+        %s/^.\{-}\t\(.\{-}\)$/\1/g
+        
+        =========================================================================================================================
+        (10978,>'0fnuKRdU',>----'772c33f277e356c5d67b81a2009b830a',>----'sbhijvkvy@163.com',>---'',>----'',>----'49.79.116.2',>-1372263461,>----0,>-----0,>-----'58b8d6',>------''),$
+        %s/^.\{-}\t'\(.\{-}\)',\t.\{-}\t'\(.\{-}\)@.\{-}\t.*$/\1\r\2/g
+        
+        
+        123~~~~~~~~~~~~~,bean1977,feixiang408@163.net$
+        s/^\(.\{-}\),\(.\{-}\),.*$/\1\r\2/g
+        à??ò?ù ~111111~yue-yu@126.com$
+        %s/^\(.\{-}\) \(.\{-}\) .*$/\1\r\2/g
+        %s/ //g
+        
+        
+        %s/^.\{-}----\(.\{-}\)----.*$/\1/g
+        %s/^.*----//g
+        
+        
+        -wenjian5663@163.com>---6666>--->------->------->------->------->------->------->------->------->------->------->------->------->------->------->------->------->------->-------$
+        %s/^.\{-}\t\(.\{-}\)\t\+$/\1/g
+        -wangyirenjunyou@163.com>-------2350115$
+        %s/^.\{-}\t\(.\{-}\)$/\1/g
+        or \=
+        ing_ventas@hotmail.com~danipau$
+        %s/.\{-}@.\{-} \(.\{-}\)$/\1/g
+        
+        
+        Jack>---093950ok>-------pcjack@126.com$
+        %s/^\(.\{-}\)\t\(.\{-}\)\t.*$/\1\r\2/g
+        
+        
+        jinxiao123>-----12345689>-------qq965331879@$
+        %s/^\(.\{-}\)\t\(.\{-}\)\t.*$/\1\r\2/g
+        
+        
+        INSERT~INTO~`uc_members`~VALUES~('100006',~'zhaolianglia',~'01f180e7ec1271e38ad321bf9991e83e',~'zhaolianglia@126.com',~'',~'',~'116.238.146.53',~'1296793295',~'0',~'0',~'fc54bf',~'');$
+        %s/^.\{-}('.\{-} '\(.\{-}\)',.*$/\1/g
+        
+        
+        INSERT~INTO~jishigou_members~VALUES~('1393','','0','zhuangjia1988','ê?ò?','5bbc7c80b4fa5e35952c41e7331667db','','0','183.141.52.81','1327515828','183.141.52.81','1327515829','1327515960','0','0','0','-2','0','-2','0','0','0','0','0','0','zhuangjia.1988@163.com','0000-00-00','0','0','','0','','0','3','normal','0','','0','1','','','0','0','0','0','0','2409','0','50c4ae705690d2bf','???-ê?','??D?êD','0','0','0','1','','','','','0','0','0','0','0','0','0','0','0','0','0','0','0','','','','','','repeat','','0','0','0','','0','0','0','0','0','0','','','','0','0','');$
+        %s/^.\{-}(.\{-},.\{-},.\{-},'\(.\{-}\)','.*$/\1/g
+        
+        
+        
+        mhw8855@163.com~~~~~886898$
+        %s/^.\{-} \{5}//g
+        
+        
+        (984,~'97636248@qq.com',~'iiliuyi',~'06ed51cb5e1fabe3d8c7fb5851bc2924',~0,~0,~0,~0,~0,~12,~0,~'',~1310643376,~1,~0,~'9999',~2,~1,~0,~0,~0,~0),$
+        %s/^.\{-},.\{-}, '\(.\{-}\)', .*$/\1/g
+        
+        <tr~style=""><td>6</td><td>xinyu0769</td><td>dc066c2b96786c7dfe9ba46a9e20ea76</td><td>xinyucomputer@126.com</td><td></td><td></td><td>59.36.37.123</td><td>1297505334</td><td>0</td><td>0</td><td>64a021</td><td></td><tr>$
+        %s/^.\{-}\/td><td>\(.\{-}\)<.*$/\1/g
+        
+        (6557,>-'??è?',>-------'itiszg',>------'f25a2fc72690b780b2a14e140ef6a9e0',>----'fkjp',>'',>----10,>----0,>-----0,>-----0,>-----'iiitiszg@163.com',>----100,>---0,>------10,>---'',>----0,>-----'',>----1294836947,>----'122.74.132.105',>------1294836947,>----'122.74.132.105',>-------1),$
+        %s/^.\{-}\t.\{-}\t'\(.\{-}\)',\t.\{-}\t'\(.\{-}\)',.*$/\1\r\2/g
+        
+        <tr~style=""><td>2</td><td>个人</td><td>robin1682</td><td>e10adc3949ba59abbe56e057f20f883e</td><td>13</td><td>男</td><td>10</td><td>1312184539</td><td>0</td><td>0</td><td>1059337806@qq.com</td><td>100</td><td>0</td><td>2</td><td></td><td>0</td><td></td><td>1312184319</td><td>127.0.0.1</td><td>1312185547</td><td>127.0.0.1</td><td>-1</td><tr>$
+        %s/^.\{-}个人<\/td><td>\(.\{-}\)<.*$/\1/g
+        
+        (627,~'a939935405',~'90cde302c9082c271b023a51adb284d4',~'939935405@qq.com',~'',~'',~'218.75.144.93|1',~1255907404,~21875,~1256358777,~'4003f3',~''),$
+        %s/^.\{-} '\(.\{-}\)', .*$/\1/g
+        
+        
+        <tr~style=""><td>2095</td><td>lcy2012xf</td><td>2ff084b394ae65ec463c648e965e4f8b</td><td>454942653@qq.com</td><td></td><td></td><td>1.58.175.114</td><td>1326378851</td><td>0</td><td>0</td><td>34ad4a</td><td></td><tr>$
+        %s/^.\{-}\/td><td>\(.\{-}\)<.*$/\1/g
+        
+        
+        
+        ??o?￡okiss3232024---?ü??￡o3117888---ê±??￡o201128~19:48:35---à′?′:vip.hi4sex.com$
+        
+        
+        
+        
+        whjzy111>-------whjzy111@yahoo.com.cn>-->-------whjzy111^M$
+        qq332891490>----499913496@qq.com>-------5e7bdb>-a5201314^M$
+        %s/^\(.\{-}\)\t.\{-}\t.\{-}\t\(.\{-}\)\r$/\1\r\2/g
+        
+        lukai_lk>-------kevinlukai>-----kevin0306@sina.com^M$
+        %s/^\(.\{-}\)\t\(.\{-}\)\t.*$/\1\r\2/g
+        
+        445623371@qq.com>-------445623375^M$
+        %s/^.\{-}\t\(.\{-}\)\r$/\1/g
+        
+        razor~cww19811027~razorchen@gmail.com^M$
+        %s/^\(.\{-}\) \(.\{-}\) .*$/\1\r\2/g
+        
+        sunlinli,13871113550,sunlinli100@qq.com^M$
+        %s/^\(.\{-}\),\(.\{-}\),.*$/\1\r\2/g
+        
+        vim -c "%s/^\(.\{-}\)\t.\{-}\t.\{-}\t\(.\{-}\)\r$/\1\r\2/g" -c "%s/^\(.\{-}\)\t\(.\{-}\)\t.*$/\1\r\2/g" -c "%s/^.\{-}\t\(.\{-}\)\r$/\1/g" -c "%s/^\(.\{-}\) \(.\{-}\) .*$/\1\r\2/g" -c "%s/^\(.\{-}\),\(.\{-}\),.*$/\1\r\2/g" -c "sort u" -c wq! {} \;
+* `:%s/^/string/g`: append `string` at the beginning of each line
+* `:%s/$/string/g`: append `string` at the end of each line
 ## DrawIt
 ### Install
 *DrawIt* is now distributed as a vimball.
@@ -483,3 +1220,83 @@ Use `:v//d` to delete all lines that do not match the last search pattern, or `:
 * `wq`
 * `sudo vim -c "set nobomb" -c wq! 1-3alpha.txt`
 * `find . -type f -name "*.txt" -exec vim -c "set nobomb" -c wq! {} \;`
+## compare
+* `vim -d file1 file2`, or `vimdiff file1 file2`
+* if file1 has been opened
+    * `:vert diffsplit file2`
+    * `: diffsplit file2`
+* if file1 and file2 both opened
+    * `:diffthis`
+* to see the new results after modifying something in the files
+    * `:diffupdate`
+* to jump to the former or next difference
+    * `[c`
+    * `]c`
+* to merge
+    * `dp`: diff put
+    * `do`: diff obtain
+## to delete duplicate lines
+`:sort u`
+`sort file | uniq > output.file`
+`cat file1 file2 | sort | uniq > output.file`
+## trim string before or after a specified character set in all lines
+* `:%s/^.*----//g`
+* `:%s/----.*$//g`
+* `.*`: match any character
+    * `.` meaning any character
+    * `*` meaning any number of
+    * Note that `.` should preceed the `*`.
+* `:%s/([^,]*,[^,]*,[^,]*,[^,]*,//g`: delete all the content before the fourth `,`
+    * `:%s/^.\{-},.\{-},.\{-},.\{-},//g` will work better
+* `:%s/^\([^-]*----[^-]*----\).*$/\1/g`: to delete all the content after the second "----"
+    * `%s/^\(.\{-}----.\{-}----\).*$/\1/g` will work better
+    * `\1`: same string as matched by the first `\(\)`
+    * `\2`: same string as matched by the second `\(\)`
+* `:%s/^[^\t]*\t\([^\t]*\t[^\t]*\t\).*$/\1/g`:59>-----RazielZamBukka>-medion500>------mike_at_ivybank@hotmail.co.uk$
+* `:%s/^.\{-}----\(.\{-}\)----.*$/\1/g`: to remove all others but the content between the first and second `----`
+* ...|...|p:`:%s/^[^|-]*|[^|]*|//g`
+    * `:%s/^.\{-1}|.\{-1}|//g` will work better
+## delete blank lines
+`g/^$/d`
+Note: `g` is used with `d`,`p` etc;`%s` is used with `//`
+* to delete lines containing "price": `:g/price/d`
+* to delete lines not containing "price": `g!/price/d`
+## process lines according length
+* `grep -E '^.{,7}$' 0.txt > 0_output.txt`: not working
+* sed
+    * `-n`,`--quiet`, `--silent`
+    * `-r`, `-E`: use extended regular expressions in the script
+    * to remove lines less or equal to 5 characters
+        `sed -r '/^.{,5}$/d' 230.txt`: not working
+    * to print lines of length 6 or more
+        `sed -nr '/^.{6,}$/p' 230.txt`: not working
+* g
+    * `g/^.\{,7\}$/d`
+## display white spaces
+`:set listchars=eol:$,tab:>-,trail:~,extends:>,precedes:<`
+`:set list`
+## percentage view
+just type `50%`
+## ^M
+如果你细心观察，你会发现每一行后面都会有个^M符号。
+出现这个符号的原因很简单，因为这个文件你在windows平台下编辑过，我们知道在windows平台下，换行符是\r\n，而在linux下是\n，这多出来的\r被vim解释成了^M。
+虽然有^M这个符号，但是实际编译运行完全不受影响。
+## `!/` event not found
+`!` is a special character in bash, so it should be escaped as `vim -c "g\!/^E_D/d"`
+## how to remove lines containing Chinese characters
+`g/[^\x00-xff]/d`
+## uppercase and lowercase
+* `u`
+* `U`
+* `l`
+* `Vu`:turn words in current line to lowercase
+* `VU`: turn all words in the current line to uppercase
+* `g~~`: turn all words in the current line to the opposite case
+* `ggguG`: turn all words in the file to lowercase
+* `gggUG`: turn all words in the file to uppercase
+* `veU`: turn the current word to uppercase
+* `ve~`: turn the current word to the opposite case
+* `:%s/\<./\u&/g`: capitalize the first letter of all words in the file
+* `:%s/\<./\l&/g`: lowercase the first letter of all words in file
+* `:%s/.*/\u&`: uppercase the first letter of the first word in each line
+* `:%s/.*/\l&`: lowercase the first letter of the first word in each line

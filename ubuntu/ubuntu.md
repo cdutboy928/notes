@@ -548,6 +548,30 @@ c_amount: 色彩强度，取值范围-2.0-5.0，负数为模糊效果，默认�
 * 增加亮度
         ffmpeg -i 0228_0342.mpg -vf unsharp=luma_msize_x=7:luma_msize_y=7:luma_amount=1.5 -f mp4 -strict -2 0228_0342_sharpen.mpg
 ## youtube-dl
+### Installation
+* On ubuntu
+    * `sudo curl -L https://yt-dl.org/downloads/latest/youtube-dl -o /usr/local/bin/youtube-dl`
+    * `sudo chmod a+rx /usr/local/bin/youtube-dl`
+* via pip
+    * `sudo -H pip install --upgrade youtube-dl`
+### command
+* `sudo youtube-dl [OPTIONS] URL [URL...]`
+### Options
+* `--proxy ""`
+* `--proxy "socks5://127.0.0.1:1080/"`
+* `--write-sub`
+* `--write-auto-sub`
+* `--all-subs`
+* `sudo youtube-dl -U`
+### Video quality
+* `-F`
+* `-f 22`
+* `-f best`
+* `-f 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/bestvideo+bestaudio' --merge-output-format mp4`
+* `-f 137+141`
+## download other videos
+* add on: FLVCD helper
+* shuoshu
 ## mplayer
 * Q = Quit
 * P = Pause
@@ -570,9 +594,6 @@ c_amount: 色彩强度，取值范围-2.0-5.0，负数为模糊效果，默认�
             -ss 10 -endpos 56
     * Stop playback after reading 100MB of the input file.
             mplayer -endpos 100mb
-## display a picture
-        gwenview test.gif
-        ffplay test.gif
 ## zathura <a name=zathura></a>
 ### navigation and shortcuts
 * same as vim navigation
@@ -619,6 +640,8 @@ c_amount: 色彩强度，取值范围-2.0-5.0，负数为模糊效果，默认�
 ### Enable copy to clipboard
         vim ~/.config/zathura/zathurarc
         set selection-clipboard clipboard
+## FoxitReader
+https://blog.csdn.net/github_38704428/article/details/79091407
 ## webtorrent
 * [Download](https://webtorrent.io/desktop/)
 * install
@@ -637,6 +660,13 @@ c_amount: 色彩强度，取值范围-2.0-5.0，负数为模糊效果，默认�
 ### Manual
     xdg-open opens a file or URL in the user's preferred application. If a URL is provided the URL will be opened in the user's preferred web browser. If a file is provided the file will be opened in the preferred application for files of that type. xdg-open supports file, ftp, http and https URLs.
     xdg-open is for use inside a desktop session only. It is not recommended to use xdg-open as root.
+## gimp
+* `sudo apt install gimp`
+* `sudo apt install gimp-plugin-registry gimp-data-extras`
+## Write
+http://www.styluslabs.com/download/
+`chmod a+x ./*`
+`Write/Write`
 ## 用专门的程序打开文件
 
         libreoffice 文件名 &
@@ -958,7 +988,7 @@ The `screen` command is very useful for remote administration. It can prevent th
 * `C-a S`: split the window horizontally
 * `C-a A`: name the current window
 ### copy and paste
-* `C-a` [ -> 进入 copy mode，在 copy mode 下可以回滚、搜索、复制就像用使用 vi 一样
+* `C-a [` -> 进入 copy mode，在 copy mode 下可以回滚、搜索、复制就像用使用 vi 一样
     * `C-b` Backward，PageUp 
     * `C-f` Forward，PageDown 
     * `H`(大写) High，将光标移至左上角 
@@ -978,6 +1008,12 @@ The `screen` command is very useful for remote administration. It can prevent th
 * `7z a dicmerge_1.zip dicmerge_1.txt`
 * `7z x dicmerge_1.zip`
 * `find . -type f -name "*.7z" -exec 7z e {} \;`
+    * `7z e` means extract files here
+    * `7z x` means extract files to a created directory
+* to avoid BSoD (blue screen of death) crashes
+    * set the number of cpus to 6
+    * dictionary size to 24M
+    * ultra
 
 ## [Dropbox-Uploader](https://github.com/andreafabrizi/Dropbox-Uploader)
 
@@ -1164,3 +1200,49 @@ Copy standard input to each FILE, and also to standard output.
 * `-i`, `--ignore-interrupts`: ignore interrupt signals
 * `cat slayers.story | tee ss-copy1 ss-copy2 ss-copy3`
 
+## open usb drive
+* `sudo fdisk -l`
+* `sudo mkdir /media/usb`
+* `sudo mount /dev/sdb1 /media/usb`
+* `sudo umount /media/usb`
+## head
+* `head 1.txt`  print the first 10 lines in 1.txt
+* `head -n 100`  print the first 100 lines in 1.txt
+    * `head -n -100`: print all but the last 100 lines, can be used to scroll viewing
+* `head -c 100` print the first 100 bytes in 1.txt
+## tail
+Just like `head`.
+## cat all files in sub directories
+`cat * */* */*/*`
+## split text file
+* Usage: `split [OPTION] [INPUT [PREFIX]]`
+* Options
+    * `-a N`: use suffixes of length N (default 2)
+    * `-b 200m`: put 200M bytes per output file
+    * `-d`: use numeric suffixes instead of alphabetic
+    * `-l N`: put N lines per output file
+* Example:`split -a 3 -d -l 99 my_big_file.txt big_file_chunk_`
+    * `-a 3` : says to use a unique 3 character suffix for each chuck file
+    * `-d`   : says make that suffix a number so 001 002 all the way to 999
+    * `-l 99`: split file by line and have 99 lines or less in each chuck.
+    * output
+           big_file_chunk_001
+           big_file_chunk_002
+           ....
+## how to mass add file extension
+`find . -type f -name "*" -exec mv -v "{}" "{}".txt \;`
+## to debug
+* press `ESC` while booting to grub mode
+* press `Ctrl+Alt+F4` after booting to command mode
+## export path
+* add `export PATH=$PATH:~/bin` to the end of `~/.bashrc`
+    * Note: end with the directory, instead of the name of the program
+* `source ~/.bashrc`
+## call bomber
+Note:这两个的原理都是在商家页面上留言然后获得回访电话，所以频率都不高，更不会一直拨打。
+### [js](https://github.com/aqiongbei/buy_pig_plan)
+### [python](https://github.com/wuhuanyan/buy_pig_plan_python)
+* `# coding=UTF-8`
+* `python3 mySelenium.py`
+* `www.flylily.top`
+* `export PATH=$PATH:/opt/google/chrome/`
