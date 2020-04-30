@@ -1,9 +1,6 @@
-## VPC for hashcat
-There are only AWS EC2 instances available.
 ### AWS EC2
 #### how to choose instances
 !!!Instances suitable for Hashcat
-Choose p3.x2large when tasks are few. p3dn.x24large when tasks are many and heavy.
 ##### [P2 Instance Details](https://amazonaws-china.com/ec2/instance-types/p2/)
 
 Name|GPUs|vGPUs|RAM|Network Brandwidth|Benchmark for WPA!!!
@@ -15,7 +12,6 @@ p2.16xlarge|16|64|732|20Gbps
 ##### [p3 Instance Details](https://amazonaws-china.com/ec2/instance-types/p3/)
 
 Instance Size|GPUs(Tesla V100)|GPU Peer to Peer|GPU Memory(GB)|vGPUs|Memory(GB)|Network Bandwidth|Benchmark for WPA!!!
---|--|--|--|--|--|--|--
 p3.2xlarge|1|N/A|16|8|61|Up to 10 Gbps
 p3.8xlarge|4|NVLink|64|32|244|10 Gbps
 p3.16xlarge|8|NVLink|128|64|488|25Gbps
@@ -39,42 +35,13 @@ We recommend that you use the Amazon EC2 console, a command line tool, or the Am
     You can use one of the following commands. For more information about these command line interfaces, see Accessing Amazon EC2.
     * reboot-instances (AWS CLI)
     * Restart-EC2Instance (AWS Tools for Windows PowerShell)
-
-##### [Amazon EC2 Spot Instances Pricing](https://amazonaws-china.com/ec2/spot/pricing/)???
+##### [Amazon EC2 Spot Instances Pricing](https://amazonaws-china.com/ec2/spot/pricing/)
 With Spot instances, You pay the Spot price that's in effect for the time period your instances are running. Spot instance prices are set by Amazon EC2 and adjust gradually based on long-term trends in supply and demand for Spot instance capacity. The following table displays the Spot price for each region and instance type (updated every 5 minutes).
 Spot instances are available at a discount of up to 90% off compared to On-Demand pricing. To compare the current Spot prices against standard On-Demand rates, visit the [Spot Instance Advisor](https://amazonaws-china.com/ec2/spot/instance-advisor/) and [Simple Monthly Calculator](https://calculator.s3.amazonaws.com/index.html)
 You can bid on excess capacity that Amazon has and so in this particular case for a GPU box you can see they actually show me in the bottom middle left that it actually costs around 35 cents per hour for their available capacity. I bid 55 cents per hour. They would only charge me with the going rate so if I bid 55 cents and the going rate is 35 then they only charge m 35 cents .
 Spot instances are also available to run for a predefined duration-in hourly increments up to six hours in length-at a discount of up to 30-50% compared to On-Demand pricing.
-Spot Instances perform exactly like other EC2 instances while running and can be terminated when you no longer need them. If you terminate your instance, you pay for any partial hour used (as you do for On-Demand or Reserved Instances). However, you are not charged for any partial hour of usage if the Spot price goes above your maximum price and Amazon EC2 interrupts your Spot Instance.
-If your Spot instance is interrupted by Amazon EC2, you will not be charged for any partial hour of usage. [...] However, if you terminate your instance, you will pay for any partial hour of usage as you would for On-Demand Instances.
-**Which price is used to calculate the pro-rated per second price?**
-The answer to this one appears to be that it will remain the same as in the hourly billing case. The price used for calculating the partial hour is the price at the beginning of that hour, ignoring any fluctuations in price over the partial hour. If you bid $0.30 on a Spot instance that was priced at $0.10 at launch time, and one minute later the price went to $0.25 and stayed there, and you terminated it after 30 minutes, you would only pay $0.05 (half an hour at $0.10). This opens up some new and interesting optimization strategies since for a significant period of time an instance is being charged per second at either over or under the current Spot market value. Even though the price in this Spot market has risen considerably, my “locked in” price might still be cheaper than other available markets, and I might make the decision to let it continue to run there at least until the next hour mark comes up and the price would get updated. Or in the flipside case, where the price has dropped considerably from what I am paying. It might be cost-effective to start a new instance at the lower price and terminate the current one. We are still analyzing and testing variations on this strategy, if it proves effective we will make another blog post on the topic in the future.
-**When AWS terminates an instance due to price, do we pay for that partial hour?**
-The answer to this one has a surprising twist we did not expect. The twist is: it depends on which hour you are in. For the first hour, it appears to be exactly as before, you pay nothing and essentially receive free compute for however long the instance was running before it was taken away. For the second or subsequent hour, you will be charged for the pro-rated hour, identically to how you would be charged if you had terminated the instance yourself. So the free-compute bidding strategy loophole appears to have been made considerably smaller, but not closed completely.
-**Per-second Billing for EC2 and EBS**
-Back in the old days, you needed to buy or lease a server if you needed access to compute power. When we launched EC2 back in 2006, the ability to use an instance for an hour, and to pay only for that hour, was big news. The pay-as-you-go model inspired our customers to think about new ways to develop, test, and run applications of all types.
-Today, services like AWS Lambda prove that we can do a lot of useful work in a short time. Many of our customers are dreaming up applications for EC2 that can make good use of a large number of instances for shorter amounts of time, sometimes just a few minutes.
-Effective October 2nd, usage of Linux instances that are launched in On-Demand, Reserved, and Spot form will be billed in one-second increments. Similarly, provisioned storage for EBS volumes will be billed in one-second increments.
-Some of our more sophisticated customers have built systems to get the most value from EC2 by strategically choosing the most advantageous target instances when managing their gaming, ad tech, or 3D rendering fleets. Per-second billing obviates the need for this extra layer of instance management, and brings the costs savings to all customers and all workloads.
-
-While this will result in a price reduction for many workloads (and you know we love price reductions), I don’t think that’s the most important aspect of this change. I believe that this change will inspire you to innovate and to think about your compute-bound problems in new ways. How can you use it to improve your support for continuous integration? Can it change the way that you provision transient environments for your dev and test workloads? What about your analytics, batch processing, and 3D rendering?
-
-One of the many advantages of cloud computing is the elastic nature of provisioning or deprovisioning resources as you need them. By billing usage down to the second we will enable customers to level up their elasticity, save money, and customers will be positioned to take advantage of continuing advances in computing.
-When you are running an Amazon Linux Spot instance under the new per-second charging model:
-
-* If AWS terminates your instance in the first hour, there is no charge
-* If AWS terminates your instance after the first hour, you will be charged for the actual time that the instance was running (down to the second)
-
-At the start of each instance hour, you are charged based on the Spot price. If Amazon EC2 terminates your Spot Instance in the first instance hour because the Spot price exceeded your bid, you are not charged for the partial hour of usage. If Amazon EC2 terminates your Spot Instance in any subsequent hour, you are charged for your usage to the nearest second. If you terminate your Spot Instance in the middle of an instance hour—be it the first or any subsequent hour—you are charged for your usage rounded to the nearest second.
-And for the sake of completeness "There is a 1 minute minimum charge per-instance". And this shouldn't apply to an instance that is terminated by AWS -- only to instances terminated by the user.
-**Things to Know**
-This change is effective in all AWS Regions and will be effective October 2, for all Linux instances that are newly launched or already running. There is a 1 minute minimum charge per-instance.
-Per-second billing is not currently applicable to instances running Microsoft Windows or Linux distributions that have a separate hourly charge. Marketplace AMIs that do not have a separate hourly charge are eligible for per-second billing.
-List prices and Spot Market prices are still listed on a per-hour basis, but bills are calculated down to the second, as is Reserved Instance usage (you can launch, use, and terminate multiple instances within an hour and get the Reserved Instance Benefit for all of the instances). Also, bills will show times in decimal form, like this:
-![per-second billing bill example](per-second_billing_bill_example_1.png)
 
 GPU Instances-Current Generation|Linux/UNIX Usage|Windows Usage
---|--|--
 g2.2xlarge|N/A*|N/A*
 g2.8xlarge|N/A*|N/A*
 g3.4xlarge|$0.342 per Hour|$1.078 per Hour
@@ -224,7 +191,6 @@ instance-terminated-launch-group-constraint|closed(one-time), open(persistent)|t
     * `request-cancelled-and-instance-running`: You cancelled the Spot request while the Spot Instances are still running. The request is cancelled, but the instances remain running.
     * `schedule-expired`: The Spot request expired because it was not fulfilled before the specified date.
     * `system-error`: There was an unexpected system error. If this is a recurring issue, please contact customer support for assistance.
-
 ##### [Amazon EC2 On-Demand Instances Pricing](https://amazonaws-china.com/ec2/pricing/on-demand/)
 On-Demand isntances let you pay for compute capacity by the hour or second (minimum of 60 seconds) with no long-term commitments. This frees you from the costs and complexities of planning, purchasing, and maintaining hardware and transforms what are commonly large fixed costs into much smaller variable costs.
 
@@ -246,7 +212,7 @@ They charge you by the fractional rounding up so if you run it for one minute yo
 
 #### AWS User data and custom scripts!!!
 
-#### AWS command line!!!
+#### ASW command line!!!
 The AWS Command Line Interface (CLI) is a unified tool to mange your AWS services. With just one tool to download and configure, you can control multiple AWS services from the command line and automate them through scripts.
 The AWS CLI introduces a new set of simple file commands for efficient file transfers to and from Amazon S3.
 ##### aws-shell (Developer Preview)
@@ -461,7 +427,7 @@ The following example shows how you would configure environment variables for th
 You can use the following command line options to override the default configuration settings for a single command. You cannot use command lien options to specify credentials.
 * `--profile`: The name of a named profile to use.
 * `--region`: The AWS Region to call.
-* `--output`: The output format.
+* `--outptu`: The output format.
 * `--endpoint-url`: The URL to make the call against. For most commands, the AWS CLI automatically determines the URL based on the service and AWS Region. However, some commands require that you specify an account-specific URL.
 When you provide one of these options at the command line, it overrides the default configuration and corresponding profile setting for a single command. Each option takes a string argument with a space or equals sign (=) separating the argument from the option name. When the argument string contains a space, use quotation marks around the argument.
 **Tip**: To set up additional profiles, you can use the `--profile` options with `aws config`.
@@ -669,8 +635,8 @@ You can install the AWS CLI with an installer (Windows) or by using pi, a packag
     These steps require that you have a working installation of Python 2 version 2.6.5+ or Python 3 version 3.3+. If you encounter any issues using the following steps, see the full installation instructions in the AWS Command Line Interface User Guide.
     1. Download and run the installation script from the pip website:
         
-            $ curl "https://bootstrap.pypa.io/get-pip.py" -o "get-pip.py"
-            $ python get-pip.py --user
+        $ curl "https://bootstrap.pypa.io/get-pip.py" -o "get-pip.py"
+        $ python get-pip.py --user
     2. Install the AWS CLI Using pip:
 
         $ pip install awscli --user
@@ -1965,9 +1931,8 @@ Your IAM user or role needs permission to call the API actions that correspond t
 ####### Changing the Root Volume of an Instance to Persist Using the AWS CLI
 ######## Example at Launch
 ######## Example While the Instance is Running
-#### [Setting Up with Amazon EC2](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/get-set-up-for-amazon-ec2.html)
+#### Setting Up with Amazon EC2
 ##### Sign Up for AWS
-They do require a credit/bank card on file.
 ###### To create an AWS account
 ##### Create an IAM User
 ###### To create an IAM user for yourself and add the user to an Administrators group
@@ -1976,7 +1941,7 @@ They do require a credit/bank card on file.
 ###### To connect to your instance using your key pair
 ##### Create a Virtual Private Cloud (VPC)
 ##### Create a Security Group
-#### [Getting Started with Amazon EC2 Linux Instances](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/EC2_GetStarted.html)
+#### Getting Started with Amazon EC2 Linux Instances
 ##### Overview
 ##### Prerequisites
 ##### Step 1: Launch an Instance
@@ -1988,78 +1953,7 @@ They do require a credit/bank card on file.
 * Add an EBS volume.
 * Install the LAMP stack.
 #### [Best Practices for Amazon EC2](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-best-practices.html)
-#### [Amazon Machine Images (AMI)](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/AMIs.html)
-* Using an AMI
-* Creating Your Own AMI
-* Buying, Sharing, and Selling AMIs
-* Deregistering Your AMI
-* Amazon Linux 2 and Amazon Linux AMI
-##### [AMI Types](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ComponentsAMIs.html)
-###### Launch Permissions
-###### Storage for the Root Device
-* Determining the Root Device Type of Your AMI
-    * To determine the root device type of an AMI using the console
-    * To determine the root device type of an AMI using the command line
-* Stopped State
-* Default Data Storage and Persistence
-* Boot Times
-* AMI Creation
-* How You're Charged
-##### [Linux AMI Virtualization Types](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/virtualization_types.html)
-* HVM AMIs
-* PV AMIs
-* PV on HVM
-##### [Finding a Linux AMI](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/finding-an-ami.html)
-* Finding a Linux AMI Using the Amazon EC2 Console
-    * To find a Linux AMI using the Choose AMI page
-    * To find a Linux AMI using the Images page
-        * [public AMIs for hashcat in east](https://us-east-2.console.aws.amazon.com/ec2/v2/home?region=us-east-2#Images:visibility=public-images;search=hashcat;sort=name)
-        * [public AMIs with hashcat in west](https://us-west-1.console.aws.amazon.com/ec2/v2/home?region=us-west-1#Images:visibility=public-images;search=hashcat;sort=name)
-        * [public AMIs with hashcat for Auto Scale](https://us-west-1.console.aws.amazon.com/ec2/v2/home?region=us-west-1#Images:visibility=public-images;search=hashcat;sort=name)
-* Finding an AMI Using the AWS CLI
-* Finding a Quick Start AMI
-##### [Shared AMIs](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/sharing-amis.html)
-###### [Finding Shared AMIs](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/usingsharedamis-finding.html)
-* Finding a Shared AMI (Console)
-    * To find a shared private AMI using the console
-    * To find a shared public AMI using the console
-* Finding a Shared AMI (AWS CLI)
-* Using Shared AMIs
-###### [Making an AMI Public](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/sharingamis-intro.html)
-* Sharing an AMI with all AWS Accounts (Console)
-* Sharing an AMI with all AWS Accounts (AWS CLI)
-###### [Sharing an AMI with Specific AWS Accounts](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/sharingamis-explicit.html)
-* Sharing an AMI with specific AWS Accounts (Console)
-* Sharing an AMI with specific AWS Accounts (AWS CLI)
-###### [Using Bookmarks](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-bookmarks.html)
-###### [Guidelines for Shared Linux AMIs](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/building-shared-amis.html)
-* Update the AMI Tools Before Using Them
-* Disable Password-Based Remote Logins for Root
-* Disable Local Root Access
-* Remove SSH Host Key Pairs
-* Install Public Key Credentials
-* Disabling sshd DNS Checks (Optional)
-* Identify Yourself
-* Protect Yourself
-##### [Paid AMIs](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/paid-amis.html)
-* Selling Your AMI
-* Finding a Paid AMI
-    * Finding a Paid AMI Using the Console
-    * Finding a Paid AMI Using Marketplace
-    * Finding a Paid AMI using the AWS CLI
-* Purchasing a Paid AMI
-* Getting the Product Code for Your Instance
-* Using Paid Support
-* Bills for Paid and Supported AMIs
-* Managing Your AWS Marketplace Subscriptions
-##### [Creating an Amazon EBS-Backed Linux AMI](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/creating-an-ami-ebs.html)
-* Overview of Creating Amazon EBS-Backed AMIs
-* Creating a Linux AMI from an Instance
-    * To create an AMI from an instance using the console
-    * To create an AMI from an instance using the command line
-* Creating a Linux AMI from a Snapshot
-##### [Creating an Instance Store-Backed Linux AMI](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/creating-an-ami-instance-store.html)
-#### [Amazon EC2 Instances](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/Instances.html)
+#### Amazon EC2 Instances
 ##### [Instance Types](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/instance-types.html)
 ###### Available Instance Types
 ####### Current Generation Instances
@@ -2106,40 +2000,13 @@ They do require a credit/bank card on file.
 * [NVIDIA P2 AMIs](https://aws.amazon.com/marketplace/search/results/?page=1&filters=instance_types&instance_types=p2.xlarge&searchTerms=NVIDIA)
 You can also install the NVIDIA driver manually. For more information, see [Installing the NVIDIA Driver on Linux Instances](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/install-nvidia-driver.html)
 ####### [Installing the NVIDIA Driver on Linux Instances](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/install-nvidia-driver.html)
-
 ######## Uninstalling Amazon-provided NVIDIA packages
-`sudo yum erase nvidia cuda`
 ######## Downloading the NVIDIA GRID Driver (G3)
 ######## Downloading a Public NVIDIA Driver (G2, P2, P3)
-http://www.nvidia.com/Download/Find.aspx
-
-Instances|Product Type|Product Series|Product
---|--|--|--
-G2|GRID|GRID Series|GRID K520
-P2|Tesla|K-Series|K-80
-P3|Tesla|V-Series|V-100
 ######## Installing the NVIDIA Driver Manually
 **To install the driver on a Linux instance**
-
-        sudo apt update -y
-        sudo apt upgrade -y linux-aws
-        reboot
-        sudo apt install -y gcc make linux-headers-$(uname -r)
-        wget http://us.download.nvidia.com/tesla/xxx.xxx/NVIDIA-Linux-x86_64-xxx.xxx.run
-        sudo /bin/sh ./NVIDIA-Linux-x86_64*.run
-        sudo reboot
-        nvidia-smi -q | head
 ####### [Activate NVIDIA GRID Virtual Applications (G3 Instances Only)](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/activate_grid.html)
 ####### [Optimizing GPU Settings (P2, P3, and G3 Instances)](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/optimize_gpu.html)
-* 1. Configure the GPU settings to be persistent
-    `sudo nvidia-persistenced`
-* 2. Disable the autoboost feature for all GPUs on the instance
-    `sudo nvidia-smi --auto-boost-default=0`
-* 3. Set all GPU clock speeds to their maximum frequency.
-    * For P2 instances: `sudo nvidia-smi -ac 2505,875`
-    * For P3 instances: `sudo nvidia-smi -ac 877,1530`
-    * For G3 instances: `sudo nvidia-smi -ac 2505,1177`
-
 ####### [Getting Started with FPGA Development](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/fpga-getting-started.html)
 ###### [T1 Micro Instances](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/concepts_micro_instances.html)
 ###### [Changing the Instance Type](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-instance-resize.html)
@@ -2172,14 +2039,7 @@ P3|Tesla|V-Series|V-100
 ####### How to Get Started
 ####### Pricing
 * View Prices
- * To view the current (updated every five minutes) lowest Spot price per region and instance type
-     * [current spot price](https://aws.amazon.com/ec2/spot/pricing/)
- * To view the Spot price history for the past three months
-     * [Simple Monthly Calculator](https://calculator.s3.amazonaws.com/index.html)
-     * [To view the Spot price history using the console](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-spot-instances-history.html)
-     * To view the Spot price history using the command line
 * View Billing
-    * [AWS Account Activity page](https://console.aws.amazon.com/billing/home?#/)
 ####### [How Spot Instances Work](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/how-spot-instances-work.html)
 ######## Launching Spot Instances in a Launch Group
 ######## Launching Spot Instances in an Availability Zone Group
@@ -2195,12 +2055,8 @@ P3|Tesla|V-Series|V-100
 ######## Spot Fleet Instance Weighting
 ######## Walkthrough: Using Spot Fleet with Instance Weighting
 ####### [Spot Instance Pricing History](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-spot-instances-history.html)
-* To view the current (updated every five minutes) lowest Spot price per region and instance type
-    * [current spot price](https://aws.amazon.com/ec2/spot/pricing/)
-* To view the Spot price history for the past three months
-    * [Simple Monthly Calculator](https://calculator.s3.amazonaws.com/index.html)
-    * To view the Spot price history using the console
-    * To view the Spot price history using the command line
+######## To view the Spot price history using the console
+######## To view the Spot price history using the command line
 ####### [Spot Instance Requests](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/spot-requests.html)
 ######## Spot Instance Request States
 ######## Specifying a Duration for Your Spot Instances
@@ -2252,7 +2108,6 @@ P3|Tesla|V-Series|V-100
 ######## Spot Fleet Dimensions
 ######## View the ClouWatch Metrics for your Spot Fleet
 ####### [Automatic Scaling for Spot Fleet](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/spot-fleet-automatic-scaling.html)
-
 ####### [Spot Request Status](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/spot-bid-status.html)
 ######## Life Cycle of a Spot Request
 ######## Getting Request Status Information
@@ -2355,21 +2210,9 @@ P3|Tesla|V-Series|V-100
     * Example 4: Launch Spot Instances Using the Lowest Price Allocation Strategy
 ###### [Connect to Your Linux Instance](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/AccessingInstances.html)
 ####### [Connecting to Your Linux Instance Using SSH](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/AccessingInstancesLinux.html)
-####### keeping alive online
-* use `ssh -i path/to/pem -o serveraliveinterval=60 ubuntu@34.201.59.34` to keep alive online.
-* add
-      `ServerAliveInterval 120`
-      `ServerAliveCountMax 1200`
-  to `~/.ssh/config` (create the file if it does not exist)
-
-        echo 'ServerAliveInterval 30' | sudo tee -a ~/.ssh/config
-        echo 'ServerAliveCountMax 1200' | sudo tee -a ~/.ssh/config
-`ServerAliveCountMax` by default this is set to 3. Therefore once the `ServerAliveInterval` has sent 3 small packs of info to your server it will then automatically log out. Setting it to 1200 means this process will have to occur at least 1200 times. In short you should be connected at least 30*1200 seconds (10 hours).
-* use screen
 ######## Prerequisites
 ######## Connecting to Your Linux Instance
 ######## Transferring Files to Linux Instances from Linux Using SCP
-Add `-r` to transfer one or more directories.
 ###### [Stop and Start Your Instance](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/Stop_Start.html)
 ####### Overview
 ####### Stopping and Starting Your Instances
@@ -2423,12 +2266,7 @@ Add `-r` to transfer one or more directories.
 ###### [Managing Software on Your Linux Instance](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/managing-software.html)
 ####### [Updating Instance Software](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/install-updates.html)
 ####### [Adding Repositories](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/add-repositories.html)
-[Repositories on Ubuntu](https://help.ubuntu.com/community/Repositories/CommandLine)
-
 ####### [Finding Software Packages](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/find-software.html)
-`apt search keyword`
-`apt-cache search keyword`
-Using `aptitude`, `apt-cache`, and `apt` all format the output differently. (None of these require the use of `sudo` when searching for a package.) I prefer using `apt` for its readability. It highlights the package name and puts a space between the different packages. It also has `[installed]` listed next to each package that is already installed.
 ####### [Installing Software Packages](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/install-software.html)
 ####### [Preparing to Compile Software](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/compile-software.html)
 ###### [Managing User Accounts on Your Linux Instance](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/managing-users.html)
@@ -2923,11 +2761,6 @@ Action注意 AWS的弹性IP分配政策是非常有意思的，申请一个IP是
     * Creating Your WebServerSG Security Group
 * Step 3: Launch an Instance
 ##### [Scenarios and Examples](https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Scenarios.html)
-###### [VPC with a Single Public Subnet](https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Scenario1.html)
-###### [Scenario 2: VPC with Public and Private Subnets (NAT)](https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Scenario2.html)
-###### [Scenario 3: VPC with Public and Private Subnets and AWS Managed VPN Access](https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Scenario3.html)
-###### [Scenario 4: VPC with a Private Subnet Only and AWS Managed VPN Access](https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Scenario4.html)
-
 ##### [VPCs and Subnets](https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Subnets.html)
 ###### VPC and Subnet Basics
 ###### VPC and Subnet Sizing
@@ -2937,9 +2770,6 @@ Action注意 AWS的弹性IP分配政策是非常有意思的，申请一个IP是
 ###### Subnet Routing
 * [Route Tables](https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Route_Tables.html)
 * [NAT](https://docs.aws.amazon.com/vpc/latest/userguide/vpc-nat.html)
-    * [NAT Gateways](https://docs.aws.amazon.com/vpc/latest/userguide/vpc-nat-gateway.html)
-    * [NAT Instances](https://docs.aws.amazon.com/vpc/latest/userguide/VPC_NAT_Instance.html)
-    * [Comparison of NAT Instances and NAT Gateways](https://docs.aws.amazon.com/vpc/latest/userguide/vpc-nat-comparison.html)
 ###### Subnet Security
 * [Network ACLs](https://docs.aws.amazon.com/vpc/latest/userguide/vpc-network-acls.html)
 ###### Connections with Your Local Network and Other VPCs
@@ -2956,291 +2786,11 @@ Action注意 AWS的弹性IP分配政策是非常有意思的，申请一个IP是
     * Assigning an IPv6 Address to an Instance
     * Unassigning an IPv6 Address From an Instance
     * API and Command Overview
-##### [Internet Gateways](https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Internet_Gateway.html)
 ##### [VPN Connections](https://docs.aws.amazon.com/vpc/latest/userguide/vpn-connections.html)
-###### [AWS Managed VPN Connections](https://docs.aws.amazon.com/vpc/latest/userguide/VPC_VPN.html)???
+###### [AWS Managed VPN Connections](https://docs.aws.amazon.com/vpc/latest/userguide/VPC_VPN.html)
 #### [Storage](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/Storage.html)
 * Amazon EBS
 * Amazon EC2 Instance Store
 * Amazon EFS File System
 * Amazon S3
 * Adding Storage
-#### [Auto Scaling](https://docs.aws.amazon.com/autoscaling/ec2/userguide/what-is-amazon-ec2-auto-scaling.html)
-AWS Auto Scaling is free. AWS Auto Scaling is enabled by Amazon CloudWatch and carries no additional fees. Service fees for your application resources and Amazon CloudWatch apply.
-##### [What is Amazon EC2 Auto Scaling](https://docs.aws.amazon.com/autoscaling/ec2/userguide/what-is-amazon-ec2-auto-scaling.html)
-* Auto Scaling Components
-* Getting Started
-* Accessing Amazon EC2 Auto Scaling
-* Pricing for Amazon EC2 Auto Scaling
-* PCI DSS Compliance
-###### [Benefits of Auto Scaling](https://docs.aws.amazon.com/autoscaling/ec2/userguide/auto-scaling-benefits.html)
-* Example: Covering Variable Demand
-* Example: Web App Architecture
-* Example: Distributing Instances Across Availability Zones
-    * Instance Distribution
-    * Rebalancing Activities
-###### [Auto Scaling Lifecycle](https://docs.aws.amazon.com/autoscaling/ec2/userguide/AutoScalingGroupLifecycle.html)
-* Scale Out
-* Instances In Service
-* Scale In
-* Attach an Instance
-* Detach an Instance
-* Lifecycle Hooks
-* Enter and Exit Standby
-
-##### [Setting Up Amazon EC2 Auto Scaling](https://docs.aws.amazon.com/autoscaling/ec2/userguide/setting-up.html)
-* Sign up for AWS
-* Prepare to Use Amazon EC2
-##### [Getting Started with Amazon EC2 Auto Scaling](https://docs.aws.amazon.com/autoscaling/ec2/userguide/GettingStartedTutorial.html)
-* Step 1: Create a Launch Configuration
-* Step 2: Create an Auto Scaling Group
-* Step 3: Verify Your Auto Scaling Group
-* Step 4: (Optional) Delete Your Scaling Infrastructure
-    * To delete your Auto Scaling group
-    * To delete your launch configuration
-##### [Tutorial: Set Up a Scaled and Load-Balanced Application](https://docs.aws.amazon.com/autoscaling/ec2/userguide/as-register-lbs-with-asg.html)
-* Prerequisites
-* Configure Scaling and Load Balancing Using the AWS Management Console
-    * Create or Select a Launch Configuration
-        * To select an existing launch configuration
-        * To create a launch configuration
-    * Create an Auto Scaling Group
-        * To create an Auto Scaling group
-    * (Optionally) Verify that Your Load Balancer is Attached to Your Auto Scaling Group
-* Configure Scaling and Load Balancer Using the AWS CLI
-    * Create a Launch Configuration
-    * Create an Auto Scaling Group with a Load Balancer
-##### [Launch Configurations](https://docs.aws.amazon.com/autoscaling/ec2/userguide/LaunchConfiguration.html)
-###### [Creating a Launch Configuration](https://docs.aws.amazon.com/autoscaling/ec2/userguide/create-launch-config.html)
-* To create a launch configuration using the console
-* To create a launch configuration using the command line
-    * [`create-launch-configuration`](https://docs.aws.amazon.com/cli/latest/reference/autoscaling/create-launch-configuration.html)
-###### [Creating a Launch Configuration Using an EC2 Instance](https://docs.aws.amazon.com/autoscaling/ec2/userguide/create-lc-with-instanceID.html)
-* Create a Launch Configuration Using an EC2 Instance
-    * Create a Launch Configuration from an EC2 Instance Using the AWS Management Console
-        * [Attach EC2 Instances to Your Auto Scaling Group](https://docs.aws.amazon.com/autoscaling/ec2/userguide/attach-instance-asg.html)
-    * Create a Launch Configuration from an EC2 Instance Using the AWS CLI
-* Create a Launch Configuration and Override the Block Devices Using the AWS CLI
-* Create a Launch Configuration and Override the Instance Type
-    * Create a Launch Configuration and Override the Instance Type Using the AWS CLI
-###### [Changing the Launch Configuration for an Auto Scaling Group](https://docs.aws.amazon.com/autoscaling/ec2/userguide/change-launch-config.html)
-* To change the launch configuration for an Auto Scaling group using the console
-* To change the launch configuration for an Auto Scaling group using the AWS CLI
-###### [Copying a Launch Configuration to a Launch Template](https://docs.aws.amazon.com/autoscaling/ec2/userguide/copy-launch-config.html)
-* To create a launch template from a launch configuration
-###### [Replacing a Launch Configuration with a Launch Template](https://docs.aws.amazon.com/autoscaling/ec2/userguide/replace-launch-config.html)
-* To replace the launch configuration for an Auto Scaling group
-###### [Launching Auto Scaling Instances in a VPC](https://docs.aws.amazon.com/autoscaling/ec2/userguide/asg-in-vpc.html)
-##### [Auto Scaling Groups](https://docs.aws.amazon.com/autoscaling/ec2/userguide/AutoScalingGroup.html)
-###### [Creating an Auto Scaling Group Using a Launch Template](https://docs.aws.amazon.com/autoscaling/ec2/userguide/create-asg-launch-template.html)
-* Prerequisites
-* Limitations
-* To create an Auto Scaling group using a launch template
-* To create an Auto Scaling Group using the command line
-    * [`create-auto-scaling-group`](https://docs.aws.amazon.com/cli/latest/reference/autoscaling/create-auto-scaling-group.html)
-###### [Creating an Auto Scaling Group Using a Launch Configuration](https://docs.aws.amazon.com/autoscaling/ec2/userguide/create-asg.html)
-* Prerequisites
-* To create an Auto Scaling group using the console
-* To create an Auto Scaling group using the command line
-###### [Creating an Auto Scaling Group Using an EC2 Instance](https://docs.aws.amazon.com/autoscaling/ec2/userguide/create-asg-from-instance.html)
-* Limitations
-* Prerequisites
-* Create an Auto Scaling Group from an EC2 Instance Using the Console
-* Create an Auto Scaling Group from an EC2 Instance Using the AWS CLI
-###### [Creating an Auto Scaling Group Using the Amazon EC2 Launch Wizard](https://docs.aws.amazon.com/autoscaling/ec2/userguide/create-asg-ec2-wizard.html)
-* To create a launch configuration and Auto Scaling group using the launch wizard
-
-###### [Tagging Auto Scaling Groups and Instances](https://docs.aws.amazon.com/autoscaling/ec2/userguide/autoscaling-tagging.html)
-* Tag Restrictions
-* Tagging Lifecycle
-* Add or Modify Tags for Your Auto Scaling Group
-    * Add or Modify Tags Using the AWS Management Console
-    * Add or Modify Tags Using the AWS CLI
-* Delete Tags
-    * Delete Tags Using the AWS Management Console
-    * Delete Tags Using the AWS CLI
-###### [Using a Load Balancer With an Auto Scaling Group](https://docs.aws.amazon.com/autoscaling/ec2/userguide/autoscaling-load-balancer.html)
-* [Attaching a Load Balancer to Your Auto Scaling Group](https://docs.aws.amazon.com/autoscaling/ec2/userguide/attach-load-balancer-asg.html)
-    * Prerequisites
-    * Add a Load Balancer Using the Console
-        * To attach a load balancer to an auto scaling group
-        * To detach a load balancer from an Auto Scaling group
-    * Add a Load Balancer Using the AWS CLI
-* [Using Elastic Load Balancing Health Checks with Auto Scaling](https://docs.aws.amazon.com/autoscaling/ec2/userguide/as-add-elb-healthcheck.html)
-    * Adding Health Checks Using the Console
-    * Adding Health Checks Using the AWS CLI
-* [Expanding Your Scaled and Load-Balanced Application to an Additional Availability Zone](https://docs.aws.amazon.com/autoscaling/ec2/userguide/as-add-availability-zone.html)
-    * Adding an Availability Zone Using the Console
-    * Adding an Availability Zone Using the AWS CLI
-###### [Launching Spot Instances in Your Auto Scaling Group](https://docs.aws.amazon.com/autoscaling/ec2/userguide/asg-launch-spot-instances.html)
-###### [Merging Your Auto Scaling Groups into a Single Multi-Zone Group](https://docs.aws.amazon.com/autoscaling/ec2/userguide/merge-auto-scaling-groups.html)
-* To merge separate single-zone groups into a single multi-zone group
-###### [Deleting Your Auto Scaling Infrastructure](https://docs.aws.amazon.com/autoscaling/ec2/userguide/as-process-shutdown.html)
-* Delete Your Auto Scaling Group
-    * To delete your Auto Scaling group using the console
-    * To delete your Auto Scaling group using the AWS CLI
-* (Optional) Delete the Launch Configuration
-    * To delete the launch configuration using the console
-    * To delete the launch configuration using the AWS CLI
-* (Optional) Delete the Load Balancer
-    * To delete your load balancer
-    * To delete the load balancer associated with the Auto Scaling group using the AWS CLI
-* (Optional) Delete the CloudWatch Alarms
-
-##### [Scaling the Size of Your Auto Scaling Group](https://docs.aws.amazon.com/autoscaling/ec2/userguide/scaling_plan.html)
-* Scaling Options
-    * Maintain current instance levels at all times
-    * Manual scaling
-    * Scale based on a schedule
-    * Scale based on demand
-* Multiple Scaling Policies
-###### [Maintaining the Number of Instances in Your Auto Scaling Group](https://docs.aws.amazon.com/autoscaling/ec2/userguide/as-maintain-instance-levels.html)
-* Determining Instance Health
-* Replacing Unhealthy Instances
-###### [Manual Scaling](https://docs.aws.amazon.com/autoscaling/ec2/userguide/as-manual-scaling.html)
-* Change the Size of Your Auto Scaling Group Using the Console
-    * To change the size of your Auto Scaling group
-    * To verify that the size of your Auto Scaling group has changed
-* Change the Size of Your Auto Scaling Group Using the AWS CLI
-* [Attach EC2 Instances to Your Auto Scaling Group](https://docs.aws.amazon.com/autoscaling/ec2/userguide/attach-instance-asg.html)
-    * Attaching an Instance Using the AWS Management Console
-        * To attach an instance to a new Auto Scaling group using the console
-        * To attach an instance to an existing Auto Scaling group using the console
-    * Attaching an Instance Using the AWS CLI
-* [Detach EC2 Instances from Your Auto Scaling Group](https://docs.aws.amazon.com/autoscaling/ec2/userguide/detach-instance-asg.html)
-    * Detaching Instances Using the AWS Management Console
-    * Detaching Instances Using the AWS CLI
-###### [Scheduled Scaling for Amazon EC2 Auto Scaling](https://docs.aws.amazon.com/autoscaling/ec2/userguide/schedule_time.html)
-* Considerations for Scheduled Actions
-* Create a Scheduled Action Using the Console
-* Update a Scheduled Action
-* Create or Update a Scheduled Action Using the AWS CLI
-* Delete a Scheduled Action
-    * To delete a scheduled action using the console
-    * To delete a scheduled action using the AWS CLI
-###### [Dynamic Scaling for Amazon EC2 Auto Scaling](https://docs.aws.amazon.com/autoscaling/ec2/userguide/as-scale-based-on-demand.html)
-* Scaling Policy Types
-* [Target Tracking Scaling Policies for Amazon EC2 Auto Scaling](https://docs.aws.amazon.com/autoscaling/ec2/userguide/as-scaling-target-tracking.html)
-    * Considerations
-    * Create an Auto Scaling Group with Target Tracking Scaling Policies
-    * Instance Warmup
-    * Configuring Scaling Policies Using the AWS CLI
-* [Simple and Step Scaling Policies for Amazon EC2 Auto Scaling](https://docs.aws.amazon.com/autoscaling/ec2/userguide/as-scaling-simple-step.html)
-    * Simple Scaling Policies
-    * Step Scaling Policies
-    * Scaling Adjustment Types
-    * Step Adjustments
-    * Instance Warmup
-    * Create an Auto Scaling Group with Step Scaling Policies
-        * To create an Auto Scaling group with scaling based on metrics
-    * Configure Scaling Policies Using the AWS CLI
-        * Step 1: Create an Auto Scaling Group
-        * Step 2: Create Scaling Policies
-        * Step 3: Create CloudWatch Alarms
-* [Add a Scaling Policy to an Existing Auto Scaling Group](https://docs.aws.amazon.com/autoscaling/ec2/userguide/policy-updating-console.html)
-* [Scaling Based on Amazon SQS](https://docs.aws.amazon.com/autoscaling/ec2/userguide/as-using-sqs-queue.html)
-    * Choosing an effective metric and target value
-    * Scaling with Amazon SQS Using the AWS CLI
-        * Step 1: Create the CloudWatch Custom Metric
-            * To create the CloudWatch custom metric
-        * Step 2: Create the Scaling Policies
-        * Step 3: Test Your Scaling Policies
-            * To test the scale-out policy
-            * To test the scale-in policy
-###### [Scaling Cooldowns for Amazon EC2 Auto scaling](https://docs.aws.amazon.com/autoscaling/ec2/userguide/Cooldown.html)
-* Example: Cooldowns
-* Default Cooldowns
-* Scaling-Specific Cooldowns
-* Cooldowns and Multiple Instances
-* Cooldowns and Lifecycle Hooks
-* Cooldowns and Spot Instances
-###### [Controlling Which Auto Scaling Instances Terminate During Scale In](https://docs.aws.amazon.com/autoscaling/ec2/userguide/as-instance-termination.html)
-* Default Termination Policy
-* Customizing the Termination Policy
-* Instance Protection
-    * Enable Instance Protection for a group
-        * To enable instance protection for a group using the console
-        * To enable instance protection for a group using the AWS CLI
-        * To change the instance protection setting for a group using the console
-        * To change the instance protection setting for a group using the AWS CLI
-    * Modify the Instance Protection Setting for an Instance
-        * To change the instance protection setting for an instance using the console
-        * To change the instance protection setting for an instance using the AWS CLI
-###### [Amazon EC2 Auto Scaling Lifecycle Hooks](https://docs.aws.amazon.com/autoscaling/ec2/userguide/lifecycle-hooks.html)
-* How Lifecycle Hooks Work
-* Considerations When Using Lifecycle Hooks
-    * Keeping Instances in a Wait State
-    * Cooldowns and Custom Actions
-    * Health Check Grace Period
-    * Lifecycle Action Result
-    * Spot Instances
-* Prepare for Notificaitons
-* Add Lifecycle Hooks
-* Test the Notification
-###### [Temporarily Removing Instances from Your Auto Scaling Group](https://docs.aws.amazon.com/autoscaling/ec2/userguide/as-enter-exit-standby.html)
-* How the Standby State Works
-* Health Status of an Instance in a Standby State
-* Temporarily Remove an Instance Using the AWS Management Console
-* Temporarily Remove an Instance Using the AWS CLI
-###### [Suspending and Resuming Scaling Processes](https://docs.aws.amazon.com/autoscaling/ec2/userguide/as-suspend-resume-processes.html)
-* Scaling Processes
-* Suspend and Resume Processes Using the Console
-* Suspend and Resume Processes Using the AWS CLI
-##### [Monitoring Your Auto Scaling Instances and Groups](https://docs.aws.amazon.com/autoscaling/ec2/userguide/as-monitoring-features.html)
-* Health Checks
-* CloudWatch Metrics
-* CloudWatch Events
-* SNS Notifications
-* CloudTrail logs
-###### [Health Checks for Auto Scaling Instances](https://docs.aws.amazon.com/autoscaling/ec2/userguide/healthcheck.html)
-* Instance Health Status
-* Health Check Grace Period
-* Custom Health Checks
-###### [Amazon CloudWatch Metrics](https://docs.aws.amazon.com/autoscaling/ec2/userguide/as-instance-monitoring.html)
-* Auto Scaling Group Metrics
-* Dimensions for Auto Scaling Group Metrics
-* Enable Auto Scaling Group Metrics
-    * To enable group metrics using the console
-    * To disable group metrics using the console
-    * To enable group metrics using the AWS CLI
-    * To disable group metrics using the AWS CLI
-* Configure Monitoring for Auto Scaling Instances
-    * To configure CloudWatch monitoring using the console
-    * To configure CloudWatch monitoring using the AWS CLI
-* View CloudWatch Metrics
-    * To view metrics using the Amazon EC2 Console
-    * To view metrics using the CloudWatch Console
-    * To view CloudWatch metrics using the AWS CLI
-* Create Amazon CloudWatch Alarms
-###### [Amazon Cloud Events](https://docs.aws.amazon.com/autoscaling/ec2/userguide/cloud-watch-events.html)
-* Auto Scaling Events
-    * EC2 Instance-launch Lifecycle Action
-    * EC2 Instance Launch Successful
-    * EC2 Instance Launch Unsuccessful
-    * EC2 Instance-terminate Lifecycle Action
-    * EC2 Instance Terminate Successful
-    * EC2 Instance Terminate Unsuccessful
-* Create a Lambda Function
-* Route Events to Your Lambda Function
-    * To route events to your Lambda function
-    * To test your rule
-###### [Amazon SNS Notifications](https://docs.aws.amazon.com/autoscaling/ec2/userguide/ASGettingNotifications.html)
-* SNS Notifications
-* Configure Amazon SNS
-    * Create an Amazon SNS Topic
-    * Subscribe to the Amazon SNS Topic
-    * Confirm Your Amazon SNS Subscription
-* Configure Your Auto Scaling Group to Send Notifications
-    * To configure Amazon SNS notifications for your Auto Scaling group using the console
-    * To configure Amazon SNS notifications for your Auto Scaling group using the AWS CLI
-* Test the Notification Configuration
-* Verify That You Received Notification of the Scaling Event
-    * To verify that your Auto Scaling group has launched new instance using the console
-    * To verify that your Auto Scaling group has launched new instance using the AWS CLI
-* Delete the Notification Configuration
-    * To delete Amazon EC2 Auto Scaling notification configuration using the console
-    * To delete Amazon EC2 Auto Scaling notification configuration using the AWS CLI
-###### [AWS CloudTrail Logging](https://docs.aws.amazon.com/autoscaling/ec2/userguide/logging-using-cloudtrail.html)
-* Amazon EC2 Auto Scaling Information in CloudTrail
-* Understanding Amazon EC2 Auto Scaling Log File Entries
-
