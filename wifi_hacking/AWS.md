@@ -2213,6 +2213,12 @@ You can also install the NVIDIA driver manually. For more information, see [Inst
 ######## Prerequisites
 ######## Connecting to Your Linux Instance
 ######## Transferring Files to Linux Instances from Linux Using SCP
+Add `-r` to transfer one or more directories.
+`scp -i myAmazonKey.pem phpMyAdmin-3.4.5-all-languages.tar.gz ec2-user@mec2-50-17-16-67.compute-1.amazonaws.com:~/.`
+`scp ~/rebels.txt dvader@deathstar.com:~/revenge`
+`scp -r dvader@deathstar.com:~/revenge ~/revenge`
+`scp dvader@deathstar.com:"revenge/*.txt" ~/revenge/`
+`scp dvader@empire.gov:~/luke.txt dvader@deathstar.com:~/revenge`
 ###### [Stop and Start Your Instance](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/Stop_Start.html)
 ####### Overview
 ####### Stopping and Starting Your Instances

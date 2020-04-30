@@ -38,9 +38,10 @@ Note the backslash in front of the `*`. This is necessary because Git does its o
 
         $ git rm \*~
 This command removes all files whose names end with a `~`.
+
 #### Moving Files
 Unlike many other VCS systems, Git doesn't explicitly track file movement. If you rename a file in Git, no metadata is stored in Git that tells it you renamed the file. However, Git is pretty smart about figuring that out after the fact-we'll deal with detecting file movement a bit later.
-Thus it's a bit confusing that Git has a `mv` command. If you want to rename a file in Git, you can runn something like this:
+Thus it's a bit confusing that Git has a `mv` command. If you want to rename a file in Git, you can run something like this:
 
         $ git mv file_from file_to
 and it works fine. In fact, if you run something like this and look at the status, you'll see that Git considers it a renamed file:
@@ -63,7 +64,7 @@ Summary:for untracked files, use `rm`;
         for tracked files and staged files: `git rm --cached` to delete from stage area and the file will become untracked; `git rm --f` to delete both from stage area and working directory.
 ### 2.3 Git Basics-Viewing the Commit History <a name=gitlog> </a>
 #### Viewing the Commit History
-After you have created several commits, or if you have cloned a repository with an existing commit history, you'll probaly want to look back to see what has happened. The most basic and powerful tool to do this is the `git log` command.
+After you have created several commits, or if you have cloned a repository with an existing commit history, you'll probably want to look back to see what has happened. The most basic and powerful tool to do this is the `git log` command.
 These examples use a very simple project called "simplegit". To get the project, run
 
         $ git clone https://github.com/schacon/simplegit-progit
@@ -133,6 +134,55 @@ One of the more helpful options is `-p` or `--patch`, which shows the difference
         -end
 This option displays the same information but with a diff directly following each entry. This is very helpful for code review or to quickly browse what happened during a series of commits that a collaborator has added. You can also use a series of summarizing options with `git log`. For example, if you want to see some abbreviated stats for each commit, you can use the `--stat` option:
 
+##### How to read the diff output
+
+    diff --git a/builtin-http-fetch.c b/http-fetch.c
+    similarity index 95%
+    rename from builtin-http-fetch.c
+    rename to http-fetch.c
+    index f3e63d7..e8f44ba 100644
+    --- a/builtin-http-fetch.c
+    +++ b/http-fetch.c
+    @@ -1,8 +1,9 @@
+     #include "cache.h"
+     #include "walker.h"
+    
+    -int cmd_http_fetch(int argc, const char **argv, const char *prefix)
+    +int main(int argc, const char **argv)
+     {
+    +       const char *prefix;
+            struct walker *walker;
+            int commits_on_stdin = 0;
+            int commits;
+    @@ -18,6 +19,8 @@ int cmd_http_fetch(int argc, const char **argv, const char *prefix)
+            int get_verbosely = 0;
+            int get_recover = 0;
+    
+    +       prefix = setup_git_directory();
+    +
+            git_config(git_default_config, NULL);
+    
+            while (arg < argc && argv[arg][0] == '-') {
+* The first line `diff --git a/builtin-http-fetch.c b/http-fetch.c` is a "git diff" header. The `a/` and `/b` filenames are the same unless rename/copy is involved.
+* Next are one or more extended header lines. The first three
+
+        similarity index 95%
+        rename from builtin-http-fetch.c
+        rename to http-fetch.c
+    tell us that the file was renamed from `builtin-http-fetch.c` to `http-fetch.c` and that those two files are 95% identical (which was used to detect this rename).
+    The last line in extended diff header, which is `index f3e63d7..e8f44ba 100644` tells us about the mode of the given file (`100644` means that it is ordinary file and not e.g. symlink, and that it doesn't have executable permission it).
+* Next is two-line unified diff header
+
+    ---a/builtin-http-fetch.c
+    +++b/http-fetch.c
+* Next come one or more hunks of differences; each hunk shows one area where the files differ. Unified format hunks starts with line like `@@ -1,8 +1,9 @@` or `@@ -18,6 +19,8 @@ int cmd_http_fetch(int argc, const char **argv, ...` It is in the format `@@ from-file-range to-file-range @@`. The `from-file-range` is in the form `-<start line>,<number of lines>`, and `to-file-range` is `+<start line>,<number of lines>`. If number-of-lines not shown it means that it is 0.
+    * `-1,6` means that this piece of the first file starts at line 1 and shows a total of 6 lines. Therefore it shows lines 1 to 6. `-` means "old".
+    * `+1,4` means that this piece of the second file starts at line 1 and shows a total of 4 lines. Therefore it shows lines 1 to 4. `+` means "new".
+    The optional header shows that C function where each change occurs, if it is a C file (like `-p` option in GUN diff), or the equivalent, if any, for other types of files. Depending on your git version and configuration, you can also get a code line next to the `@@` line, e.g. the `func1() {` in `@@ -4,7 +4,6 @@ func1() {`. This an also be obtained with the `-p` flag of plain diff. This awesome feature often tells exactly to which function or class each hunk belongs, which is very useful to interpret the diff.
+* Next comes the description of where files differ. The lines common to both files begin with a space character. The lines that actually differ between the two files have one of the following indicator characters in the left print column:
+    * `+`: A line was added here to the first file.
+    * `-`: A line was removed here from the first file.
+
         $ git log --stat
         commit ca82a6dff817ec66f44342007202690a93763949
         Author: Scott Chacon <schacon@gee-mail.com>
@@ -163,6 +213,7 @@ This option displays the same information but with a diff directly following eac
         lib/simplegit.rb    |  25 +++++++++++++++++++++++++
         3 files changed, 54 insertions(+)
 As you can see, the `--stat` option prints below each commit entry a list of modified files, how many files were changed, and how many lines in those files were added and removed. It also puts a summary of the information at the end.
+
 Another really useful option is `--pretty`. This option changes the log output to formats other than the default. A few prebuilt options are available for you to use. The `oneline` option prints each commit on a single line, which is useful if you're looking at a lot of commits. In addition, the `short`, `full`, and `fuller` options show the output in roughly the same format but with less or more information, respectively:
 
         $ git log --pretty=oneline
@@ -211,7 +262,7 @@ The `oneline` and `format` options are particularly usefule with another `log` o
         * d6016bc require time for xmlschema
         *  11d191e Merge branch 'defunkt' into local
 This type of output will become more interesting as we go through branching and merging in the next chapter.
-Those are only some simple output-formatting options to `git log`-there are many more. Common options to `git log` lists the options we've covered so far, as well as some othe common formatting options that may be useful, along with how they change the output of the long command.
+Those are only some simple output-formatting options to `git log`-there are many more. Common options to `git log` lists the options we've covered so far, as well as some other common formatting options that may be useful, along with how they change the output of the long command.
 Table 2. common options to `git log`
 
 Option|Description
@@ -233,7 +284,7 @@ However, the time-limiting options such as `--since` and `--until` are very usef
         $ git log --since=2.weeks
 This command works with lots of formats-you can specify a specific date like "`2008-01-15`", or a relative date such as "`2 years 1 day 3 minutes ago`".
 You can also filter the list to commits that match some search criteria. The `--author` option allows you to filter on a specific author, and the `--grep` option lets you search for keywords in the commit messages.
-_Note: You can specify more than one isntance of both the --auothr and --grep search criteria, which will limit the commit output to commits that match any of the --author patterns and any of the --grep patterns; however, adding the --all-match option further limits the output to just those commits that match all --grep patters._
+_Note: You can specify more than one instance of both the --author and --grep search criteria, which will limit the commit output to commits that match any of the --author patterns and any of the --grep patterns; however, adding the --all-match option further limits the output to just those commits that match all --grep patters._
 Another really helpful filter is the `-S` option (colloquially referred to as Git's "pickaxe" option), which takes a string and shows only those commits that changed the number of occurrences of that string. For instance, if you wanted to find the last commit that added or removed a reference to a specific function, you could call:
 
         $ git log -S function_name
@@ -1010,19 +1061,19 @@ If you don't want to type it every single time you push, you can set up a "crede
 For more information on the various credential caching options available, see Credential Storage._
 The next time one of your collaborators fetches from the server, they will get a reference to where the server's version of `serverfix` is under the remote branch `origin/serverfix`:
 
-        $ git fetch origin
-        remote: Counting objects: 7, done.
-        remote: Compressing objects: 100% (2/2), done.
-        remote: Total 3 (delta 0), reused 3 (delta 0)
-        Unpacking objects: 100% (3/3), done.
-        From https://github.com/schacon/simplegit
-         * [new branch]     serverfix       -> origin/serverfix
+    $ git fetch origin
+    remote: Counting objects: 7, done.
+    remote: Compressing objects: 100% (2/2), done.
+    remote: Total 3 (delta 0), reused 3 (delta 0)
+    Unpacking objects: 100% (3/3), done.
+    From https://github.com/schacon/simplegit
+     * [new branch]     serverfix       -> origin/serverfix
 It's important to note that when you do a fetch that brings down new remote-tracking branches, you don't automatically have local, editable copies of them. In other words, in this case, you don't have a new `serverfix` branch-you only have an `origin/serverfix` pointer that you can't modify.
 To merge this work into your current working branch, you can run `git merge origin/serverfix`. If you want your own `serverfix` branch that you can work on, you can base it off your remote-tracking branch:
 
-        $ git checkout -b severfix origin/serverfix
-        Branch serverfix set up tp track remtoe branch serverfix from origin
-        Switched to a new branch 'serverfix'
+    $ git checkout -b severfix origin/serverfix
+    Branch serverfix set up tp track remtoe branch serverfix from origin
+    Switched to a new branch 'serverfix'
 This gives you a local branch that you can work on that starts where `origin/serverfix` is.
 ##### man git-push
 ###### NAME
@@ -1039,21 +1090,21 @@ When neither the command-line nor the configuration specify what to push, the de
 ###### `push.default`
 Defines the action `git push` should take if no refspec is explicitly given. Different values are well-suited for specific workflows; for instance, in a purely central workflow (i.e. the fetch source is equal to the push destination), `upstream` probably what you want. Possible values are: 
 * `nothing`
-    do not push anything (error out) unless a refspec is explicitly given. This is primarily meant for people who want to avoid mistakes by always being explicit.
+do not push anything (error out) unless a refspec is explicitly given. This is primarily meant for people who want to avoid mistakes by always being explicit.
 * `current`
-    push the current branch to update a branch with the same name on the receiving end. Works in both central and non-central workflows.
+push the current branch to update a branch with the same name on the receiving end. Works in both central and non-central workflows.
 * `upstream`
-    push the current branch back to the branch whose changes usually integrated into the current branch (which is called `@{upstream}`). This mode only makes sense if you are pushing to the same repository you would normally pull from (i.e. central workflow)
+push the current branch back to the branch whose changes usually integrated into the current branch (which is called `@{upstream}`). This mode only makes sense if you are pushing to the same repository you would normally pull from (i.e. central workflow)
 * `tracking`
-    This is a deprecated synonym for `upstream`.
+This is a deprecated synonym for `upstream`.
 * `simple`
-    in centralized workflow, work like `upstream` with an added safety to refuse to push if the upstream branch's name is different from the local one.
-    When pushing to a remote that is different from the remote you normally pull from, work as `current`. This is the safest option and is suited for beginners.
-    This mode has become the default in Git 2.0.
+in centralized workflow, work like `upstream` with an added safety to refuse to push if the upstream branch's name is different from the local one.
+When pushing to a remote that is different from the remote you normally pull from, work as `current`. This is the safest option and is suited for beginners.
+This mode has become the default in Git 2.0.
 * `matching`
-    push all branches having the same name on both ends. This makes the repository you are pushing to remember the set of branches that will be pushed out (e.g. if you always push *maint* and *master* there and no other branches, the repository you push to will have these two branches, and your local *maint* and *master* will be pushed there).
-    To use this mode effectively, you have to make sure *all* the branches you would push out are ready to be pushed out before running `git push`, as the whole point of this mode is to allow you to push all of the branches in one go. If you usually finish work on only one branch and push out the result, while other branches are unfinished, this mode is not for you. Also this mode is no suitable for pushing into a shared central repository, as other people may add new branches there, or update the tip of existing branches outside your control.
-    This used to be the default, but not since Git 2.0 (`simple` is the new default).
+push all branches having the same name on both ends. This makes the repository you are pushing to remember the set of branches that will be pushed out (e.g. if you always push *maint* and *master* there and no other branches, the repository you push to will have these two branches, and your local *maint* and *master* will be pushed there).
+To use this mode effectively, you have to make sure *all* the branches you would push out are ready to be pushed out before running `git push`, as the whole point of this mode is to allow you to push all of the branches in one go. If you usually finish work on only one branch and push out the result, while other branches are unfinished, this mode is not for you. Also this mode is no suitable for pushing into a shared central repository, as other people may add new branches there, or update the tip of existing branches outside your control.
+This used to be the default, but not since Git 2.0 (`simple` is the new default).
 ###### OPTIONS
 ####### `<repository>`
 The "remote" repository that is destination of a push operation. This parameter can be either a URL (see the section [GIT URLS](GIT_URLS)) or the name of a remote (see the section [REMOTES](#REMOTES))
@@ -1066,46 +1117,46 @@ Checking out a local branch from a remote-tracking branch automatically creates 
 Tracking branches are local branches that have a direct relationship to a remote branch. If you're on a tracking branch and type `git pull`, Git automatically knows which server to fetch from and which branch to merge in.
 When you clone a repository, it generally automatically creates a `master` branch that tracks `origin/master`. However, you can set up other tracking branches if you wish-ones that track branches on other remotes, or don't track the `master` branch. The simple case is the example you just saw, running `git checkout -b <branch> <remote>/<branch>`. This is a common enough operation that Git provides the `--track` shorthand:
 
-        $ git checkout --track origin/serverfix
-        Branch serverfix set up to track remote branch serverfix from origin.
-        Switched to a new branch 'serverfix'.
+    $ git checkout --track origin/serverfix
+    Branch serverfix set up to track remote branch serverfix from origin.
+    Switched to a new branch 'serverfix'.
 In fact, this is so common that there's even a shortcut for that shortcut. If the branch name you're trying to checkout doesn't exist and exactly matches a name on only one remote, Git will create a tracking branch for you:
 
-        $ git checkout serverfix
-        Branch serverfix set up to track remote branch serverfix from origin.
-        Switched to a new branch 'serverfix'
+    $ git checkout serverfix
+    Branch serverfix set up to track remote branch serverfix from origin.
+    Switched to a new branch 'serverfix'
 To set up a local branch with a different name than the remote branch, you can easily use the first version with a different local branch name:
 
-        $ git checkout -b sf origin/serverfix
-        Branch sf set up to track remote branch serverfix from origin.
-        Switched to a new branch 'sf'
+    $ git checkout -b sf origin/serverfix
+    Branch sf set up to track remote branch serverfix from origin.
+    Switched to a new branch 'sf'
 Now your local branch `sf` will automatically pull from `orgin/serverfix`.
 If you already have a local branch and want to set it to a remote branch you just pulled, or want to change the upstream branch you're tracking, you can use the `-u` or `--set-upstream-to` option to `git branch` to explicitly set it at any time.
 
-        $ git branch -u origin/serverfix
-        Branch serverfix set up to track remote branch serverfix from origin.
+    $ git branch -u origin/serverfix
+    Branch serverfix set up to track remote branch serverfix from origin.
 _Note: Upstream shorthand.
 When you have a tracking branch set up, you can reference its upstream branch with the `@{upstream}` or `@{u}` shorthand. So if you're on the `master`branch and it's tracking `origin/master`, you can say something like `git merge @{u}` instead of `git merge origin/master` if you wish._
 If you want to see what tracking branches you have set up, you can use the `-vv` option to `git branch`. This will list out your local branches with more information including what each branch is tracking and if your local branch is ahead, behind or both.
 
-        $ git branch -vv
-            iss53 7e424c3 [origin/iss53: ahead 2] forgot the brackets
-            master  1ae2a45 [origin/master] developing index fix
-        *   serverfix f874d9 [teamone/server-fix-good: ahead 3, behiend 1] this should do it
-            testing 5ea463a trying something new
+    $ git branch -vv
+        iss53 7e424c3 [origin/iss53: ahead 2] forgot the brackets
+        master  1ae2a45 [origin/master] developing index fix
+    *   serverfix f874d9 [teamone/server-fix-good: ahead 3, behiend 1] this should do it
+        testing 5ea463a trying something new
 So here we can see that our `iss53` branch is tracking `origin/iss53` and is "ahead" by two, meaning that we have two commits locally that are note pushed up the server. We can also see that our `master` branch is tracking `origin/master` and is up to date. Next we can see that our `serverfix` branch is tracking the `server-fix-googd` branch on our `teamone` server and is ahead by three and behind one, meaning that there is one commit on the server we haven't merged in yet and three commits locally that we haven't pushed. Finally we can see that our `testing` branch is not tracking any remote branch.
 It's important to note that these numbers are only since the last time you fetched from each server. This command does not reach out to the servers, it's telling you about what it has cached from these servers locally. If you want totally up to date ahead and behind numbers, you'll need to fetch from all your remotes right before running this. You could do that like this:
 
-        $ git fetch --all; git branch -vv
+    $ git fetch --all; git branch -vv
 #### Fetching
 ##### NAME
 git-fetch - Download objects and refs from another repository.
 ##### Synopsis
 
-        git fetch [<options>] [<repository> [<refspec>...]]
-        git fetch [<options>] <group>
-        git fetch --multiple [<options>] [(<repository> | <group>)...]
-        git fetch --all [<options>]
+    git fetch [<options>] [<repository> [<refspec>...]]
+    git fetch [<options>] <group>
+    git fetch --multiple [<options>] [(<repository> | <group>)...]
+    git fetch --all [<options>]
 ##### Description
 **Fetch branches and/or tags (collectively, "refs") from one or more other repositories, along with the objects necessary to complete their histories. Remote-tracking branches are updated** (see description of <refspec> below for ways to control this behavior).
 By default, any tag that points into the histories being fetched is also fetched; the effect is to fetch tags that point at branches that you are interested in. The default behavior can be changed by using the `--tags` or `--no-tags` options or by configuring `remote.<name>.tagOpt`. By using a refspec that fetches tags explicitly, you can fetch tags that do not point into branches you are interested in as well.
@@ -1114,33 +1165,33 @@ By default, any tag that points into the histories being fetched is also fetched
 The names of refs that are fetched, together with the object names they point at, are written to `.git/FETCH_HEAD`. This information may be used by scripts or other git commands, such as `git-pull`.
 ##### Options
 * `--all`
-    Fetch all remotes.
+Fetch all remotes.
 * `-a`, `--append`
-    Append ref names and object names of fetched refs to the existing contents of `.git/FETCG_HEAD`. Without this option old data in `.git/FETCH_HEAD` will be overwritten.
+Append ref names and object names of fetched refs to the existing contents of `.git/FETCG_HEAD`. Without this option old data in `.git/FETCH_HEAD` will be overwritten.
 * `--dry-run`
-    Show what would be done, without making any changes.
+Show what would be done, without making any changes.
 * `-f`, `--force`
-    When `git fetch` is used with `<rbranch>:<lbranch>` refspec, it refuses to update the local branch `<lbranch>` unless the remote branch `<rbranch>` it fetches is a descendant of `<lbranch>`. This option overrides that check.
+When `git fetch` is used with `<rbranch>:<lbranch>` refspec, it refuses to update the local branch `<lbranch>` unless the remote branch `<rbranch>` it fetches is a descendant of `<lbranch>`. This option overrides that check.
 * `--multiple`
-    Allow several `<repository>` and `<group>` arguments to be specified. No `<refspec>`s may be specified.
+Allow several `<repository>` and `<group>` arguments to be specified. No `<refspec>`s may be specified.
 * `-p`, `--prune`
-    After fetching, remove any remote-tracking references that no long exist on the remote. Tags are not subject to pruning if they are fetched only because of the default tag auto-following or due to a `--tags` option. However, if the tags are fetched due to an explicit refspec (either on the command line or in the remote configuration, for example if the remote was cloned with the `--mirror` option), then they are also subject to pruning.
+After fetching, remove any remote-tracking references that no long exist on the remote. Tags are not subject to pruning if they are fetched only because of the default tag auto-following or due to a `--tags` option. However, if the tags are fetched due to an explicit refspec (either on the command line or in the remote configuration, for example if the remote was cloned with the `--mirror` option), then they are also subject to pruning.
 * `-n`, `--no-tags`
-    By default, tags that point at objects that are downloaded from the remote repository are fetched and stored locally. This option disables this automatic tag following. The default behavior for a remote may be specified with the `remote.<name>tagOpt` setting. See `git-config`.
+By default, tags that point at objects that are downloaded from the remote repository are fetched and stored locally. This option disables this automatic tag following. The default behavior for a remote may be specified with the `remote.<name>tagOpt` setting. See `git-config`.
 * `-t`, `--tags`
-    Fetch all tags from the remote (i.e., fetch remote tags `refs/tags/*` into local tags with the same name), in addition to whatever else would otherwise be fetched. Using this option alone does not subject tags to pruning, even if `--prune` is used (though tags may be pruned anyway if they are also the destination of an explicit refspec; see `--prune`).
+Fetch all tags from the remote (i.e., fetch remote tags `refs/tags/*` into local tags with the same name), in addition to whatever else would otherwise be fetched. Using this option alone does not subject tags to pruning, even if `--prune` is used (though tags may be pruned anyway if they are also the destination of an explicit refspec; see `--prune`).
 * `-v`, `--verbose`
-    Be verbose.
+Be verbose.
 * `<repository>`
-    The "remote" repository that is the source of a fetch or pull operation. This parameter can be either a URL (see the section *GIT URLS* below) or the name of a remote (see the section *REMOTES* below).
+The "remote" repository that is the source of a fetch or pull operation. This parameter can be either a URL (see the section *GIT URLS* below) or the name of a remote (see the section *REMOTES* below).
 * `<group>`
-    A name referring to a list of repositories as the value of `remotes.<group>` in the configuration file. (See `git-config`)
+A name referring to a list of repositories as the value of `remotes.<group>` in the configuration file. (See `git-config`)
 * `<refspec>`
-    Specifies which refs to fetch and which local refs to update. **When no <refspec>s appear on the command line, the refs to fetch are read from `remote.<repository>.fetch` variables instead** (See CONFIGURED REMOTE-TRACKING BRANCHES below).
-    The format of a `<refspec>` is an optional plus `+`, followed by the source ref `<src>`, followed by a colon `:`, followed by the destination ref `<dst>`. The colon can be omitted when `<dst>` is empty.
-    `tag <tag>` means the same as `refs/tags/<tag>:refs/tags/<tag>`; it requests fetching everything up to the given tag.
-    **The remote ref that matches `<src>` if fetched, and if `<dst>` is not empty string, the local ref that matches it is fast-forwarded using `<src>`. If the optional plus `+` is used, the local ref is updated even if it does not result in a fast-forward update.**
-    Note: When the remote branch you want to fetch is known to be rewound and rebased regularly, it is expected that its new tip will not be descendant of its previous tip (as stored in your remote-tracking branch the last time you fetched). You would want to use the `+` sign to indicate non-fast-forward updates will be needed for such branches. ???There is no way to determine or declare that a branch will be made available in a repository with this behavior; the pulling user simply must know this is the expected usage pattern for a branch.???
+Specifies which refs to fetch and which local refs to update. **When no <refspec>s appear on the command line, the refs to fetch are read from `remote.<repository>.fetch` variables instead** (See CONFIGURED REMOTE-TRACKING BRANCHES below).
+The format of a `<refspec>` is an optional plus `+`, followed by the source ref `<src>`, followed by a colon `:`, followed by the destination ref `<dst>`. The colon can be omitted when `<dst>` is empty.
+`tag <tag>` means the same as `refs/tags/<tag>:refs/tags/<tag>`; it requests fetching everything up to the given tag.
+**The remote ref that matches `<src>` if fetched, and if `<dst>` is not empty string, the local ref that matches it is fast-forwarded using `<src>`. If the optional plus `+` is used, the local ref is updated even if it does not result in a fast-forward update.**
+Note: When the remote branch you want to fetch is known to be rewound and rebased regularly, it is expected that its new tip will not be descendant of its previous tip (as stored in your remote-tracking branch the last time you fetched). You would want to use the `+` sign to indicate non-fast-forward updates will be needed for such branches. ???There is no way to determine or declare that a branch will be made available in a repository with this behavior; the pulling user simply must know this is the expected usage pattern for a branch.???
 ##### GIT URLS <a name=GIT_URLS> </a>
 In general, URLs contain information about **the transport protocol, the address of the remote server, and the path o the repository.** Depending on the transport protocol, some of this information many be absent.
 Git support ssh, git, http, and https protocols (in addition, ftp, and ftps can be used for fetching, but this is inefficient and deprecated; do not use it).
@@ -1163,22 +1214,22 @@ For local repositories, also supported by Git natively, the following syntaxes m
 These two syntaxes are mostly equivalent, except when cloning, when the former implies `--local` option. See `git-clone` for details.
 If there are a large number of similar-named remote repositories and you want to use a different format for them (such that the URLs you use will be rewritten into URLs that work), you can create a configuration section of the form:
 
-        [url "<acutual url base>"
-                insteadof = <other url base>
+    [url "<acutual url base>"
+            insteadof = <other url base>
 For example, with this:
 
-        [url "git://git.host.xz/"]
-                insteadof = hsot.xz:/path/to/
-                insteadof = work:
+    [url "git://git.host.xz/"]
+            insteadof = hsot.xz:/path/to/
+            insteadof = work:
 a URL like `work:repo.git` or like `host.xz:/path/to/repo.git` will be rewritten in any context that takes a URL to be `git://git.host.xz/repo.git`.
 If you want to rewrite URLs for push only, you can create a configuration section of the form:
 
-        [url "<actual url base>"]
-                pushInsteadof = <other url base>
+    [url "<actual url base>"]
+            pushInsteadof = <other url base>
 For example, with this:
 
-        [url "ssh://example.org/"]
-                pushInsteadof = git://example.org/
+    [url "ssh://example.org/"]
+            pushInsteadof = git://example.org/
 a URL like `git://example.org/path/to/repo.git` will be rewritten to `ssh://example.org/path/to/repo.git` for pushes, but pulls will still use the original URL.
 
 ##### REMOTES <a name=REMOTES> </a>
@@ -1191,37 +1242,37 @@ All of these also allow you to omit the refspec from the command line because th
 ###### Named remote in configuration file
 You can choose to provide the name of a remote which you had previously configured using `git-remote`, `git-config` or even by a manual edit to the `$GIT_DIR/config` file. The URL of this remote will be used to access the repository. The refspec of this remote will be used by default when you do not provide a refspec on the command line. The entry in the `config` file would appear like this:
 
-        [remote "<name>"]
-                url = <url>
-                pushurl = <pushurl>
-                push = <refspec>
-                fetch = <refspec>
+    [remote "<name>"]
+            url = <url>
+            pushurl = <pushurl>
+            push = <refspec>
+            fetch = <refspec>
 The `<pushurl>` is used for pushes only. It is optional and defaults to `<url>`.
 
 ###### Named file in `$GIT_DIR/remotes`
 You can choose to provide the name of a file in `GIT_DIR/remotes`. The URL in this file will be used to access the repository. The refspec in this file will be used as default when you do not provide a refspec on the command line. This file should have the following format:
 
-        URL: one of the above URL format
-        Push: <refspec>
-        Pull: <refspec>
+    URL: one of the above URL format
+    Push: <refspec>
+    Pull: <refspec>
 `Push:` lines are used by `git push` and `Pull:` lines are used by `git pull` and `git fetch`. Multiple `Push:` and `Pull` lines may be specified for additional branch mappings.
 
 ###### Named file in `$GIT_DIR/branches`
 You can choose to provide the name of a file in `$GIT_DIR/branches`. The URL in this file will be used to access the repository. This file should have the following format:
-        `<url>#<head>`
+    `<url>#<head>`
 `<url>` is required; `#<head>` is optional.
 Depending on the operation, git will use one of the following refspecs, if you don't provide one on the command line. `<branch>` is the name of this file in `$GIT_DIR/branches` and `<head>` defaults to `master`.
 git fetch uses:
-        `refs/heads/<head>:refs/heads/<branch>` ??? <a name=head_vs_branch></a>
+    `refs/heads/<head>:refs/heads/<branch>` ??? <a name=head_vs_branch></a>
 git push uses:
-        `HEAD:refs/heads/<head>`
+    `HEAD:refs/heads/<head>`
 
 ##### CONFIGURED REMOTE-TRACKING BRANCHES
 You often interact with the same remote repository by regularly and repeatedly fetching from it. In order to keep track of the progress of such a remote repository, `git fetch` allows you to configure `remote.<repository>.fetch` configuration variables.
 Typically such a variable may look like this:
 
-        [remote "origin"]
-                fetch = +refs/heads/*:refs/remotes/origin/*
+    [remote "origin"]
+            fetch = +refs/heads/*:refs/remotes/origin/*
 ![configuration_variables](configuration_variables.png)
 This configuration is used in two ways:
 * When `git fetch` is run without specifying what branches and/or tags to fetch on the command line, e.g. `git fetch origin` or `git fetch`, `remote.<repository>.fetch` values are used as the refspecs-they specify which refs to fetch and which local refs to update. The example above will fetch all branches that exist in the `origin` (i.e., any ref that matches the left-hand side of the value, `refs/head/*`) and update the corresponding remote-tracking branches in the `refs/remotes/origin/*` hierarchy.
@@ -1229,16 +1280,16 @@ This configuration is used in two ways:
 The latter use of the `remote.<repository>.fetch` values can be overridden by giving the `--refmap=<refspec>` parameter(s) on the command line.
 ##### EXAMPLES
 * Update the remote-tracking branches
-    `git fetch origin`
-  The above command copies all branches from the remote `refs/heads/` namespace and stores them to the local `refs/remotes/origin/` namespace, unless the `branch.<name>.fetch` option is used to specify a non-default refspec.
+`git fetch origin`
+The above command copies all branches from the remote `refs/heads/` namespace and stores them to the local `refs/remotes/origin/` namespace, unless the `branch.<name>.fetch` option is used to specify a non-default refspec.
 * Using refspecs explicitly:
-    `git fetch origin +pu:pu maint:tmp`
-    This updates (or creates, as necessary) branches `pu` and `tmp` in the local repository by fetching from the branches (respectively) `pu` and `maint` from the remote repository.
-    The `pu` branch will be updated even if it is not fast-forward, because it is prefixed with a plug sign; `tmp` will not be.
+`git fetch origin +pu:pu maint:tmp`
+This updates (or creates, as necessary) branches `pu` and `tmp` in the local repository by fetching from the branches (respectively) `pu` and `maint` from the remote repository.
+The `pu` branch will be updated even if it is not fast-forward, because it is prefixed with a plug sign; `tmp` will not be.
 * Peek at a remote's branch, without configuring the remote in your local repository:
-    `$ git fetch git://git.kernel.org/pub/scm/git/git.git maint`
-    ` git log FETCH_HEAD`
-    The first command fetches the `maint` branch from the repository at `git://git/kernel.org/pub/scm/git/git.git` and the second command uses `FETCH_HEAD` to examine the branch with `git-log`. The fetched objects will eventually be remove by git's built-in housekeeping (see `git-gc`).
+`$ git fetch git://git.kernel.org/pub/scm/git/git.git maint`
+` git log FETCH_HEAD`
+The first command fetches the `maint` branch from the repository at `git://git/kernel.org/pub/scm/git/git.git` and the second command uses `FETCH_HEAD` to examine the branch with `git-log`. The fetched objects will eventually be remove by git's built-in housekeeping (see `git-gc`).
 
 #### Pulling
 While the `git fetch` command will fetch down all the changes on the server that you don't have yet, it will not modify your working directory at all. It will simply get the data for you and merge it yourself. However, there is a command called `git pull` which is essentially a `git fetch` immediately followed by a `git merge` in most cases. If you have a tracking branch set up as demonstrated in the last section, either by explicitly setting it or by having it created for you by the `clone` or `checkout` commands, `git pull` will look up what server and branch your current branch is tracking, fetch from that server and then try to merge in that remote branch.
@@ -1246,9 +1297,9 @@ Generally it's better to simply use the `fetch` and `merge` commands explicitly 
 #### Deleting Remote Branches
 Suppose you're done with a remote branch-say you and your collaborators are finished with a feature and have merged it into your remote's `master` branch (or whatever branch your stable codeline is in). You can delete a remote branch using the `--delete` option to `git push`. If you want to delete your `serverfix` branch from the server, you run the following:
 
-        $ git push origin --delete serverfix
-        To https://github.com/schacon/simplegit
-         - [deleted]        serverfix
+    $ git push origin --delete serverfix
+    To https://github.com/schacon/simplegit
+     - [deleted]        serverfix
 Basically all this done is to remove the pointer from the server. The Git server will generally keep the data there for a while until a garbage runs, so if it was accidentally deleted, it's often easy to recover.
 ### 3.6 Git Branching - Rebasing
 #### Rebasing
@@ -1263,17 +1314,17 @@ Figure 36. Merging to integrate diverged work history
 However, there is another way: you can take the patch of the change that was introduced in `C4` and reapply it on top of `C3`. In Git, this is called _rebasing_. With the `rebase` command, you can take all the changes that were committed on one branch and replay them on another one.
 In this example, you'd run the following:
 
-        $ git checkout experiment
-        $ git rebase master
-        Firtst, rewinding head to replay your work on top of it...
-        Applying: added staged coommand
+    $ git checkout experiment
+    $ git rebase master
+    Firtst, rewinding head to replay your work on top of it...
+    Applying: added staged coommand
 It works by going to the common ancestor of the two branches (the one you're on and the one you're rebasing onto), getting the diff introduced by each commit of the branch you're on, saving those diffs to temporary files, resetting the current branch to the same commit as the branch you are rebasing onto, and finally applying each change in turn.
 ![rebasing the change introduced in `C4` onto `C3`](basic-rebase-3.png)
 Figure 37. Rebasing the change introduced in `C4` onto `C3`
 At this point, you can go back to the `master` branch and do a fast-forward merge.
 
-        $ git checkout master
-        $ git mege experiment
+    $ git checkout master
+    $ git mege experiment
 ![fast-forwarding the master branch](basic-rebase-4.png)
 Figure 38. Fast-forwarding the master branch
 Now, the snapshot pointed to by `C4'` is exactly the same as the one that was pointed to by `C5` in the merge example. There is no difference in the end product of the integration, but rebasing makes for a cleaner history. If you examine the log of a rebased branch, it looks like a linear history: it appears that all the work happened in series, even when it originally happened in parallel.
