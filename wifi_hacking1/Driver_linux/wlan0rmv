@@ -1,0 +1,5 @@
+#!/bin/bash
+
+rmmod r8180
+rmmod ieee80211_r8180
+rmmod ieee80211_crypt_r8180

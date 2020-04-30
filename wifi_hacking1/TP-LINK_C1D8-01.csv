@@ -1,0 +1,6 @@
+
+BSSID, First time seen, Last time seen, channel, Speed, Privacy, Cipher, Authentication, Power, # beacons, # IV, LAN IP, ID-length, ESSID, Key
+30:FC:68:0B:C1:D8, 2018-07-06 23:53:50, 2018-07-06 23:54:38,  1,  54, WPA2WPA , CCMP,PSK, -54,      299,        1,   0.  0.  0.  0,  12, TP-LINK_C1D8, 
+
+Station MAC, First time seen, Last time seen, Power, # packets, BSSID, Probed ESSIDs
+

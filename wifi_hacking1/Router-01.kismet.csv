@@ -1,0 +1,3 @@
+Network;NetType;ESSID;BSSID;Info;Channel;Cloaked;Encryption;Decrypted;MaxRate;MaxSeenRate;Beacon;LLC;Data;Crypt;Weak;Total;Carrier;Encoding;FirstTime;LastTime;BestQuality;BestSignal;BestNoise;GPSMinLat;GPSMinLon;GPSMinAlt;GPSMinSpd;GPSMaxLat;GPSMaxLon;GPSMaxAlt;GPSMaxSpd;GPSBestLat;GPSBestLon;GPSBestAlt;DataSize;IPType;IP;
+1;infrastructure;Router_3AD23E;84:39:BE:3A:D2:3E;;1;No;WPA,AES-CCM;No;54.0;0;7120;0;556;0;0;556;;;Sat Jun 23 23:43:55 2018;Sun Jun 24 00:04:25 2018;-9;0;0;0.000000;0.000000;0.000000;0.000000;0.000000;0.000000;0.000000;0.000000;0.000000;0.000000;0.000000;0;0;0.0.0.0;
+

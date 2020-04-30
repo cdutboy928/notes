@@ -1,0 +1,11 @@
+#!/bin/sh
+
+ifconfig wlan0 down
+
+rmmod r8187.ko
+rmmod ieee80211-rtl.ko
+rmmod ieee80211_crypt_ccmp-rtl.ko
+rmmod ieee80211_crypt_tkip-rtl.ko
+rmmod ieee80211_crypt_wep-rtl.ko
+rmmod ieee80211_crypt-rtl.ko
+

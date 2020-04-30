@@ -1,0 +1,6 @@
+
+BSSID, First time seen, Last time seen, channel, Speed, Privacy, Cipher, Authentication, Power, # beacons, # IV, LAN IP, ID-length, ESSID, Key
+CA:F8:83:76:92:69, 2018-07-01 15:28:54, 2018-07-01 21:12:36,  1,  54, WPA2WPA , CCMP,PSK, -50,   124793,        0,   0.  0.  0.  0,  12, TPGuest_9269, 
+
+Station MAC, First time seen, Last time seen, Power, # packets, BSSID, Probed ESSIDs
+

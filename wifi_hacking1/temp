@@ -1,0 +1,40 @@
+ BSSID              PWR  Beacons    #Data, #/s  CH  MB   ENC  CIPHER AUTH ESSID
+                                                                                                                               
+0 9C:32:A9:73:10:91  -51       22        0    0   6  54e  WPA2 CCMP   PSK  CU_DXJP                                              
+1 34:96:72:27:1C:9C  -53       34       10    0   1  54e. WPA2 CCMP   PSK  山水巷2.4G3                                          
+1 34:96:72:26:47:BC  -54       52      148    0   1  54e. WPA2 CCMP   PSK  山水巷2.4G4                                          
+1 FC:D7:33:E7:1B:78  -55       19       43    0   6  54e. WPA2 CCMP   PSK  山水巷2.4G1                                          
+1 9C:32:A9:73:03:31  -55       27       14    0  11  54e  WPA2 CCMP   PSK  CU_AmGA                                              
+1 28:2C:B2:B5:48:DA  -60       61        0    0   1  54e. WPA2 CCMP   PSK  ɽˮ��2.4G2                                            
+0 78:44:FD:1B:0D:84  -78       20        0    0   1  54e. WPA2 CCMP   PSK  山水巷2.4G                                           
+0 74:A7:8E:82:13:BF  -79        7        0    0  11  54e  WPA2 CCMP   PSK  CU_r3ZY                                              
+1 78:44:FD:DD:04:5A  -80       13        4    0   6  54e. WPA2 CCMP   PSK  山水巷2.4G                                           
+1 88:25:93:02:CA:06  -81       16        2    0   6  54e. WPA2 CCMP   PSK  TP-LINK_CA06                                         
+1 BC:D1:77:DC:C2:8E  -84       13       14    0   6  22e. WPA2 CCMP   PSK  TP-LINK_DCC28E                                       
+0 90:94:97:FB:16:A1  -86        5        0    0  11  54e  WPA2 CCMP   PSK  <length: 15>                                         
+0 D0:76:E7:50:13:54  -88        4        0    0   1  54e  WPA2 CCMP   PSK  TP-LINK_702                                          
+0 80:13:82:4E:C5:E1  -88        5        0    0  11  54e  WPA2 CCMP   PSK  <length: 15>                                         
+0 78:44:FD:1B:0A:14  -89        4        0    0  11  54e. WPA2 CCMP   PSK  山水巷2.4G 
+
+
+
+ BSSID              STATION            PWR   Rate    Lost    Frames  Probe                                                      
+                                                                                                                                
+ (not associated)   10:4A:7D:A1:2A:57  -32    0 - 1      0        1                                                             
+ (not associated)   DA:A1:19:DF:51:3C  -50    0 - 1      0        1                                                             
+ (not associated)   4C:BB:58:76:01:F1  -50    0 - 1      0        2                                                             
+ (not associated)   DA:A1:19:AD:6B:06  -50    0 - 1      0        1                                                             
+ (not associated)   60:FE:C5:7C:DD:BD  -84    0 - 1      0        2  TP-LINK_CA06                                               
+ (not associated)   DA:A1:19:70:F2:23  -48    0 - 1      0        1                                                             
+ 34:96:72:27:1C:9C  00:9E:C8:44:F3:7F  -68    0 -12      0        1                                                             
+ 34:96:72:26:47:BC  DC:D9:16:AB:9E:3F  -50    0e- 0e     0       32                                                             
+ 34:96:72:26:47:BC  1C:DA:27:CF:0F:09  -74    1e-12e     0      123                                                             
+ 34:96:72:26:47:BC  F4:70:AB:C0:EA:79   -1    1e- 0      0        2                                                             
+ FC:D7:33:E7:1B:78  90:21:81:CF:D0:C6  -48    0e- 0e     0       41  NiceToMeetYou,DBS                                          
+ 9C:32:A9:73:03:31  44:C3:46:94:21:3B  -50    0 - 1      0        1                                                             
+ 9C:32:A9:73:03:31  34:2E:B6:A4:21:CB  -62    0e- 1     38       17                                                             
+ 28:2C:B2:B5:48:DA  94:BF:2D:A5:31:71  -52    0 -24      0        1                                                             
+ 78:44:FD:DD:04:5A  A8:C8:3A:C5:76:5E   -1    2e- 0      0        3                                                             
+ 88:25:93:02:CA:06  5C:FF:FF:10:E1:39   -1    1e- 0      0        2                                                             
+ 88:25:93:02:CA:06  3C:A5:81:03:30:48  -90    0 - 1e    69       16                                                             
+ BC:D1:77:DC:C2:8E  F0:79:E8:F6:DC:C5  -88    0 - 1e     0       14 

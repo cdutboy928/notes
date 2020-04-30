@@ -1,0 +1,30 @@
+From 27ddbe049e3c639c9b85afb407b67856b0846070 Mon Sep 17 00:00:00 2001
+From: "Luis R. Rodriguez" <mcgrof@do-not-panic.com>
+Date: Fri, 19 Oct 2012 18:03:19 -0700
+Subject: [PATCH] compat-drivers: add / to target stable release end dir
+
+Upstream commit 27ddbe049e3c639c9b85afb407b67856b0846070
+
+This should fix uploading via kup using scripts/gen-release.sh
+
+Signed-off-by: Luis R. Rodriguez <mcgrof@do-not-panic.com>
+---
+ scripts/gen-release.sh |    2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/scripts/gen-release.sh b/scripts/gen-release.sh
+index 1f3de75..ab7499a 100755
+--- a/scripts/gen-release.sh
++++ b/scripts/gen-release.sh
+@@ -289,7 +289,7 @@ elif [[ "$BASE_TREE" = "linux-stable" ]]; then
+ 		echo -e "File ${TARGET_STABLE}/${RELEASE}.tar.bz2${NORMAL} already exists"
+ 	fi
+ 
+-	kup put ${RELEASE}.tar.bz2 ${RELEASE}.tar.asc ${TARGET_STABLE}
++	kup put ${RELEASE}.tar.bz2 ${RELEASE}.tar.asc ${TARGET_STABLE}/
+ else
+ 	echo "Unsupported release type: $BASE_TREE"
+ 	exit 1
+-- 
+1.7.10.4
+

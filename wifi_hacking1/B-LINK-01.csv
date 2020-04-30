@@ -1,0 +1,7 @@
+
+BSSID, First time seen, Last time seen, channel, Speed, Privacy, Cipher, Authentication, Power, # beacons, # IV, LAN IP, ID-length, ESSID, Key
+08:EA:40:80:AC:54, 2018-06-24 00:17:59, 2018-06-24 00:19:59, 12,  54, WPA2, CCMP TKIP,PSK, -48,        4,        0,   0.  0.  0.  0,  18, B-LINK-2.4G_80AC54, 
+
+Station MAC, First time seen, Last time seen, Power, # packets, BSSID, Probed ESSIDs
+C4:0B:CB:FE:4A:DA, 2018-06-24 00:18:12, 2018-06-24 00:19:40, -60,        9, 08:EA:40:80:AC:54,
+
