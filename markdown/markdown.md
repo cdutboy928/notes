@@ -8,7 +8,7 @@ There is no need to trans when in code format
     * press Esc to avoid indent
 * use more headers and less lists.
 * 好象是list里面第二级只需比第一级缩进1位，第三级要比第二级缩进2位，第四级要比第三级缩进3位甚至更多，反正是越往后的级数要比前一级缩进的越多。
-* add blank lin before the header when the text before the header is in normal format
+* add blank line before the header when the text before the header is in normal format
 * Actually there must be blank line both before and after the normal text.
 * To conceal: `au FileType markdown setl conceallevel=2`
 
@@ -100,6 +100,8 @@ alert(s);
         ![test a image](standfor_parent.png)
         *.. stands for the up parent directory*
         ![test a image](../git/git_on_android_gif.gif)
+        ![test gif](bili_v_d_1582993084879.gif)
+        **Note:图片链接的前面最好有一个空白行，不然容易导致图片不能正常显示**
    * does not display the inline image
               [Benjamin Bannekat](https://octodex.github.com/images/bannekat.png)
           [Benjamin Bannekat](https://octodex.github.com/images/bannekat.png)
