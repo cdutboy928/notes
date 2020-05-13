@@ -1212,6 +1212,15 @@ Copy standard input to each FILE, and also to standard output.
 * proxy
     * `export http_proxy=socks5://127.0.0.1:1081`
     * `export https_proxy=socks5://127.0.0.1:1081`
+* ConEmu对VimIM的支持不好，不能显示菜单。
+## terminus
+* shortcuts
+    * `Alt+K` to previous tab;
+    * `Alt+J` to next tab;
+    * `Ctrl+T` to create new bash window
+* proxy
+    * `export http_proxy=socks5://127.0.0.1:1081`
+    * `export https_proxy=socks5://127.0.0.1:1081`
 ## open usb drive
 * `sudo fdisk -l`
 * `sudo mkdir /media/usb`

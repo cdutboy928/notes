@@ -152,3 +152,7 @@ SOCKS v5
 可以大大提高速度
 ### on mobile phone
 v2rayNG
+## some websites
+
+* http://baa.im/12765
+

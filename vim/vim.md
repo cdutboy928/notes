@@ -128,9 +128,10 @@
 * or install through vundle:
     * Plugin 'vim-scripts/VimIM'
     * Plugin 'vimim/vimim'
-    ` let g:vimim_ctrl_space_to_toggle=1`
-     `let g:vimim_tab_as_onekey=1`
-     `imap <C-L> <C-\>`
+    * `let g:vimim_ctrl_space_to_toggle=1`
+    * `let g:vimim_tab_as_onekey=1`
+    * `imap <C-L> <C-\>`
+    * `let g:Vimim_punctuation = 3` 为了能够正常地输入中文标点符号
 * **Note: the spf13 makes the installation failed once again.**
 ### configuration
 * `s:rc["g:Vimim_cloud"]` 中的初始值改为'baidu'
@@ -151,6 +152,9 @@
     * 在insert 模式下按下Ctrl+6, 即可进入有菜单的输入模式,按菜单提示按对应的字母或者按字母j 和k 上下翻选词就行了。按回车是无缝上英文的。这个的优点是可以jk选词，但是其实是点石成金模式，打完拼音需要按空格才能出现中文选词菜单。
 * 拼音搜索中文
     * 用 Vim 打开一个文本，输入 /ceshi 来搜索关键字，然后回车，此时会提示 Pattern not found（确保文中没有 ceshi 这个 5 个字母的关键字，有的话则匹配不到中文的），然后继续按 n ，如果这个文本里有 测试 或拼音一样的中文的话，则都会被搜索匹配到，继续按 n 来匹配一下一个关键字。
+### 新情况
+???现在云输入法好像不能用了，vimim好像也不能用了。现在只能用vim-scripts/VimIM,通过bundle安装。词典文件放到`~/.vim/plugin`目录下。词库文件vimim.pinyin_quote_sogou.txt较好用，但是没有三词。vimim.pinyin_big.txt 有三词，但是需要改名成为vimim.pinyin_quote_sogou.txt,且较慢。
+
 ## aboout color schemes
 ### [solarized](https://github.com/altercation/vim-colors-solarized)
 ![the light and dark](https://raw.githubusercontent.com/altercation/solarized/master/img/solarized-vim.png)
@@ -1261,6 +1265,7 @@ Use `:v//d` to delete all lines that do not match the last search pattern, or `:
 Note: `g` is used with `d`,`p` etc;`%s` is used with `//`
 * to delete lines containing "price": `:g/price/d`
 * to delete lines not containing "price": `g!/price/d`
+* `:'<,'>s/^$\n//gc`
 ## process lines according length
 * `grep -E '^.{,7}$' 0.txt > 0_output.txt`: not working
 * sed
