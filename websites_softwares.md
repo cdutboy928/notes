@@ -1,5 +1,16 @@
 ## websites
-
+* https://twdownloader.net/
+* https://send.firefox.com/
+* https://msdn.itellyou.cn
+* https://www.bangongziyuan.com/ppt/
+* http://www.dxzy163.com/
+* http://www.bewindoweb.com/dwg.php
+* https://uzer.me/
+* http://www.hippter.com/
+* https://cn.office-converter.com/
+* https://huajiakeji.com/
+* http://freecomputerbooks.com/
 ## softwares
 ### 录屏软件
 * 那就是大名鼎鼎的“BandicamPortable”
+## `wn.run/`

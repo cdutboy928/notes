@@ -201,7 +201,7 @@ git clone https://github.com/sunuslee/vim-plugin-random-colorscheme-picker`
   to switch to a new random theme without restarting vim.
 ## relativenumber
 * `set relativenumber` or `set rnu`
-* use `d4j` `d4k` `g4j` insteada of `4dd`
+* use `d3j` `d3k` `g3j` insteada of `4dd`
 ## 显示空格等不可见的字符
     set list
     set listchars=tab:›\ ,trail:•,extends:#,nbsp:. " Highlight problematic whitespace

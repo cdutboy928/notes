@@ -1221,6 +1221,7 @@ Copy standard input to each FILE, and also to standard output.
 * proxy
     * `export http_proxy=socks5://127.0.0.1:1081`
     * `export https_proxy=socks5://127.0.0.1:1081`
+## fluent terminal 不卡，比较好用
 ## open usb drive
 * `sudo fdisk -l`
 * `sudo mkdir /media/usb`
