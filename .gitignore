@@ -1,1 +1,5 @@
 *.chm
+~*.docx
+~*.pptx
+~*.xlsx
+*.swp
