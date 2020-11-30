@@ -1,6 +1,0 @@
-
-BSSID, First time seen, Last time seen, channel, Speed, Privacy, Cipher, Authentication, Power, # beacons, # IV, LAN IP, ID-length, ESSID, Key
-78:11:DC:1A:08:98, 2018-06-23 23:41:14, 2018-06-23 23:44:04,  2,  54, WPA2, CCMP TKIP,PSK, -50,      227,        0,   0.  0.  0.  0,  11, Xiaomi_0897, 
-
-Station MAC, First time seen, Last time seen, Power, # packets, BSSID, Probed ESSIDs
-

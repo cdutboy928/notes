@@ -1,6 +1,0 @@
-
-BSSID, First time seen, Last time seen, channel, Speed, Privacy, Cipher, Authentication, Power, # beacons, # IV, LAN IP, ID-length, ESSID, Key
-F4:70:AB:4B:78:E0, 2018-07-01 00:00:16, 2018-07-01 00:00:17, 11,  54, WPA2, CCMP,PSK, -41,        3,        0,   0.  0.  0.  0,  11, vivo X9Plus, 
-
-Station MAC, First time seen, Last time seen, Power, # packets, BSSID, Probed ESSIDs
-
