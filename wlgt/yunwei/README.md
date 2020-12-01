@@ -1,6 +1,10 @@
 # 新入职人员试用期内掌握情况
 ## 光纤基础知识
 * https://www.youtube.com/user/thefoainc/playlists
+* https://www.bilibili.com/video/BV1D4411a7Ls
+* https://www.bilibili.com/video/BV1VE411C7HV
+* https://www.bilibili.com/video/BV1tE411i7xu
+* https://www.bilibili.com/video/BV1UE411F7PW?p=4
 * 多模光纤和多模光纤
 * C波段、L波段
 * 光纤几个标准
@@ -29,6 +33,7 @@
 * [introduction to optical transceivers](https://www.youtube.com/watch?v=Uo-JNY94khk)
 * https://www.youtube.com/watch?v=Mrrb6fyxCn4
 * 损耗受限距离的估算
+* https://community.fs.com/cn/blog/understanding-fiber-loss-what-is-it-and-how-to-calculate-it.html
 * https://www.youtube.com/watch?v=QEzHQoTM1KM
 * https://www.youtube.com/watch?v=as6AXnGjdUE&list=PLC7CC6B17EF009849&index=19
 * https://www.youtube.com/watch?v=PPwOHzLQU2k
@@ -41,3 +46,5 @@
 * [IP地址分类](https://www.bilibili.com/video/av34692686/)
     * 常用内网IP段
     * 非常熟练常用网络号位数与子网主机数量的对应
+## 想了解
+* 现有网络结构，中间链路的逻辑及实体
