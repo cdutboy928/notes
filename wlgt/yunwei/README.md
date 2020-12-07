@@ -45,6 +45,7 @@
 * 多模双芯模块:850nm 多模没有单芯模块
 * 裸纤
 ## 交换机
+* 
 * 管理口
 * https://forum.huawei.com/enterprise/zh/forum.php?mod=viewthread&tid=242229&extra=page%3D1&page=2
 * https://support.huawei.com/enterprise/zh/doc/EDOC1100098004
@@ -73,6 +74,7 @@
 * `startup saved-configuration 1.cfg`
 * https://www.bilibili.com/video/BV1V741127f6/?spm_id_from=333.788.videocard.0
 * https://www.bilibili.com/video/BV1Kt4y1Q7MJ?p=3
+* https://www.bilibili.com/video/BV1Jt41177Ld/?spm_id_from=333.788.videocard.9
 ## 网络
 * [IP地址分类](https://www.bilibili.com/video/av34692686/)
     * 常用内网IP段
