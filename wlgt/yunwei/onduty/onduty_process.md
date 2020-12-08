@@ -7,6 +7,8 @@
     * 218.240.7.166:8787
     * 账号：wladm
     * 密码：wladm@123
+* 打开核心网监控页面
+    * http://218.240.7.100:8888/Orion/SummaryView.aspx?ViewID=1
 * 查看近24小时之内有无断掉未恢复的
     * 如有，截图发群里
 	* 昨天至今城域网未恢复的
@@ -17,7 +19,7 @@
 	* QQ：1034651389
 	* 密码：wladm123
 ### 时刻关注有无报障，及时发群里
-* 有人报障一定要问清楚用户什么业务。  
+* 有人报障一定要问清楚用户什么业务。
 * 如果用户说是链路业务，就问哪里到哪里的链路。
 * 如果是互联网业务，就问他使用的ip是什么。
 ### OA填日总结
@@ -29,7 +31,24 @@
        * http://218.240.7.108:51990/
        * 帐号：admin
        * 密码：qwas!@#
-*  统计各个机房温湿度???
+*  统计各个机房UPS温湿度
+    * 
+    * 远程桌面：218.240.7.180:51990
+	* 账号：wladm
+	* 密码：wladm@123
+	* 理想机房：地址：https://10.1.1.131     usid：admin  pw：wladm123
+	* 廊坊机房：地址：https://10.1.1.135     usid：admin  pw：wladm123
+	* 广安门机房：地址：https://192.168.255.196   usid：admin  pw：wladm123
+	* 西坝河机房：地址：https://10.1.1.130   usid：admin  pw：000001
+	* 华威桥机房：地址：https://10.1.1.133   usid：admin  pw：wladm123
+	* 慧科大厦机房：地址：https://192.168.255.198  usid：admin  pw：wladm123
+	* 风景线机房：地址：https://10.1.1.134  usid：admin  pw：wladm123
+	* 炫彩嘉轩机房：地址：https://192.168.255.205  usid：admin  pw：wladm123
+	* 亦庄卡乐工房：地址：https://192.168.255.201  usid：admin  pw：wladm123
+	* 广之旅机房： 地址：https://10.1.1.138  usid: admin  pw: wladm123
+	* 育芳园机房： 地址：https://192.168.255.206   usid：admin  pw：wladm123
+	* 佳汇国际A座机房：地址：https://192.168.255.199   usid：admin  pw：wladm123
+	* 金龙酒店机房：地址：https://192.168.255.200   usid：admin  pw：wladm123
 *  异常及用户报障情况
 ### 下班时间发邮件
 * 腾讯企业邮箱网址：mail.xlynet.com
@@ -39,55 +58,23 @@
     * 插入文档
     * 添加附件
 ## 晚班
-
-流入--下行
-流出--上行
-RX-收
-TX-发
 ## 其他
-* 360云盘：
+* 360云盘
 	* 账号：18610691660
 	* 密码：qwer1234
+* 落地查询
+    * https://124.205.81.64:8443/bj_ibr/main.do
+	* 693272454-ld
+	* ???
 * M8扎线：
 	* 机柜：左线右纤
-
-（ups）7.98
-
-理想机房：地址：https://10.1.1.131     usid：admin  pw：wladm123
-
-廊坊机房：地址：https://10.1.1.135     usid：admin  pw：wladm123
-
-广安门机房：地址：https://192.168.255.196   usid：admin  pw：wladm123
-
-西坝河机房：地址：https://10.1.1.130   usid：admin  pw：000001
-
-华威桥机房：地址：https://10.1.1.133   usid：admin  pw：wladm123
-
-慧科大厦机房：地址：https://192.168.255.198  usid：admin  pw：wladm123
-
-风景线机房：地址：https://10.1.1.134  usid：admin  pw：wladm123
-
-炫彩嘉轩机房：地址：https://192.168.255.205  usid：admin  pw：wladm123
-
-亦庄卡乐工房：地址：https://192.168.255.201  usid：admin  pw：wladm123
-
-广之旅机房： 地址：https://10.1.1.138  usid: admin  pw: wladm123
-
-育芳园机房： 地址：https://192.168.255.206   usid：admin  pw：wladm123
-
-佳汇国际A座机房：地址：https://192.168.255.199   usid：admin  pw：wladm123
-
-金龙酒店机房：地址：https://192.168.255.200   usid：admin  pw：wladm123
+* 咱们目前二层只有203模块间，三层IT02机房有F01-F04四个柜子、G06机柜有2台5728。
 
 
 
-咱们目前二层只有203模块间，三层IT02机房有F01-F04四个柜子、G06机柜有2台5728。
 
 
 
-远程桌面：218.240.7.180:51990
-账号：wladm
-密码：wladm@123
 
 
-UPS???
+
