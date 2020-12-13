@@ -45,8 +45,17 @@
 * 多模双芯模块:850nm 多模没有单芯模块
 * 裸纤
 ## 交换机
-* 
+* managable vs unmanagable
+* 机架式，框式，盒式
+* POE
 * 管理口
+* 各个系列
+* 命名规则
+    * LI,SI,EI,HI
+    * F
+    * TP
+    * PWR
+    * 
 * https://forum.huawei.com/enterprise/zh/forum.php?mod=viewthread&tid=242229&extra=page%3D1&page=2
 * https://support.huawei.com/enterprise/zh/doc/EDOC1100098004
 1. 如何查看设备型号、基础性能、接口类型（及模式），可使用何种类型方式进行接口的使用
@@ -75,6 +84,16 @@
 * https://www.bilibili.com/video/BV1V741127f6/?spm_id_from=333.788.videocard.0
 * https://www.bilibili.com/video/BV1Kt4y1Q7MJ?p=3
 * https://www.bilibili.com/video/BV1Jt41177Ld/?spm_id_from=333.788.videocard.9
+* 右键清屏
+* 通过正则表达式过滤display结果
+* `dispaly diagnostic-information`
+* `display device`
+* `display esn`
+* RPS
+* https://e.huawei.com/cn/products-and-solutions?l2=switches
+* GE,XGE,10GE,FE
+* 堆叠，级联和集群;框式交换机
+* https://www.bilibili.com/video/av840252089/
 ## 网络
 * [IP地址分类](https://www.bilibili.com/video/av34692686/)
     * 常用内网IP段
@@ -83,3 +102,7 @@
 * 现有网络结构，中间链路的逻辑及实体
 ## 问题
 * 
+## 其他学习
+* 正则表达式
+* rename
+* rename.sh
