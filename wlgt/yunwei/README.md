@@ -44,6 +44,7 @@
 * 单模双芯模块:1310nm 有10 20公里模块，1550nm 有40 80公里模块
 * 多模双芯模块:850nm 多模没有单芯模块
 * 裸纤
+* https://www.bilibili.com/video/BV14A411h7tk?t=19
 ## 交换机
 * managable vs unmanagable
 * 机架式，框式，盒式
@@ -89,17 +90,84 @@
 * `dispaly diagnostic-information`
 * `display device`
 * `display esn`
+* `display this`
+* `display | begin aaa`
+* `header login information`
+* `header shell`
+* `CTR+A`
+* aaa
+*
 * RPS
 * https://e.huawei.com/cn/products-and-solutions?l2=switches
 * GE,XGE,10GE,FE
 * 堆叠，级联和集群;框式交换机
 * https://www.bilibili.com/video/av840252089/
+* https://www.bilibili.com/video/BV1oZ4y1x7Gj/?spm_id_from=333.788.recommend_more_video.9
+* https://www.bilibili.com/video/BV1DK411V72H/?spm_id_from=autoNext
+* https://www.bilibili.com/video/BV1FE411A7RE
+* ![华为交换机命名](华为新交换机命名.png)
+* AOC DAC
+* https://www.bilibili.com/video/BV1FE411A7xC
+* https://www.bilibili.com/video/BV1qE411w7mg
+* https://www.bilibili.com/video/BV1iT4y1g7Sc
+* https://zhuanlan.zhihu.com/p/124184028
+* https://www.bilibili.com/video/BV1i7411V7oR
+* CTRL+U
+* CTRL+N
+* CTRL+P
+* CTRL+A
+* https://blog.51cto.com/huanghai/2369799
+* https://segmentfault.com/a/1190000022541389
+* `vlan 20` vs. `interface vlan 20`
+* https://www.bilibili.com/video/BV1At411f7hJ?p=1
+* https://www.bilibili.com/video/BV1h54y1U73S/?spm_id_from=333.788.recommend_more_video.3
+* https://www.bilibili.com/video/BV1d541187vG/?spm_id_from=333.788.videocard.0
 ## 网络
 * [IP地址分类](https://www.bilibili.com/video/av34692686/)
     * 常用内网IP段
     * 非常熟练常用网络号位数与子网主机数量的对应
+	* 30,4
+	* 29,8
+	* 28,16
+	* 27,32
+	* 26,64
+	* 25,128
+	* 24,254
+    * 子网掩码与剩余0位数
+	* 255,0
+	* 254,1
+	* 252,2
+	* 248,3
+	* 240,4
+	* 224,5
+	* 192,6
+	* 128,7
+    * 十进制转二进制
+	* 1,01
+	* 2,10
+	* 3,11
+	* 4,100
+	* 5,101
+	* 6,110
+	* 7,111
+	* 8,1000
+	* 9=8+1=1000+1,1001
+	* 10=8+2=1000+10,1010
+	* 11=8+3=1000+11,1011
+	* 12=8+4=1000+100,1100
+	* 13=8+5=1000+101,1101
+	* 14=8+6=1000+110,1110
+	* 15=8+7=1000+111,1111
+	* 16=10000
+	* 32,100000
+	* 64,1000000
+	* 128,10000000
+    * 可容纳的主机数
+	* 27,30-27=5,32
 ## 想了解
 * 现有网络结构，中间链路的逻辑及实体
+* vlan
+    * 当trunk 端口的PVID与本交换机VLANID有重复时，trunk 两端的trunk口的PVID要设置成相同，否则会出错。
 ## 问题
 * 
 ## 其他学习
